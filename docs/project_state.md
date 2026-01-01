@@ -15,11 +15,11 @@ Current:
 
 Later:
 
-* [ ] create mock JIRA server that can be used to test the frontend v2 and v3
-  * [ ] create issues
-  * [ ] transition issues
-  * [ ] edit description
-  * [ ] add comments
+* [x] create mock JIRA server that can be used to test the frontend v2 and v3
+  * [x] create issues
+  * [x] transition issues
+  * [x] edit description
+  * [x] add comments
 * [ ] create simple user account and settings storage backend
 * [ ] create SPA local-first frontend
   * [ ] choose local storage method suitable also for large JIRA projects
