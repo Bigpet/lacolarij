@@ -1,6 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.libs/
+lib/
+lib64/
+parts/
+sdist/
+*.egg-info/
+*.egg
+
+# Virtual Environments
+.venv/
+
+# uv
+.uv/
+
+# Node.js
+node_modules/
+.cache/
+.npm/
+
+
+# Secrets & Local Config
+.env
+.env.*
+!.env.example
 JIRA_TOKEN.txt
 JIRA_EMAIL.txt
 JIRA_URL.txt
 
-
-# 
+# OS Files
+.DS_Store
+Thumbs.db
