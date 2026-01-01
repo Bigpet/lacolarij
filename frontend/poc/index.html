@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jira PoC</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <div id="app">
+        <header>
+            <h1>Jira Issues</h1>
+        </header>
+
+        <div id="login-form">
+            <div class="form-group">
+                <label for="jira-url">Jira URL:</label>
+                <input type="text" id="jira-url" placeholder="https://your-domain.atlassian.net"
+                    value="https://bigpet.atlassian.net" />
+            </div>
+            <div class="form-group">
+                <label for="jira-email">Email:</label>
+                <input type="email" id="jira-email" placeholder="email@example.com" value="dravorek@gmail.com" />
+            </div>
+            <div class="form-group">
+                <label for="jira-token">API Token:</label>
+                <input type="password" id="jira-token" placeholder="Your Jira API Token" />
+            </div>
+            <button id="connect-btn">Connect & Load Issues</button>
+        </div>
+
+        <div id="main-content" class="hidden">
+            <div class="controls">
+                <button id="refresh-btn">Sync / Refresh</button>
+                <button id="logout-btn" class="secondary">Logout</button>
+            </div>
+            <div id="error-container" class="hidden"></div>
+            <ul id="issue-list">
+                <!-- Issues will be rendered here -->
+            </ul>
+        </div>
+    </div>
+    <script type="module" src="/main.js"></script>
+</body>
+
+</html>
