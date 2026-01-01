@@ -4,15 +4,22 @@ State: Currently nothing is implemented
 
 Current:
 
-* [ ] create simple proof of concept
-  * [ ] store tasks in a local file (i.e. json document)
-  * [ ] sync changes to existing tasks, create new ones, add new remote tasks to local
-  * [ ] use jira cloud API for now (later on jira server api option will be added) 
+* [x] create simple proof of concept (to be discarded)
+  * [x] sync changes to existing tasks, change title
+  * [x] use jira cloud API for now (later on jira server api option will be added) 
 
+* [x] download the REST API docs for JIRA for use in later queries
+  * [x] try to download the documentation in a format that suitable for LLM use
+  * [x] used OpenAPI JIRA v3 spec to generate Markdown files in `./docs/jira/v3`
+  * [x] downloaded the JIRA v2 docs as well for JIRA server and generated Markdown files in `./docs/jira/v2`
 
 Later:
 
-* [ ] create jira simulation backend
+* [ ] create mock JIRA server that can be used to test the frontend v2 and v3
+  * [ ] create issues
+  * [ ] transition issues
+  * [ ] edit description
+  * [ ] add comments
 * [ ] create simple user account and settings storage backend
 * [ ] create SPA local-first frontend
   * [ ] choose local storage method suitable also for large JIRA projects
