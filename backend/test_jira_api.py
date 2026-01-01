@@ -6,10 +6,11 @@ import uuid
 # Configuration
 JIRA_URL = os.environ.get("JIRA_URL", "http://localhost:8000")
 JIRA_EMAIL = os.environ.get("JIRA_EMAIL", "dummy@example.com")
-JIRA_TOKEN = os.environ.get("JIRA_TOKEN", "dummy_token")
+JIRA_PASSWORD = os.environ.get("JIRA_PASSWORD", "dummy_token")
+JIRA_PROJECT_KEY = os.environ.get("JIRA_PROJECT_KEY", "TEST")
 
 # Setup auth headers for basic auth (used by real JIRA, and ignored/accepted by mock)
-AUTH = (JIRA_EMAIL, JIRA_TOKEN)
+AUTH = (JIRA_EMAIL, JIRA_PASSWORD)
 
 @pytest.fixture
 def client():
@@ -19,7 +20,7 @@ def client():
 def test_create_issue(client):
     issue_data = {
         "fields": {
-            "project": {"key": "TEST"},
+            "project": {"key": JIRA_PROJECT_KEY},
             "summary": f"Test Issue {uuid.uuid4()}",
             "description": "This is a test issue created by the automated test script.",
             "issuetype": {"name": "Task"}
