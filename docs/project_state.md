@@ -20,6 +20,8 @@ Later:
   * [x] transition issues
   * [x] edit description
   * [x] add comments
+  * [ ] make the tests run on v3 endpoints
+  * [ ] manual running of the test suite against a test JIRA project to verify parity
 * [ ] create simple user account and settings storage backend
 * [ ] create SPA local-first frontend
   * [ ] choose local storage method suitable also for large JIRA projects
