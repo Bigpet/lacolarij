@@ -1,0 +1,10 @@
+# JIRA Configuration
+# Copy this file to config.toml and fill in your values.
+# Environment variables (JIRA_URL, JIRA_EMAIL, etc.) take priority over these settings.
+
+[jira]
+url = "https://your-instance.atlassian.net"
+email = "user@example.com"
+token = "your-api-token"
+project_key = "PROJ"
+api_version = "3"

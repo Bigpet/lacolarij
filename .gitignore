@@ -28,6 +28,7 @@ node_modules/
 .env
 .env.*
 !.env.example
+config.toml
 JIRA_*.txt
 
 # OS Files

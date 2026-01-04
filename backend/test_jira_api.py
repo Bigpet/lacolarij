@@ -1,17 +1,19 @@
-import os
 import pytest
 import httpx
 import uuid
 
-# Configuration
-JIRA_URL = os.environ.get("JIRA_URL", "http://localhost:8000")
-JIRA_EMAIL = os.environ.get("JIRA_EMAIL", "dummy@example.com")
-JIRA_PASSWORD = os.environ.get("JIRA_PASSWORD", "dummy_token")
-JIRA_PROJECT_KEY = os.environ.get("JIRA_PROJECT_KEY", "TEST")
+from config import load_config
+
+# Load configuration (env vars > config.toml > defaults)
+_config = load_config()
+JIRA_URL = _config.url
+JIRA_EMAIL = _config.email
+JIRA_PASSWORD = _config.token
+JIRA_PROJECT_KEY = _config.project_key
+JIRA_API_VERSION = _config.api_version
 
 # Setup auth headers for basic auth (used by real JIRA, and ignored/accepted by mock)
 AUTH = (JIRA_EMAIL, JIRA_PASSWORD)
-JIRA_API_VERSION = os.environ.get("JIRA_API_VERSION", "3")
 
 @pytest.fixture
 def client():
