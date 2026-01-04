@@ -5,6 +5,7 @@ import { LoginPage } from "@/features/auth/LoginPage";
 import { RegisterPage } from "@/features/auth/RegisterPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { IssuesPage } from "@/pages/IssuesPage";
+import { IssueDetailPage } from "@/pages/IssueDetailPage";
 import { BoardPage } from "@/pages/BoardPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 
@@ -44,6 +45,7 @@ function App() {
       <Route element={<AppShell />}>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/issues" element={<IssuesPage />} />
+        <Route path="/issues/:issueId" element={<IssueDetailPage />} />
         <Route path="/board" element={<BoardPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>

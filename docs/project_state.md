@@ -1,6 +1,6 @@
 # Project State
 
-State: Phase 1 Foundation complete
+State: Phase 2 Core Features complete
 
 past:
 
@@ -13,7 +13,6 @@ past:
   * [x] verify tests by running against acutal JIRA server
 
 
-current:
 * [x] create an architecture documents for the application based on the following lessons from the Proof of Concept:
     * backend:
       * We will need a relay server to forward requests to JIRA (to work around CORS)
@@ -44,9 +43,28 @@ current:
   * [x] Login/Register pages with routing
   * [x] Settings page for JIRA connection management
 
+* [x] Phase 2: Core Features
+  * [x] Implement relay service for JIRA forwarding
+    * Created `backend/app/services/relay_service.py` for proxying requests to JIRA
+    * Created `backend/app/api/relay.py` for API endpoints
+    * Support for both API v2 and v3, handles authentication and CORS
+  * [x] Build issue list view with local storage
+    * Created `frontend/src/lib/db/index.ts` with Dexie IndexedDB schema
+    * Created `frontend/src/components/issues/IssueList.tsx` and `IssueCard.tsx`
+    * Search and filter functionality
+  * [x] Build issue detail view
+    * Created `frontend/src/components/issues/IssueDetail.tsx`
+    * Basic ADF rendering for description and comments
+    * Added route `/issues/:issueId`
+  * [x] Implement basic sync (pull only)
+    * Created `frontend/src/features/sync/syncEngine.ts`
+    * Created `frontend/src/stores/syncStore.ts` for sync state
+    * Created `frontend/src/components/sync/SyncStatusBar.tsx`
+    * Incremental sync with last-sync tracking
+
 next:
-* [ ] Phase 2: Core Features
-  * [ ] Implement relay service for JIRA forwarding
-  * [ ] Build issue list view with local storage
-  * [ ] Build issue detail view with ADF editor
-  * [ ] Implement basic sync (pull only) 
+* [ ] Phase 3: Sync Engine
+  * [ ] Implement push sync for local changes
+  * [ ] Add conflict detection
+  * [ ] Build conflict resolution UI
+  * [ ] Add sync status indicators 

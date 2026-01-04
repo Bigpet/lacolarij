@@ -1,0 +1,69 @@
+/**
+ * Zustand store for sync state management.
+ */
+
+import { create } from "zustand";
+
+export interface Conflict {
+  id: string;
+  entityType: "issue" | "comment";
+  entityId: string;
+  entityKey?: string;
+  field?: string;
+  localValue: unknown;
+  remoteValue: unknown;
+  localTimestamp: number;
+  remoteTimestamp: string;
+}
+
+interface SyncState {
+  status: "idle" | "syncing" | "error";
+  lastSync: Date | null;
+  pendingCount: number;
+  conflicts: Conflict[];
+  error: string | null;
+  activeConnectionId: string | null;
+
+  // Actions
+  setStatus: (status: "idle" | "syncing" | "error") => void;
+  setLastSync: (date: Date) => void;
+  setPendingCount: (count: number) => void;
+  addConflict: (conflict: Conflict) => void;
+  removeConflict: (id: string) => void;
+  clearConflicts: () => void;
+  setError: (error: string | null) => void;
+  setActiveConnection: (connectionId: string | null) => void;
+  reset: () => void;
+}
+
+const initialState = {
+  status: "idle" as const,
+  lastSync: null,
+  pendingCount: 0,
+  conflicts: [],
+  error: null,
+  activeConnectionId: null,
+};
+
+export const useSyncStore = create<SyncState>((set) => ({
+  ...initialState,
+
+  setStatus: (status) => set({ status }),
+  setLastSync: (lastSync) => set({ lastSync }),
+  setPendingCount: (pendingCount) => set({ pendingCount }),
+
+  addConflict: (conflict) =>
+    set((state) => ({
+      conflicts: [...state.conflicts, conflict],
+    })),
+
+  removeConflict: (id) =>
+    set((state) => ({
+      conflicts: state.conflicts.filter((c) => c.id !== id),
+    })),
+
+  clearConflicts: () => set({ conflicts: [] }),
+  setError: (error) => set({ error }),
+  setActiveConnection: (activeConnectionId) => set({ activeConnectionId }),
+  reset: () => set(initialState),
+}));
