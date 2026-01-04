@@ -18,31 +18,57 @@ def client():
     with httpx.Client(base_url=JIRA_URL, auth=AUTH, timeout=10.0) as client:
         yield client
 
-def test_create_issue(client):
+def make_adf_description(text):
+    """Convert plain text to Atlassian Document Format for API v3."""
+    return {
+        "type": "doc",
+        "version": 1,
+        "content": [
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": text
+                    }
+                ]
+            }
+        ]
+    }
+
+def create_test_issue(client):
+    """Helper to create a test issue and return its key."""
+    description_text = "This is a test issue created by the automated test script."
+
     issue_data = {
         "fields": {
             "project": {"key": JIRA_PROJECT_KEY},
             "summary": f"Test Issue {uuid.uuid4()}",
-            "description": "This is a test issue created by the automated test script.",
             "issuetype": {"name": "Task"}
         }
     }
-    if JIRA_URL != "http://localhost:8000":
-         # Adjust project key and issuetype for real JIRA if needed
-         # This is a placeholder, might need env vars for valid project/type
-         pass 
-         
+
+    # API v3 requires Atlassian Document Format for description
+    if JIRA_API_VERSION == "3":
+        issue_data["fields"]["description"] = make_adf_description(description_text)
+    else:
+        issue_data["fields"]["description"] = description_text
+
     response = client.post(f"/rest/api/{JIRA_API_VERSION}/issue", json=issue_data)
-    assert response.status_code == 201 or response.status_code == 200 # 201 Created is standard, but mock might return 200
-    
+    assert response.status_code == 201 or response.status_code == 200
+
     data = response.json()
     assert "key" in data
     assert "id" in data
-    
+
     return data["key"]
 
+def test_create_issue(client):
+    key = create_test_issue(client)
+    assert key is not None
+
 def test_get_issue(client):
-    key = test_create_issue(client)
+    key = create_test_issue(client)
     
     response = client.get(f"/rest/api/{JIRA_API_VERSION}/issue/{key}")
     assert response.status_code == 200
@@ -53,41 +79,61 @@ def test_get_issue(client):
     assert "summary" in data["fields"]
 
 def test_update_issue(client):
-    key = test_create_issue(client)
-    new_description = f"Updated description {uuid.uuid4()}"
-    
+    key = create_test_issue(client)
+    new_description_text = f"Updated description {uuid.uuid4()}"
+
     update_data = {
-        "fields": {
-            "description": new_description
-        }
+        "fields": {}
     }
-    
+
+    # API v3 requires Atlassian Document Format for description
+    if JIRA_API_VERSION == "3":
+        update_data["fields"]["description"] = make_adf_description(new_description_text)
+    else:
+        update_data["fields"]["description"] = new_description_text
+
     response = client.put(f"/rest/api/{JIRA_API_VERSION}/issue/{key}", json=update_data)
     assert response.status_code == 204
-    
+
     # Verify update
     response = client.get(f"/rest/api/{JIRA_API_VERSION}/issue/{key}")
     data = response.json()
-    assert data["fields"]["description"] == new_description
+    # For v3, description is ADF object; check text content within
+    if JIRA_API_VERSION == "3":
+        desc_content = data["fields"]["description"]["content"][0]["content"][0]["text"]
+        assert desc_content == new_description_text
+    else:
+        assert data["fields"]["description"] == new_description_text
 
 def test_add_comment(client):
-    key = test_create_issue(client)
-    comment_body = f"Test comment {uuid.uuid4()}"
-    
-    comment_data = {
-        "body": comment_body
-    }
-    
+    key = create_test_issue(client)
+    comment_text = f"Test comment {uuid.uuid4()}"
+
+    # API v3 requires Atlassian Document Format for comment body
+    if JIRA_API_VERSION == "3":
+        comment_data = {
+            "body": make_adf_description(comment_text)
+        }
+    else:
+        comment_data = {
+            "body": comment_text
+        }
+
     response = client.post(f"/rest/api/{JIRA_API_VERSION}/issue/{key}/comment", json=comment_data)
     assert response.status_code == 201 or response.status_code == 200
-    
+
     data = response.json()
-    assert data["body"] == comment_body
+    # For v3, body is ADF object; check text content within
+    if JIRA_API_VERSION == "3":
+        body_content = data["body"]["content"][0]["content"][0]["text"]
+        assert body_content == comment_text
+    else:
+        assert data["body"] == comment_text
 
 def test_transition_issue(client):
     # This test is tricky on real JIRA because transitions depend on workflow state.
     # For mock, we know the transitions.
-    key = test_create_issue(client)
+    key = create_test_issue(client)
     
     # Get available transitions first
     response = client.get(f"/rest/api/{JIRA_API_VERSION}/issue/{key}/transitions")

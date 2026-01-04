@@ -28,9 +28,7 @@ node_modules/
 .env
 .env.*
 !.env.example
-JIRA_TOKEN.txt
-JIRA_EMAIL.txt
-JIRA_URL.txt
+JIRA_*.txt
 
 # OS Files
 .DS_Store
