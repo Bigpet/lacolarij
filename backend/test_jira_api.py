@@ -11,6 +11,7 @@ JIRA_PROJECT_KEY = os.environ.get("JIRA_PROJECT_KEY", "TEST")
 
 # Setup auth headers for basic auth (used by real JIRA, and ignored/accepted by mock)
 AUTH = (JIRA_EMAIL, JIRA_PASSWORD)
+JIRA_API_VERSION = os.environ.get("JIRA_API_VERSION", "3")
 
 @pytest.fixture
 def client():
@@ -31,7 +32,7 @@ def test_create_issue(client):
          # This is a placeholder, might need env vars for valid project/type
          pass 
          
-    response = client.post("/rest/api/2/issue", json=issue_data)
+    response = client.post(f"/rest/api/{JIRA_API_VERSION}/issue", json=issue_data)
     assert response.status_code == 201 or response.status_code == 200 # 201 Created is standard, but mock might return 200
     
     data = response.json()
@@ -43,7 +44,7 @@ def test_create_issue(client):
 def test_get_issue(client):
     key = test_create_issue(client)
     
-    response = client.get(f"/rest/api/2/issue/{key}")
+    response = client.get(f"/rest/api/{JIRA_API_VERSION}/issue/{key}")
     assert response.status_code == 200
     
     data = response.json()
@@ -61,11 +62,11 @@ def test_update_issue(client):
         }
     }
     
-    response = client.put(f"/rest/api/2/issue/{key}", json=update_data)
+    response = client.put(f"/rest/api/{JIRA_API_VERSION}/issue/{key}", json=update_data)
     assert response.status_code == 204
     
     # Verify update
-    response = client.get(f"/rest/api/2/issue/{key}")
+    response = client.get(f"/rest/api/{JIRA_API_VERSION}/issue/{key}")
     data = response.json()
     assert data["fields"]["description"] == new_description
 
@@ -77,7 +78,7 @@ def test_add_comment(client):
         "body": comment_body
     }
     
-    response = client.post(f"/rest/api/2/issue/{key}/comment", json=comment_data)
+    response = client.post(f"/rest/api/{JIRA_API_VERSION}/issue/{key}/comment", json=comment_data)
     assert response.status_code == 201 or response.status_code == 200
     
     data = response.json()
@@ -89,7 +90,7 @@ def test_transition_issue(client):
     key = test_create_issue(client)
     
     # Get available transitions first
-    response = client.get(f"/rest/api/2/issue/{key}/transitions")
+    response = client.get(f"/rest/api/{JIRA_API_VERSION}/issue/{key}/transitions")
     assert response.status_code == 200
     transitions = response.json()["transitions"]
     
@@ -104,7 +105,7 @@ def test_transition_issue(client):
         }
     }
     
-    response = client.post(f"/rest/api/2/issue/{key}/transitions", json=transition_data)
+    response = client.post(f"/rest/api/{JIRA_API_VERSION}/issue/{key}/transitions", json=transition_data)
     assert response.status_code == 204
     
     # Verify status change (if we knew what status it mapped to, but for now just success of call)
