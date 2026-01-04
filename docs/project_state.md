@@ -1,6 +1,6 @@
 # Project State
 
-State: Currently nothing is implemented
+State: Phase 1 Foundation complete
 
 past:
 
@@ -31,7 +31,22 @@ current:
       * should have a status lanes view and quick-filters
     * well tested, including integration tests
 
-* [ ] create simple user account and settings storage backend
-* [ ] create SPA local-first frontend
-  * [ ] choose local storage method suitable also for large JIRA projects
-  * [ ] ... 
+* [x] Phase 1 Foundation - create simple user account and settings storage backend
+  * [x] Modular FastAPI backend with user auth (JWT, Argon2 password hashing)
+  * [x] SQLite database with SQLAlchemy ORM
+  * [x] JIRA connection management with Fernet-encrypted API tokens
+  * [x] Mock JIRA server moved to services/mock_jira/
+* [x] Phase 1 Foundation - create SPA local-first frontend
+  * [x] Vite + React + TypeScript setup
+  * [x] Tailwind CSS with shadcn/ui-style components
+  * [x] IndexedDB schema with Dexie (issues, comments, sync metadata)
+  * [x] Zustand auth store with persistence
+  * [x] Login/Register pages with routing
+  * [x] Settings page for JIRA connection management
+
+next:
+* [ ] Phase 2: Core Features
+  * [ ] Implement relay service for JIRA forwarding
+  * [ ] Build issue list view with local storage
+  * [ ] Build issue detail view with ADF editor
+  * [ ] Implement basic sync (pull only) 
