@@ -42,3 +42,13 @@ class ForbiddenError(HTTPException):
             status_code=status.HTTP_403_FORBIDDEN,
             detail=detail,
         )
+
+
+class RelayError(HTTPException):
+    """Raised when the relay service fails to proxy a request."""
+
+    def __init__(self, detail: str = "Relay service error"):
+        super().__init__(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=detail,
+        )

@@ -42,11 +42,12 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    # Include mock JIRA routes at /api/jira/mock
+    # Must be before api_router to avoid conflict with /api/jira/{connection_id}
+    app.include_router(mock_jira_router, prefix="/api/jira/mock")
+
     # Include API routes
     app.include_router(api_router)
-
-    # Include mock JIRA routes at /api/jira/mock
-    app.include_router(mock_jira_router, prefix="/api/jira/mock")
 
     # Health check endpoint
     @app.get("/health")

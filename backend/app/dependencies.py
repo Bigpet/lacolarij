@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_session
 from app.db.repositories import UserRepository, ConnectionRepository
+from app.services.relay_service import RelayService
 from app.core.security import decode_access_token
 from app.core.exceptions import AuthenticationError
 from app.models.user import User
@@ -36,6 +37,11 @@ async def get_connection_repository(
 ) -> ConnectionRepository:
     """Get connection repository."""
     return ConnectionRepository(session)
+
+
+def get_relay_service() -> RelayService:
+    """Get relay service."""
+    return RelayService()
 
 
 # Current user dependency
