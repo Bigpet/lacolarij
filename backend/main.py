@@ -18,10 +18,9 @@ default_transitions = [
 
 class IssueFields(BaseModel):
     summary: Optional[str] = None
-    description: Optional[str] = None
+    description: Optional[Any] = None  # str for v2, ADF dict for v3
     issuetype: Optional[Dict[str, Any]] = None
     project: Optional[Dict[str, Any]] = None
-    # Add other fields as needed
 
 class IssueCreate(BaseModel):
     fields: IssueFields
@@ -31,7 +30,7 @@ class IssueUpdate(BaseModel):
     update: Optional[Dict[str, Any]] = None
 
 class CommentCreate(BaseModel):
-    body: str
+    body: Any  # str for v2, ADF dict for v3
 
 class Transition(BaseModel):
     transition: Dict[str, Any]
