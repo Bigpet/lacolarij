@@ -26,7 +26,7 @@ function dynamicProxyPlugin(): Plugin {
 
         // Get target URL from header or use default backend
         const targetUrl =
-          req.headers["x-jira-url"] || "http://localhost:8080";
+          req.headers["x-jira-url"] || "http://localhost:8000";
 
         // Rewrite URL: remove /api prefix for external JIRA, keep for local backend
         let targetPath = req.url;
