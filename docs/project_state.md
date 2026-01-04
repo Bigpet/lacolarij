@@ -14,7 +14,7 @@ past:
 
 
 current:
-* [ ] create an architecture documents for the application based on the following lessons from the Proof of Concept:
+* [x] create an architecture documents for the application based on the following lessons from the Proof of Concept:
     * backend:
       * We will need a relay server to forward requests to JIRA (to work around CORS)
       * We want to have a dummy JIRA server implementation for a demo mode
