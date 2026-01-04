@@ -5,8 +5,6 @@ __pycache__/
 *.so
 .Python
 .libs/
-lib/
-lib64/
 parts/
 sdist/
 *.egg-info/
@@ -22,6 +20,7 @@ sdist/
 node_modules/
 .cache/
 .npm/
+frontend/dist/
 
 
 # Secrets & Local Config
