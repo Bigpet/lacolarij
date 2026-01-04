@@ -46,7 +46,7 @@ current:
 
 next:
 * [ ] Phase 2: Core Features
-  * [ ] Implement relay service for JIRA forwarding
+  * [x] Implement relay service for JIRA forwarding
   * [ ] Build issue list view with local storage
   * [ ] Build issue detail view with ADF editor
   * [ ] Implement basic sync (pull only) 
