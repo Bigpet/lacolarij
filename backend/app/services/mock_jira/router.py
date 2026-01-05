@@ -162,6 +162,48 @@ async def get_transitions(issue_id_or_key: str) -> dict[str, Any]:
     return {"transitions": DEFAULT_TRANSITIONS}
 
 
+@router.get("/rest/api/2/search/jql")
+@router.get("/rest/api/3/search/jql")
+async def search_issues(
+    jql: str = "",
+    maxResults: int = 50,
+    fields: str | None = None,
+    nextPageToken: str | None = None,
+) -> dict[str, Any]:
+    """Search for issues using JQL (simplified implementation)."""
+    # Get unique issues (since we store by both key and id)
+    seen_ids = set()
+    unique_issues = []
+    for issue in _issues.values():
+        if issue["id"] not in seen_ids:
+            seen_ids.add(issue["id"])
+            unique_issues.append(issue)
+
+    # Sort by updated timestamp (descending by default, but JQL can override)
+    if "order by" in jql.lower():
+        if "asc" in jql.lower():
+            unique_issues.sort(
+                key=lambda x: x["fields"].get("updated", ""),
+                reverse=False
+            )
+        else:
+            unique_issues.sort(
+                key=lambda x: x["fields"].get("updated", ""),
+                reverse=True
+            )
+
+    # Simple pagination (no actual nextPageToken implementation for mock)
+    total = len(unique_issues)
+    issues = unique_issues[:maxResults]
+
+    return {
+        "startAt": 0,
+        "maxResults": maxResults,
+        "total": total,
+        "issues": issues,
+    }
+
+
 def reset_storage() -> None:
     """Reset the in-memory storage (useful for testing)."""
     _issues.clear()

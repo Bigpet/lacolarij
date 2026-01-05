@@ -50,8 +50,10 @@ async def relay_jira_request(
 
     # Check if connection is the mock JIRA
     if connection.jira_url == "demo://local":
-        # Redirect to mock JIRA
+        # Redirect to mock JIRA (preserve query parameters)
         mock_path = f"/api/jira/mock/rest/api/{api_version}/{path}"
+        if request.query_params:
+            mock_path = f"{mock_path}?{request.query_params}"
         raise HTTPException(
             status_code=307,
             headers={"Location": mock_path},
@@ -86,6 +88,7 @@ async def relay_jira_request(
             headers[key] = value
 
     try:
+        print(f"[Relay] {request.method} {full_path} -> {connection.jira_url}")
         response = await relay_service.forward_request(
             connection=connection,
             method=request.method,
@@ -94,6 +97,9 @@ async def relay_jira_request(
             query_params=query_params,
             headers=headers,
         )
+        print(f"[Relay] Response: {response.status_code}")
+        if response.status_code >= 400:
+            print(f"[Relay] Error body: {response.body}")
 
         return Response(
             content=response.body,
@@ -102,8 +108,12 @@ async def relay_jira_request(
             media_type=response.headers.get("Content-Type", "application/json"),
         )
     except RelayError as e:
+        print(f"[Relay] RelayError: {e.status_code} - {e}")
         raise HTTPException(status_code=e.status_code, detail=str(e))
     except Exception as e:
+        import traceback
+        print(f"[Relay] Exception: {e}")
+        traceback.print_exc()
         raise HTTPException(status_code=502, detail=f"Relay error: {str(e)}")
 
 
