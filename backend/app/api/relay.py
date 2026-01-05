@@ -113,12 +113,12 @@ async def search_issues(
     current_user: CurrentUser,
     connection_repo: ConnectionRepo,
     jql: str | None = None,
-    start_at: int = 0,
+    next_page_token: str | None = None,
     max_results: int = 50,
     fields: str | None = None,
 ) -> dict[str, Any]:
     """
-    Search for issues using JQL.
+    Search for issues using JQL with nextPageToken pagination.
 
     This is a convenience endpoint that wraps the JIRA search API.
     """
@@ -133,7 +133,7 @@ async def search_issues(
         return await relay_service.search_issues(
             connection=connection,
             jql=jql,
-            start_at=start_at,
+            next_page_token=next_page_token,
             max_results=max_results,
             fields=field_list,
         )

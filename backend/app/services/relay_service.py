@@ -91,11 +91,25 @@ class RelayService:
                 headers=request_headers,
             )
 
-            # Extract response headers we care about
+            # Extract response headers (forward all except hop-by-hop headers)
+            # Hop-by-hop headers that should NOT be forwarded:
+            hop_by_hop_headers = {
+                "connection",
+                "keep-alive",
+                "proxy-authenticate",
+                "proxy-authorization",
+                "te",
+                "trailers",
+                "transfer-encoding",
+                "upgrade",
+                "content-length",  # Let FastAPI recalculate this
+                "authorization",   # Don't leak auth headers
+            }
+            
             response_headers = {}
-            for key in ["Content-Type", "X-RateLimit-Remaining", "X-RateLimit-Limit"]:
-                if key.lower() in response.headers:
-                    response_headers[key] = response.headers[key.lower()]
+            for key, value in response.headers.items():
+                if key.lower() not in hop_by_hop_headers:
+                    response_headers[key] = value
 
             return RelayResponse(
                 status_code=response.status_code,
@@ -107,23 +121,27 @@ class RelayService:
         self,
         connection: JiraConnection,
         jql: str | None = None,
-        start_at: int = 0,
+        next_page_token: str | None = None,
         max_results: int = 50,
         fields: list[str] | None = None,
     ) -> dict[str, Any]:
-        """Search for issues using JQL."""
-        body = {
+        """Search for issues using JQL with nextPageToken pagination."""
+        query_params: dict[str, str] = {
             "jql": jql or "",
-            "startAt": start_at,
-            "maxResults": max_results,
-            "fields": fields or ["*all"],
+            "maxResults": str(max_results),
         }
+        
+        if next_page_token:
+            query_params["nextPageToken"] = next_page_token
+            
+        if fields:
+            query_params["fields"] = ",".join(fields)
 
         response = await self.forward_request(
             connection=connection,
-            method="POST",
-            path="/rest/api/3/search",
-            body=body,
+            method="GET",
+            path="/rest/api/3/search/jql",
+            query_params=query_params,
         )
 
         if response.status_code == 200 and response.body:
