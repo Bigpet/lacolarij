@@ -518,20 +518,21 @@ class SyncEngineImpl implements SyncEngine {
     // Use JIRA's search with updated >= since
     const jql = since
       ? `updated >= "${formatJiraDate(since)}" ORDER BY updated ASC`
-      : 'ORDER BY updated ASC';
+      : 'created >= -3000w ORDER BY updated ASC';
 
-    let startAt = 0;
+    let nextPageToken: string | undefined = undefined;
     const maxResults = 100;
 
     while (true) {
-      const response = await this.api.searchIssues({ jql, startAt, maxResults });
+      const response = await this.api.searchIssues({ jql, nextPageToken, maxResults });
 
       for (const remoteIssue of response.issues) {
         await this.mergeRemoteIssue(remoteIssue);
       }
 
-      if (startAt + response.issues.length >= response.total) break;
-      startAt += maxResults;
+      // Check if there's a next page
+      if (!response.nextPageToken) break;
+      nextPageToken = response.nextPageToken;
     }
 
     await this.db.syncMeta.put({
