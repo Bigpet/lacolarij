@@ -1,9 +1,15 @@
 """Mock JIRA server router for demo mode."""
 
 import uuid
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Response
+
+
+def _now_iso() -> str:
+    """Generate ISO 8601 timestamp for JIRA compatibility."""
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000+0000")
 
 from app.services.mock_jira.models import (
     IssueCreate,
@@ -35,6 +41,7 @@ async def create_issue(issue: IssueCreate) -> dict[str, Any]:
     """Create a new issue."""
     key = f"TEST-{len(_issues) // 2 + 1}"  # Divide by 2 since we store by both key and id
     issue_id = str(len(_issues) // 2 + 1)
+    now = _now_iso()
 
     new_issue = {
         "id": issue_id,
@@ -55,6 +62,12 @@ async def create_issue(issue: IssueCreate) -> dict[str, Any]:
                     "name": "To Do",
                 },
             },
+            "priority": {"name": "Medium"},
+            "assignee": None,
+            "reporter": {"displayName": "Demo User"},
+            "labels": [],
+            "created": now,
+            "updated": now,
             "comment": {"comments": [], "total": 0},
         },
     }
@@ -84,6 +97,8 @@ async def update_issue(issue_id_or_key: str, update: IssueUpdate) -> Response:
             issue["fields"]["summary"] = update.fields.summary
         if update.fields.description:
             issue["fields"]["description"] = update.fields.description
+        # Update the timestamp to enable conflict detection
+        issue["fields"]["updated"] = _now_iso()
 
     return Response(status_code=204)
 
@@ -93,12 +108,14 @@ async def update_issue(issue_id_or_key: str, update: IssueUpdate) -> Response:
 async def add_comment(issue_id_or_key: str, comment: CommentCreate) -> dict[str, Any]:
     """Add a comment to an issue."""
     issue = _get_issue(issue_id_or_key)
+    now = _now_iso()
 
     new_comment = {
         "id": str(uuid.uuid4()),
         "body": comment.body,
         "author": {"name": "user", "displayName": "User"},
-        "created": "2023-01-01T12:00:00.000+0000",
+        "created": now,
+        "updated": now,
     }
 
     if "comment" not in issue["fields"]:
@@ -106,6 +123,8 @@ async def add_comment(issue_id_or_key: str, comment: CommentCreate) -> dict[str,
 
     issue["fields"]["comment"]["comments"].append(new_comment)
     issue["fields"]["comment"]["total"] = len(issue["fields"]["comment"]["comments"])
+    # Update issue timestamp when comment is added
+    issue["fields"]["updated"] = now
 
     return new_comment
 
@@ -130,6 +149,8 @@ async def transition_issue(
         raise HTTPException(status_code=400, detail="Invalid transition ID")
 
     issue["fields"]["status"] = target_status
+    # Update timestamp on status change
+    issue["fields"]["updated"] = _now_iso()
     return Response(status_code=204)
 
 

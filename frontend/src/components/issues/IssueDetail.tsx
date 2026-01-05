@@ -1,8 +1,14 @@
+import * as React from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
+import { api, type JiraTransition } from "@/lib/api";
+import { issueService } from "@/features/issues/issueService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select } from "@/components/ui/select";
 import type { Issue } from "@/types";
 import {
   ArrowLeft,
@@ -13,10 +19,15 @@ import {
   CheckCircle,
   Clock,
   ExternalLink,
+  Pencil,
+  Save,
+  X,
+  Loader2,
 } from "lucide-react";
 
 interface IssueDetailProps {
   issueId: string;
+  connectionId?: string;
   onBack?: () => void;
   jiraUrl?: string;
 }
@@ -169,12 +180,146 @@ function renderAdfContent(content: unknown[]): React.ReactNode[] {
   });
 }
 
-export function IssueDetail({ issueId, onBack, jiraUrl }: IssueDetailProps) {
+// Map status category key to our simplified category
+function mapStatusCategoryKey(key: string): "todo" | "indeterminate" | "done" {
+  switch (key.toLowerCase()) {
+    case "new":
+    case "undefined":
+      return "todo";
+    case "done":
+      return "done";
+    default:
+      return "indeterminate";
+  }
+}
+
+export function IssueDetail({
+  issueId,
+  connectionId,
+  onBack,
+  jiraUrl,
+}: IssueDetailProps) {
   const issue = useLiveQuery(() => db.issues.get(issueId), [issueId]);
   const comments = useLiveQuery(
     () => db.comments.where("issueId").equals(issueId).toArray(),
     [issueId]
   );
+
+  // Editing state
+  const [isEditingSummary, setIsEditingSummary] = React.useState(false);
+  const [editedSummary, setEditedSummary] = React.useState("");
+  const [isEditingDescription, setIsEditingDescription] = React.useState(false);
+  const [editedDescription, setEditedDescription] = React.useState("");
+  const [isSaving, setIsSaving] = React.useState(false);
+
+  // Status transitions
+  const [transitions, setTransitions] = React.useState<JiraTransition[]>([]);
+  const [isLoadingTransitions, setIsLoadingTransitions] = React.useState(false);
+
+  // Load transitions when connection is available
+  React.useEffect(() => {
+    if (connectionId && issue) {
+      setIsLoadingTransitions(true);
+      api
+        .getTransitions(connectionId, issue.key)
+        .then((result) => setTransitions(result.transitions))
+        .catch((err) => console.error("Failed to load transitions:", err))
+        .finally(() => setIsLoadingTransitions(false));
+    }
+  }, [connectionId, issue?.key]);
+
+  const handleSaveSummary = async () => {
+    if (!issue || !editedSummary.trim()) return;
+    setIsSaving(true);
+    try {
+      await issueService.updateSummary(issue.id, editedSummary.trim());
+      setIsEditingSummary(false);
+    } catch (error) {
+      console.error("Failed to save summary:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveDescription = async () => {
+    if (!issue) return;
+    setIsSaving(true);
+    try {
+      // Store as simple ADF document
+      const adfDescription = editedDescription.trim()
+        ? {
+            type: "doc",
+            version: 1,
+            content: [
+              {
+                type: "paragraph",
+                content: [{ type: "text", text: editedDescription.trim() }],
+              },
+            ],
+          }
+        : null;
+      await issueService.updateDescription(issue.id, adfDescription);
+      setIsEditingDescription(false);
+    } catch (error) {
+      console.error("Failed to save description:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleStatusChange = async (transitionId: string) => {
+    if (!issue || !connectionId) return;
+    const transition = transitions.find((t) => t.id === transitionId);
+    if (!transition) return;
+
+    try {
+      await issueService.transitionIssue(issue.id, transitionId, {
+        name: transition.to.name,
+        category: mapStatusCategoryKey(transition.to.statusCategory.key),
+      });
+    } catch (error) {
+      console.error("Failed to transition issue:", error);
+    }
+  };
+
+  const startEditSummary = () => {
+    if (issue) {
+      setEditedSummary(issue.summary);
+      setIsEditingSummary(true);
+    }
+  };
+
+  const startEditDescription = () => {
+    if (issue) {
+      // Extract text from ADF if possible
+      const desc = issue.description;
+      if (typeof desc === "string") {
+        setEditedDescription(desc);
+      } else if (
+        desc &&
+        typeof desc === "object" &&
+        "content" in desc &&
+        Array.isArray((desc as { content: unknown[] }).content)
+      ) {
+        // Try to extract text from ADF
+        const extractText = (content: unknown[]): string => {
+          return content
+            .map((node) => {
+              if (typeof node !== "object" || node === null) return "";
+              const n = node as { type: string; text?: string; content?: unknown[] };
+              if (n.type === "text") return n.text || "";
+              if (n.content) return extractText(n.content);
+              return "";
+            })
+            .join("");
+        };
+        setEditedDescription(extractText((desc as { content: unknown[] }).content));
+      } else {
+        setEditedDescription("");
+      }
+      setIsEditingDescription(true);
+    }
+  };
 
   if (!issue) {
     return (
@@ -214,14 +359,69 @@ export function IssueDetail({ issueId, onBack, jiraUrl }: IssueDetailProps) {
       {/* Issue key and summary */}
       <div>
         <h1 className="text-sm font-mono text-primary mb-2">{issue.key}</h1>
-        <h2 className="text-2xl font-bold">{issue.summary}</h2>
+        {isEditingSummary ? (
+          <div className="flex items-center gap-2">
+            <Input
+              value={editedSummary}
+              onChange={(e) => setEditedSummary(e.target.value)}
+              className="text-xl font-bold"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSaveSummary();
+                if (e.key === "Escape") setIsEditingSummary(false);
+              }}
+            />
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={handleSaveSummary}
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => setIsEditingSummary(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <h2
+            className="text-2xl font-bold cursor-pointer hover:bg-muted/50 rounded px-1 -mx-1 group"
+            onClick={startEditSummary}
+          >
+            {issue.summary}
+            <Pencil className="inline-block h-4 w-4 ml-2 opacity-0 group-hover:opacity-50" />
+          </h2>
+        )}
       </div>
 
       {/* Metadata */}
-      <div className="flex flex-wrap gap-4">
-        <Badge variant={getStatusCategoryVariant(issue.statusCategory)}>
-          {issue.status}
-        </Badge>
+      <div className="flex flex-wrap gap-4 items-center">
+        {/* Status dropdown */}
+        {connectionId && transitions.length > 0 ? (
+          <Select
+            value=""
+            onChange={(e) => handleStatusChange(e.target.value)}
+            options={transitions.map((t) => ({
+              value: t.id,
+              label: t.name,
+            }))}
+            placeholder={issue.status}
+            className="w-40"
+            disabled={isLoadingTransitions}
+          />
+        ) : (
+          <Badge variant={getStatusCategoryVariant(issue.statusCategory)}>
+            {issue.status}
+          </Badge>
+        )}
 
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           <Tag className="h-4 w-4" />
@@ -278,10 +478,51 @@ export function IssueDetail({ issueId, onBack, jiraUrl }: IssueDetailProps) {
 
       {/* Description */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Description</CardTitle>
+          {!isEditingDescription && (
+            <Button variant="ghost" size="sm" onClick={startEditDescription}>
+              <Pencil className="h-4 w-4 mr-1" />
+              Edit
+            </Button>
+          )}
         </CardHeader>
-        <CardContent>{renderDescription(issue.description)}</CardContent>
+        <CardContent>
+          {isEditingDescription ? (
+            <div className="space-y-2">
+              <Textarea
+                value={editedDescription}
+                onChange={(e) => setEditedDescription(e.target.value)}
+                className="min-h-[200px]"
+                placeholder="Enter description..."
+                autoFocus
+              />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={handleSaveDescription}
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                  ) : (
+                    <Save className="h-4 w-4 mr-1" />
+                  )}
+                  Save
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setIsEditingDescription(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : (
+            renderDescription(issue.description)
+          )}
+        </CardContent>
       </Card>
 
       {/* Comments */}
