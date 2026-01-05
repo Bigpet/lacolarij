@@ -12,4 +12,4 @@ test-real:
 	cd backend && uv run pytest test_jira_api.py -v
 
 server:
-	cd backend && uv run uvicorn main:app --reload
+	cd backend && uv run uvicorn app.main:app --reload

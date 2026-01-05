@@ -123,23 +123,24 @@ class ApiClient {
     connectionId: string,
     params: {
       jql?: string;
-      startAt?: number;
+      nextPageToken?: string;
       maxResults?: number;
       fields?: string[];
     } = {}
   ): Promise<JiraSearchResponse> {
     const queryParams = new URLSearchParams();
     if (params.jql) queryParams.set("jql", params.jql);
-    if (params.startAt !== undefined)
-      queryParams.set("startAt", params.startAt.toString());
+    if (params.nextPageToken)
+      queryParams.set("nextPageToken", params.nextPageToken);
     if (params.maxResults !== undefined)
       queryParams.set("maxResults", params.maxResults.toString());
-    if (params.fields) queryParams.set("fields", params.fields.join(","));
+    if (params.fields)
+      queryParams.set("fields", params.fields.join(","));
 
     const query = queryParams.toString();
     return this.jiraRequest<JiraSearchResponse>(
       connectionId,
-      `/rest/api/3/search${query ? `?${query}` : ""}`
+      `/rest/api/3/search/jql${query ? `?${query}` : ""}`
     );
   }
 
@@ -199,6 +200,7 @@ export interface JiraSearchResponse {
   startAt: number;
   maxResults: number;
   total: number;
+  nextPageToken?: string;
   issues: JiraIssue[];
 }
 

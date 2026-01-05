@@ -114,10 +114,10 @@ export class SyncEngine {
     if (!searchJql.toLowerCase().includes("order by")) {
       searchJql = searchJql
         ? `${searchJql} ORDER BY updated ASC`
-        : "ORDER BY updated ASC";
+        : "created >= -3000w ORDER BY updated ASC";
     }
 
-    let startAt = 0;
+    let nextPageToken: string | undefined = undefined;
     let totalFetched = 0;
 
     while (true) {
@@ -126,7 +126,7 @@ export class SyncEngine {
         connectionId,
         {
           jql: searchJql,
-          startAt,
+          nextPageToken,
           maxResults,
           fields: [
             "summary",
@@ -151,12 +151,12 @@ export class SyncEngine {
 
       totalFetched += response.issues.length;
 
-      // Check if we've fetched all issues
-      if (startAt + response.issues.length >= response.total) {
+      // Check if there's a next page
+      if (!response.nextPageToken) {
         break;
       }
 
-      startAt += maxResults;
+      nextPageToken = response.nextPageToken;
     }
 
     console.log(`Synced ${totalFetched} issues`);
