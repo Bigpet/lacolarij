@@ -153,6 +153,10 @@ export const pendingOperationsRepository = {
     return db.pendingOperations.orderBy("createdAt").toArray();
   },
 
+  async getByEntityId(entityId: string): Promise<PendingOperation[]> {
+    return db.pendingOperations.where("entityId").equals(entityId).toArray();
+  },
+
   async add(operation: Omit<PendingOperation, "id">): Promise<string> {
     const id = crypto.randomUUID();
     await db.pendingOperations.add({ ...operation, id });
@@ -161,6 +165,10 @@ export const pendingOperationsRepository = {
 
   async delete(id: string): Promise<void> {
     await db.pendingOperations.delete(id);
+  },
+
+  async deleteByEntityId(entityId: string): Promise<void> {
+    await db.pendingOperations.where("entityId").equals(entityId).delete();
   },
 
   async updateAttempt(id: string, error: string | null): Promise<void> {

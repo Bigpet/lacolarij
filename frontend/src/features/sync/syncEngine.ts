@@ -1,13 +1,18 @@
 /**
  * Sync engine for synchronizing issues with JIRA.
  *
- * Phase 2: Pull-only sync (no push yet)
+ * Phase 3: Push and pull sync with conflict detection
  */
 
 import { api, type JiraIssue, type JiraSearchResponse } from "@/lib/api";
-import { db, issueRepository, syncMetaRepository } from "@/lib/db";
+import {
+  db,
+  issueRepository,
+  syncMetaRepository,
+  pendingOperationsRepository,
+} from "@/lib/db";
 import { useSyncStore } from "@/stores/syncStore";
-import type { Issue } from "@/types";
+import type { Issue, PendingOperation } from "@/types";
 
 // Map status category from JIRA to our simplified version
 function mapStatusCategory(
@@ -73,6 +78,9 @@ export class SyncEngine {
     store.setActiveConnection(options.connectionId);
 
     try {
+      // Push local changes first (before pull to minimize conflicts)
+      await this.pushPendingChanges(options.connectionId);
+
       // Pull remote changes
       await this.pullRemoteChanges(options);
 
@@ -203,6 +211,180 @@ export class SyncEngine {
       const updatedIssue = mapJiraIssueToLocal(remote);
       await issueRepository.put(updatedIssue);
     }
+  }
+
+  /**
+   * Push all pending local changes to JIRA.
+   */
+  private async pushPendingChanges(connectionId: string): Promise<void> {
+    const store = useSyncStore.getState();
+    const pending = await pendingOperationsRepository.getAll();
+
+    if (pending.length === 0) {
+      console.log("No pending changes to push");
+      return;
+    }
+
+    console.log(`Pushing ${pending.length} pending changes`);
+
+    for (const op of pending) {
+      // Only process issue operations for now
+      if (op.entityType !== "issue") {
+        continue;
+      }
+
+      try {
+        // Get local issue to check version
+        const localIssue = await issueRepository.getById(op.entityId);
+        if (!localIssue) {
+          // Issue was deleted locally, remove pending op
+          await pendingOperationsRepository.delete(op.id);
+          continue;
+        }
+
+        // Skip if already in conflict
+        if (localIssue._syncStatus === "conflict") {
+          console.log(`Skipping ${localIssue.key} - already in conflict`);
+          continue;
+        }
+
+        // Version check: GET current issue from JIRA
+        let remoteIssue: JiraIssue;
+        try {
+          remoteIssue = await api.getIssue(connectionId, localIssue.key);
+        } catch (error) {
+          // Issue might not exist on server (new issue) - handle separately
+          console.error(`Failed to fetch remote issue ${localIssue.key}:`, error);
+          await pendingOperationsRepository.updateAttempt(
+            op.id,
+            error instanceof Error ? error.message : "Failed to fetch remote"
+          );
+          continue;
+        }
+
+        // Check for version conflict
+        if (remoteIssue.fields.updated !== localIssue._remoteVersion) {
+          console.log(`Conflict detected for ${localIssue.key}`);
+          await this.handlePushConflict(localIssue, remoteIssue, op.id);
+          continue;
+        }
+
+        // Execute the operation
+        await this.executePendingOperation(connectionId, op, localIssue);
+
+        // Get updated remote version after push
+        const updatedRemote = await api.getIssue(connectionId, localIssue.key);
+
+        // Mark issue as synced with new version
+        await issueRepository.put({
+          ...localIssue,
+          _syncStatus: "synced",
+          _remoteVersion: updatedRemote.fields.updated,
+          _syncError: null,
+        });
+
+        // Remove pending operation
+        await pendingOperationsRepository.delete(op.id);
+
+        console.log(`Successfully pushed ${localIssue.key}`);
+      } catch (error) {
+        console.error(`Failed to push operation for ${op.entityId}:`, error);
+
+        // Check if it's a conflict error (409)
+        if (this.isConflictError(error)) {
+          const localIssue = await issueRepository.getById(op.entityId);
+          if (localIssue) {
+            try {
+              const remoteIssue = await api.getIssue(connectionId, localIssue.key);
+              await this.handlePushConflict(localIssue, remoteIssue, op.id);
+            } catch {
+              // Failed to get remote, just mark attempt
+              await pendingOperationsRepository.updateAttempt(
+                op.id,
+                "Conflict detected but failed to fetch remote version"
+              );
+            }
+          }
+        } else {
+          // Retry later
+          await pendingOperationsRepository.updateAttempt(
+            op.id,
+            error instanceof Error ? error.message : "Unknown error"
+          );
+        }
+      }
+    }
+
+    // Update pending count
+    const remaining = await pendingOperationsRepository.count();
+    store.setPendingCount(remaining);
+  }
+
+  /**
+   * Execute a single pending operation.
+   */
+  private async executePendingOperation(
+    connectionId: string,
+    op: PendingOperation,
+    localIssue: Issue
+  ): Promise<void> {
+    const payload = op.payload as {
+      fields?: Record<string, unknown>;
+      transition?: { id: string };
+    };
+
+    if (payload.transition) {
+      // Handle status transition
+      await api.transitionIssue(
+        connectionId,
+        localIssue.key,
+        payload.transition.id
+      );
+    } else if (payload.fields) {
+      // Handle field update
+      await api.updateIssue(connectionId, localIssue.key, {
+        fields: payload.fields,
+      });
+    }
+  }
+
+  /**
+   * Handle a conflict detected during push.
+   */
+  private async handlePushConflict(
+    localIssue: Issue,
+    remoteIssue: JiraIssue,
+    _pendingOpId: string
+  ): Promise<void> {
+    const store = useSyncStore.getState();
+
+    // Update local issue to conflict status
+    await issueRepository.put({
+      ...localIssue,
+      _syncStatus: "conflict",
+    });
+
+    // Add conflict to store
+    store.addConflict({
+      id: `${localIssue.id}-${Date.now()}`,
+      entityType: "issue",
+      entityId: localIssue.id,
+      entityKey: localIssue.key,
+      localValue: localIssue,
+      remoteValue: mapJiraIssueToLocal(remoteIssue),
+      localTimestamp: localIssue._localUpdated,
+      remoteTimestamp: remoteIssue.fields.updated,
+    });
+  }
+
+  /**
+   * Check if an error is a conflict error (HTTP 409).
+   */
+  private isConflictError(error: unknown): boolean {
+    if (error instanceof Error) {
+      return error.message.includes("409") || error.message.includes("Conflict");
+    }
+    return false;
   }
 
   async syncSingleIssue(

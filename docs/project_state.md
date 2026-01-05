@@ -1,6 +1,6 @@
 # Project State
 
-State: Phase 2 Core Features complete
+State: Phase 3 Sync Engine complete
 
 past:
 
@@ -62,9 +62,32 @@ past:
     * Created `frontend/src/components/sync/SyncStatusBar.tsx`
     * Incremental sync with last-sync tracking
 
+* [x] Phase 3: Sync Engine
+  * [x] Implement push sync for local changes
+    * Created `frontend/src/features/issues/issueService.ts` for local-first mutations
+    * Modified `frontend/src/features/sync/syncEngine.ts` with `pushPendingChanges()` method
+    * Queues operations in pendingOperations table, processes on sync
+  * [x] Add conflict detection
+    * Version checking via `_remoteVersion` comparison before push
+    * Conflict detection during pull for pending issues
+    * Created `frontend/src/features/sync/conflictService.ts`
+  * [x] Build conflict resolution UI
+    * Created `frontend/src/components/sync/ConflictResolver.tsx` - side-by-side comparison modal
+    * Created `frontend/src/components/sync/ConflictBanner.tsx` - notification banner
+    * "Keep Mine" and "Keep Theirs" resolution options
+  * [x] Add sync status indicators
+    * IssueCard shows synced/pending/conflict icons (already existed)
+    * IssueDetail shows sync status badge
+  * [x] Add inline editing to IssueDetail
+    * Click-to-edit summary
+    * Status dropdown with transitions
+    * Edit button for description
+  * [x] Mock JIRA timestamp tracking
+    * Added `updated` timestamp tracking to `backend/app/services/mock_jira/router.py`
+
 next:
-* [ ] Phase 3: Sync Engine
-  * [ ] Implement push sync for local changes
-  * [ ] Add conflict detection
-  * [ ] Build conflict resolution UI
-  * [ ] Add sync status indicators 
+* [ ] Phase 4: Board View
+  * [ ] Implement Kanban board
+  * [ ] Add drag-and-drop transitions
+  * [ ] Implement quick filters
+  * [ ] Add column customization 
