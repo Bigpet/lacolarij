@@ -150,6 +150,16 @@ export function BoardPage() {
     return grouped;
   }, [filteredIssues, columns]);
 
+  // Map JIRA status category keys to our internal category names
+  const mapJiraCategoryToInternal = (
+    jiraCategory: string
+  ): "todo" | "indeterminate" | "done" => {
+    const key = jiraCategory.toLowerCase();
+    if (key === "new" || key === "todo") return "todo";
+    if (key === "done") return "done";
+    return "indeterminate";
+  };
+
   // Handle drag end
   const handleDragEnd = useCallback(
     async (result: DropResult) => {
@@ -168,22 +178,35 @@ export function BoardPage() {
       const issue = filteredIssues.find((i) => i.id === draggableId);
       const targetColumn = columns.find((c) => c.id === destination.droppableId);
 
-      if (!issue || !targetColumn || !activeConnectionId) return;
+      if (!issue || !targetColumn) {
+        console.warn("Issue or target column not found");
+        return;
+      }
 
       // If moving to a different column, find an appropriate transition
       if (destination.droppableId !== source.droppableId) {
         const issueTransitions = transitionsCache[issue.id];
 
-        if (!issueTransitions) {
-          // Fetch transitions if not cached
-          await fetchTransitions(issue.id, issue.key);
-          return; // User will need to drag again after transitions are loaded
+        if (!issueTransitions || issueTransitions.length === 0) {
+          // If no connection or no cached transitions, just update locally
+          // The sync will handle the actual transition later
+          console.log("No transitions cached, updating locally only");
+          await issueService.transitionIssue(
+            issue.id,
+            "local-only", // Placeholder transition ID
+            {
+              name: targetColumn.statuses[0] || targetColumn.title,
+              category: targetColumn.statusCategory,
+            }
+          );
+          return;
         }
 
         // Find a transition that matches the target column
         const matchingTransition = issueTransitions.find((t) => {
+          const mappedCategory = mapJiraCategoryToInternal(t.toCategory);
           // Match by status category
-          if (t.toCategory === targetColumn.statusCategory) return true;
+          if (mappedCategory === targetColumn.statusCategory) return true;
           // Match by status name
           return targetColumn.statuses.some(
             (s) => s.toLowerCase() === t.toStatus.toLowerCase()
@@ -192,16 +215,36 @@ export function BoardPage() {
 
         if (matchingTransition) {
           // Perform the transition
+          console.log("Transitioning issue", issue.key, "to", matchingTransition.toStatus);
           await issueService.transitionIssue(issue.id, matchingTransition.id, {
             name: matchingTransition.toStatus,
-            category: targetColumn.statusCategory,
+            category: mapJiraCategoryToInternal(matchingTransition.toCategory),
           });
         } else {
-          console.warn("No matching transition found for target column");
+          // No matching transition found - try the first available one for that category
+          const fallbackTransition = issueTransitions.find((t) => {
+            const mappedCategory = mapJiraCategoryToInternal(t.toCategory);
+            return mappedCategory === targetColumn.statusCategory;
+          });
+
+          if (fallbackTransition) {
+            console.log("Using fallback transition to", fallbackTransition.toStatus);
+            await issueService.transitionIssue(issue.id, fallbackTransition.id, {
+              name: fallbackTransition.toStatus,
+              category: mapJiraCategoryToInternal(fallbackTransition.toCategory),
+            });
+          } else {
+            console.warn(
+              "No matching transition found for target column:",
+              targetColumn.title,
+              "Available transitions:",
+              issueTransitions
+            );
+          }
         }
       }
     },
-    [filteredIssues, columns, activeConnectionId, transitionsCache, fetchTransitions]
+    [filteredIssues, columns, transitionsCache]
   );
 
   const visibleColumns = columns.filter((col) => col.visible);
@@ -273,20 +316,18 @@ export function BoardPage() {
         />
       </div>
 
-      {/* Board Columns */}
+      {/* Board Columns - single scroll container */}
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex-1 overflow-x-auto">
-          <div className="flex gap-4 min-h-[500px] pb-4">
-            {visibleColumns.map((column) => (
-              <BoardColumn
-                key={column.id}
-                id={column.id}
-                title={column.title}
-                issues={issuesByColumn[column.id] || []}
-                colorClass={column.colorClass}
-              />
-            ))}
-          </div>
+        <div className="flex gap-4 pb-4 overflow-x-auto">
+          {visibleColumns.map((column) => (
+            <BoardColumn
+              key={column.id}
+              id={column.id}
+              title={column.title}
+              issues={issuesByColumn[column.id] || []}
+              colorClass={column.colorClass}
+            />
+          ))}
         </div>
       </DragDropContext>
 
