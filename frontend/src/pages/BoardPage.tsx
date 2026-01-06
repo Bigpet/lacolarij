@@ -1,12 +1,11 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { DragDropContext, type DropResult } from "@hello-pangea/dnd";
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/lib/db";
 import { api } from "@/lib/api";
 import { issueService } from "@/features/issues/issueService";
 import { useSyncStore } from "@/stores/syncStore";
 import { useBoardStore } from "@/stores/boardStore";
 import { useAuthStore } from "@/stores/authStore";
+import { useSearch } from "@/hooks/useSearch";
 import { BoardColumn } from "@/components/board/BoardColumn";
 import { QuickFilters, defaultQuickFilters } from "@/components/board/QuickFilters";
 import { Button } from "@/components/ui/button";
@@ -40,11 +39,8 @@ export function BoardPage() {
     Record<string, { id: string; name: string; toStatus: string; toCategory: string }[]>
   >({});
 
-  // Live query for all issues
-  const issues = useLiveQuery(
-    () => db.issues.orderBy("_localUpdated").reverse().toArray(),
-    []
-  );
+  // Full-text search with MiniSearch
+  const { results: searchResults, totalCount } = useSearch(searchTerm);
 
   // Fetch transitions for issues (cache them)
   const fetchTransitions = useCallback(
@@ -69,32 +65,20 @@ export function BoardPage() {
 
   // Prefetch transitions for visible issues
   useEffect(() => {
-    if (!issues || !activeConnectionId) return;
+    if (!searchResults.length || !activeConnectionId) return;
 
     // Only prefetch for first 20 issues to avoid rate limiting
-    const issuesToPrefetch = issues.slice(0, 20);
+    const issuesToPrefetch = searchResults.slice(0, 20);
     issuesToPrefetch.forEach((issue) => {
       if (!transitionsCache[issue.id]) {
         fetchTransitions(issue.id, issue.key);
       }
     });
-  }, [issues, activeConnectionId, fetchTransitions, transitionsCache]);
+  }, [searchResults, activeConnectionId, fetchTransitions, transitionsCache]);
 
-  // Apply filters and search
+  // Apply quick filters on top of search results
   const filteredIssues = useMemo(() => {
-    if (!issues) return [];
-
-    let result = issues;
-
-    // Apply search filter
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(
-        (issue) =>
-          issue.key.toLowerCase().includes(term) ||
-          issue.summary.toLowerCase().includes(term)
-      );
-    }
+    let result = searchResults;
 
     // Apply quick filters
     if (activeFilters.length > 0) {
@@ -116,7 +100,7 @@ export function BoardPage() {
     }
 
     return result;
-  }, [issues, searchTerm, activeFilters, user]);
+  }, [searchResults, activeFilters, user]);
 
   // Group issues by column
   const issuesByColumn = useMemo(() => {
@@ -332,7 +316,7 @@ export function BoardPage() {
       </DragDropContext>
 
       {/* Empty State */}
-      {(!issues || issues.length === 0) && (
+      {totalCount === 0 && (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <RefreshCw className="h-12 w-12 text-muted-foreground mb-4" />
           <h2 className="text-lg font-medium mb-2">No issues found</h2>

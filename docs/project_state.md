@@ -1,6 +1,6 @@
 # Project State
 
-State: Phase 4 Board View complete
+State: Phase 5 Polish (partial) complete
 
 past:
 
@@ -104,10 +104,28 @@ past:
     * Reset to default columns
     * Column config persisted to localStorage
 
-next:
-* [ ] Phase 5: Polish
-  * [ ] Full-text search
+* [x] Phase 5: Polish (partial)
+  * [x] Full-text search
+    * Created `frontend/src/lib/adf.ts` - ADF text extraction utility
+    * Created `frontend/src/features/search/searchService.ts` - MiniSearch-based full-text search
+    * Created `frontend/src/hooks/useSearch.ts` - React hook for search with live indexing
+    * Updated `IssueList.tsx` and `BoardPage.tsx` to use full-text search
+    * Searches across: key, summary, description (ADF), labels, assignee, reporter
+    * Supports prefix search and fuzzy matching
+  * [x] Offline indicators
+    * Added `isOnline` state to `syncStore.ts`
+    * Created `frontend/src/hooks/useConnectivity.ts` - listens for online/offline events
+    * Created `frontend/src/components/sync/OfflineBanner.tsx` - shows when offline
+    * Updated `AppShell.tsx` to initialize connectivity monitoring
+    * Updated `SyncStatusBar.tsx` to use store's online state
+    * Updated `syncEngine.ts` to check connectivity before syncing
+    * Auto-sync triggers when coming back online with pending changes
   * [ ] Attachment caching
-  * [ ] Offline indicators
   * [ ] Performance optimization
-  * [ ] Comprehensive testing 
+  * [ ] Comprehensive testing
+
+next:
+* [ ] Phase 5: Polish (remaining)
+  * [ ] Attachment caching (CacheStorage for images/files)
+  * [ ] Performance optimization (virtualization, React.memo)
+  * [ ] Comprehensive testing (Vitest, React Testing Library) 

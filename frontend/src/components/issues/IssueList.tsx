@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/lib/db";
 import type { Issue } from "@/types";
+import { useSearch } from "@/hooks/useSearch";
 import { IssueCard } from "./IssueCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,55 +22,33 @@ export function IssueList({
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
-  // Load issues from IndexedDB
-  const issues = useLiveQuery(
-    () => db.issues.orderBy("_localUpdated").reverse().toArray(),
-    []
-  );
+  // Full-text search with MiniSearch
+  const { results: searchResults, totalCount, isIndexReady } = useSearch(searchQuery);
 
-  // Get unique statuses for filter
+  // Get unique statuses for filter (from all issues via search results when no query)
   const uniqueStatuses = useMemo(() => {
-    if (!issues) return [];
-    const statuses = new Set(issues.map((i) => i.status));
+    const statuses = new Set(searchResults.map((i) => i.status));
     return Array.from(statuses).sort();
-  }, [issues]);
+  }, [searchResults]);
 
-  // Filter issues
+  // Apply status filter on top of search results
   const filteredIssues = useMemo(() => {
-    if (!issues) return [];
+    if (!statusFilter) return searchResults;
+    return searchResults.filter((issue) => issue.status === statusFilter);
+  }, [searchResults, statusFilter]);
 
-    return issues.filter((issue) => {
-      // Search filter
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        const matchesSearch =
-          issue.key.toLowerCase().includes(query) ||
-          issue.summary.toLowerCase().includes(query);
-        if (!matchesSearch) return false;
-      }
-
-      // Status filter
-      if (statusFilter && issue.status !== statusFilter) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [issues, searchQuery, statusFilter]);
-
-  // Count by status category
+  // Count by status category (from all issues, not filtered)
   const statusCounts = useMemo(() => {
-    if (!issues) return { todo: 0, indeterminate: 0, done: 0 };
-    return issues.reduce(
+    return searchResults.reduce(
       (acc, issue) => {
         acc[issue.statusCategory]++;
         return acc;
       },
       { todo: 0, indeterminate: 0, done: 0 }
     );
-  }, [issues]);
+  }, [searchResults]);
 
-  if (!issues) {
+  if (!isIndexReady && totalCount === 0) {
     return (
       <div className="flex items-center justify-center h-40">
         <p className="text-muted-foreground">Loading...</p>
@@ -133,14 +110,14 @@ export function IssueList({
           Done: <strong>{statusCounts.done}</strong>
         </span>
         <span className="ml-auto">
-          Total: <strong>{issues.length}</strong>
+          Total: <strong>{totalCount}</strong>
         </span>
       </div>
 
       {/* Issue list */}
       {filteredIssues.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
-          {issues.length === 0 ? (
+          {totalCount === 0 ? (
             <>
               <p className="text-lg">No issues yet</p>
               <p className="text-sm">
@@ -148,7 +125,7 @@ export function IssueList({
               </p>
             </>
           ) : (
-            <p>No issues match your filters</p>
+            <p>No issues match your search</p>
           )}
         </div>
       ) : (

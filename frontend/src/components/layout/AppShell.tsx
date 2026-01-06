@@ -2,7 +2,9 @@ import * as React from "react";
 import { Outlet, Navigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { useSyncStore } from "@/stores/syncStore";
+import { useConnectivity } from "@/hooks/useConnectivity";
 import { Header } from "./Header";
+import { OfflineBanner } from "@/components/sync/OfflineBanner";
 import { ConflictBanner } from "@/components/sync/ConflictBanner";
 import { ConflictResolver } from "@/components/sync/ConflictResolver";
 
@@ -10,6 +12,9 @@ export function AppShell() {
   const { token } = useAuthStore();
   const conflicts = useSyncStore((state) => state.conflicts);
   const activeConnectionId = useSyncStore((state) => state.activeConnectionId);
+
+  // Initialize connectivity monitoring
+  useConnectivity();
 
   const [showConflictResolver, setShowConflictResolver] = React.useState(false);
   const [currentConflictIndex, setCurrentConflictIndex] = React.useState(0);
@@ -38,6 +43,7 @@ export function AppShell() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <OfflineBanner />
       <Header />
       <ConflictBanner onReviewClick={handleReviewConflicts} />
       <main className="flex-1 container mx-auto px-4 py-6">

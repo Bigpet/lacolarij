@@ -72,6 +72,13 @@ export class SyncEngine {
     }
 
     const store = useSyncStore.getState();
+
+    // Check connectivity before syncing
+    if (!store.isOnline) {
+      console.log("Cannot sync while offline");
+      return;
+    }
+
     this.isRunning = true;
     store.setStatus("syncing");
     store.setError(null);
@@ -411,7 +418,7 @@ export class SyncEngine {
   }
 
   isOnline(): boolean {
-    return navigator.onLine;
+    return useSyncStore.getState().isOnline;
   }
 }
 
@@ -438,6 +445,6 @@ export function useSync() {
     pendingCount: store.pendingCount,
     conflicts: store.conflicts,
     error: store.error,
-    isOnline: syncEngine.isOnline(),
+    isOnline: store.isOnline,
   };
 }

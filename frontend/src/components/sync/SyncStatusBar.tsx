@@ -24,8 +24,7 @@ function formatRelativeTime(date: Date | null): string {
 }
 
 export function SyncStatusBar() {
-  const { status, lastSync, pendingCount, conflicts, error } = useSyncStore();
-  const isOnline = navigator.onLine;
+  const { status, lastSync, pendingCount, conflicts, error, isOnline } = useSyncStore();
 
   return (
     <div className="flex items-center gap-3 text-sm">
