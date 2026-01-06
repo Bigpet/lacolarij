@@ -17,7 +17,7 @@ export function BoardColumn({
   colorClass = "bg-muted/50",
 }: BoardColumnProps) {
   return (
-    <div className="flex flex-col h-full min-w-[280px] max-w-[320px]">
+    <div className="flex flex-col min-w-[280px] w-[300px] flex-shrink-0">
       {/* Column Header */}
       <div
         className={cn(
@@ -31,14 +31,14 @@ export function BoardColumn({
         </span>
       </div>
 
-      {/* Droppable Area */}
+      {/* Droppable Area - no overflow, let parent handle scroll */}
       <Droppable droppableId={id}>
         {(provided, snapshot) => (
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
             className={cn(
-              "flex-1 p-2 space-y-2 overflow-y-auto rounded-b-lg border border-t-0 min-h-[200px]",
+              "flex-1 p-2 space-y-2 rounded-b-lg border border-t-0 min-h-[200px]",
               snapshot.isDraggingOver && "bg-accent/50"
             )}
           >
