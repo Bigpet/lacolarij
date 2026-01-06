@@ -1,6 +1,6 @@
 # Project State
 
-State: Phase 3 Sync Engine complete
+State: Phase 4 Board View complete
 
 past:
 
@@ -85,9 +85,29 @@ past:
   * [x] Mock JIRA timestamp tracking
     * Added `updated` timestamp tracking to `backend/app/services/mock_jira/router.py`
 
+* [x] Phase 4: Board View
+  * [x] Implement Kanban board
+    * Created `frontend/src/components/board/BoardCard.tsx` - compact card for board view
+    * Created `frontend/src/components/board/BoardColumn.tsx` - droppable column component
+    * Issues grouped by status category (todo/indeterminate/done)
+  * [x] Add drag-and-drop transitions
+    * Integrated `@hello-pangea/dnd` for drag-and-drop
+    * Dragging issues between columns triggers JIRA transitions
+    * Transitions prefetched and cached for smooth UX
+  * [x] Implement quick filters
+    * Created `frontend/src/components/board/QuickFilters.tsx`
+    * Built-in filters: My Issues, Recently Updated, High Priority
+    * Search bar for filtering by key/summary
+  * [x] Add column customization
+    * Created `frontend/src/stores/boardStore.ts` with persistence
+    * Toggle column visibility
+    * Reset to default columns
+    * Column config persisted to localStorage
+
 next:
-* [ ] Phase 4: Board View
-  * [ ] Implement Kanban board
-  * [ ] Add drag-and-drop transitions
-  * [ ] Implement quick filters
-  * [ ] Add column customization 
+* [ ] Phase 5: Polish
+  * [ ] Full-text search
+  * [ ] Attachment caching
+  * [ ] Offline indicators
+  * [ ] Performance optimization
+  * [ ] Comprehensive testing 
