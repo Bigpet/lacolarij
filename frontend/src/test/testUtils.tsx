@@ -1,0 +1,23 @@
+import { render, RenderOptions } from "@testing-library/react";
+import { BrowserRouter } from "react-router-dom";
+import { ReactElement, ReactNode } from "react";
+
+interface WrapperProps {
+  children: ReactNode;
+}
+
+function AllProviders({ children }: WrapperProps) {
+  return <BrowserRouter>{children}</BrowserRouter>;
+}
+
+function customRender(
+  ui: ReactElement,
+  options?: Omit<RenderOptions, "wrapper">
+) {
+  return render(ui, { wrapper: AllProviders, ...options });
+}
+
+// Re-export everything from testing-library
+export * from "@testing-library/react";
+export { userEvent } from "@testing-library/user-event";
+export { customRender as render };
