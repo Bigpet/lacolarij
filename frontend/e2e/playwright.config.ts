@@ -25,18 +25,25 @@ export default defineConfig({
     },
   ],
 
-  // Start backend server before tests
+  // Start servers before tests
   webServer: [
     {
-      command: 'cd ../backend && uv run uvicorn app.main:app --host 127.0.0.1 --port 8000',
-      port: 8000,
-      timeout: 12 * 1000,
+      command: 'uv run uvicorn app.main:app --host 127.0.0.1 --port 8000',
+      url: 'http://localhost:8000/health',
+      timeout: 120 * 1000,
       reuseExistingServer: !process.env.CI,
+      stderr: "pipe",
+      // stdout: "pipe",
+      // port: 8000,
+      cwd: '../../backend',
     },
     {
       command: 'npm run dev',
-      port: 5173,
-      timeout: 6 * 1000,
+      url: 'http://localhost:5173/',
+      stderr: "pipe",
+      // stdout: "pipe",
+      // port: 5173,
+      timeout: 60 * 1000,
       reuseExistingServer: !process.env.CI,
     },
   ],

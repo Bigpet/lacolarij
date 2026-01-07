@@ -16,11 +16,17 @@ sdist/
 # uv
 .uv/
 
+# Frontend
+frontend/dist/
+frontend/e2e/test-results/junit.xml
+frontend/e2e/playwright-report/index.html
+frontend/test-results/.last-run.json
+
 # Node.js
 node_modules/
 .cache/
 .npm/
-frontend/dist/
+
 
 
 # Secrets & Local Config

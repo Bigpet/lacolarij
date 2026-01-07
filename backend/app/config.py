@@ -4,6 +4,7 @@ import secrets
 from pathlib import Path
 from functools import lru_cache
 
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,6 +21,18 @@ class Settings(BaseSettings):
     host: str = "127.0.0.1"
     port: int = 8080
     debug: bool = False
+
+    # Allow DEBUG to accept non-boolean values (e.g., "pw:api" for debugging)
+    @field_validator('debug', mode='before')
+    @classmethod
+    def parse_debug(cls, v: bool | str) -> bool:
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            # Accept any non-empty string as truthy for debugging
+            # This allows DEBUG=pw:api, DEBUG=1, DEBUG=true, etc.
+            return v.lower() not in ('', '0', 'false', 'no', 'off')
+        return bool(v)
 
     # Database
     database_path: Path = Path(__file__).parent.parent / "data" / "jiralocal.db"
