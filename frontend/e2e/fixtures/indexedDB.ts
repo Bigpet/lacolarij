@@ -44,4 +44,11 @@ export class IndexedDBHelper {
       sessionStorage.clear();
     });
   }
+
+    async isOffline(): Promise<boolean> {
+    // Check offline status by trying to navigate to a non-existent resource
+    // or checking the browser's navigator.onLine
+    return this.page.evaluate(() => navigator.onLine === false);
+  }
+
 }
