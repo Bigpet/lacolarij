@@ -21,6 +21,9 @@ frontend/dist/
 frontend/e2e/test-results/junit.xml
 frontend/e2e/playwright-report/index.html
 frontend/test-results/.last-run.json
+frontend/e2e/playwright-report/trace/
+frontend/e2e/playwright-report/data/
+frontend/test-results/
 
 # Node.js
 node_modules/

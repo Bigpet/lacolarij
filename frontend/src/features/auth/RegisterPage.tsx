@@ -55,10 +55,10 @@ export function RegisterPage() {
             Enter your details to create a new account
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <CardContent className="space-y-4">
             {displayError && (
-              <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
+              <div role="alert" className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
                 {displayError}
               </div>
             )}
