@@ -1133,10 +1133,10 @@ test('should load issue list within 2 seconds', async ({ authenticatedPage }) =>
 - [x] Settings page tests
 
 ### Phase 3: Issue Operations (Week 2-3)
-- [ ] List view tests
-- [ ] Detail view tests
-- [ ] Inline editing tests
-- [ ] Comment functionality tests
+- [x] List view tests
+- [x] Detail view tests
+- [x] Inline editing tests
+- [x] Comment functionality tests (read-only)
 
 ### Phase 4: Board View (Week 3)
 - [ ] Board rendering tests

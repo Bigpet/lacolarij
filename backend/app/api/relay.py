@@ -4,6 +4,7 @@ import json
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi.responses import RedirectResponse
 
 from app.dependencies import CurrentUser, ConnectionRepo
 from app.services.relay_service import relay_service, RelayError
@@ -54,11 +55,7 @@ async def relay_jira_request(
         mock_path = f"/api/jira/mock/rest/api/{api_version}/{path}"
         if request.query_params:
             mock_path = f"{mock_path}?{request.query_params}"
-        raise HTTPException(
-            status_code=307,
-            headers={"Location": mock_path},
-            detail="Redirecting to mock JIRA",
-        )
+        return RedirectResponse(url=mock_path, status_code=307)
 
     # Build the full path
     full_path = f"/rest/api/{api_version}/{path}"

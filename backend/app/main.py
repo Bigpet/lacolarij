@@ -1,5 +1,6 @@
 """FastAPI application factory."""
 
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -42,11 +43,18 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    # Include mock JIRA routes at /api/jira/mock
+    # IMPORTANT: Must be included BEFORE api_router so it takes precedence
+    # over the relay router's /{connection_id}/... pattern
+    app.include_router(mock_jira_router, prefix="/api/jira/mock")
+
     # Include API routes
     app.include_router(api_router)
 
-    # Include mock JIRA routes at /api/jira/mock
-    app.include_router(mock_jira_router, prefix="/api/jira/mock")
+    # Include test routes only in test environment
+    if os.getenv("JIRALOCAL_ENV") == "test":
+        from app.api.test import router as test_router
+        app.include_router(test_router)
 
     # Health check endpoint
     @app.get("/health")

@@ -26,23 +26,25 @@ export default defineConfig({
   ],
 
   // Start servers before tests
+  // NOTE: If tests fail with "Test endpoints not available", stop any existing
+  // backend/frontend processes and let Playwright start fresh ones with JIRALOCAL_ENV=test
   webServer: [
     {
       command: 'uv run uvicorn app.main:app --host 127.0.0.1 --port 8000',
-      url: 'http://localhost:8000/health',
+      url: 'http://127.0.0.1:8000/health',
       timeout: 120 * 1000,
       reuseExistingServer: !process.env.CI,
-      stderr: "pipe",
-      // stdout: "pipe",
-      // port: 8000,
+      stderr: 'pipe',
       cwd: '../../backend',
+      env: {
+        ...process.env,
+        JIRALOCAL_ENV: 'test',
+      },
     },
     {
       command: 'npm run dev',
-      url: 'http://localhost:5173/',
-      stderr: "pipe",
-      // stdout: "pipe",
-      // port: 5173,
+      url: 'http://127.0.0.1:5173/',
+      stderr: 'pipe',
       timeout: 60 * 1000,
       reuseExistingServer: !process.env.CI,
     },
