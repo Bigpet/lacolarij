@@ -221,6 +221,6 @@ test.describe('Issue Detail View', () => {
     await detailPage.waitForLoaded();
 
     // Verify issue type is displayed
-    await expect(page.locator('text=Bug')).toBeVisible();
+    await expect(detailPage.issueType).toBeVisible();
   });
 });

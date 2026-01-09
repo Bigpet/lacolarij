@@ -36,21 +36,21 @@ function getSyncStatusBadge(status: Issue["_syncStatus"]) {
   switch (status) {
     case "synced":
       return (
-        <Badge variant="success" className="flex items-center gap-1">
+        <Badge variant="success" className="flex items-center gap-1" data-testid="sync-status-badge">
           <CheckCircle className="h-3 w-3" />
           Synced
         </Badge>
       );
     case "pending":
       return (
-        <Badge variant="warning" className="flex items-center gap-1">
+        <Badge variant="warning" className="flex items-center gap-1" data-testid="sync-status-badge">
           <Clock className="h-3 w-3" />
           Pending
         </Badge>
       );
     case "conflict":
       return (
-        <Badge variant="destructive" className="flex items-center gap-1">
+        <Badge variant="destructive" className="flex items-center gap-1" data-testid="sync-status-badge">
           <AlertCircle className="h-3 w-3" />
           Conflict
         </Badge>
@@ -423,7 +423,7 @@ export function IssueDetail({
           </Badge>
         )}
 
-        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+        <div className="flex items-center gap-1 text-sm text-muted-foreground" data-testid="issue-type">
           <Tag className="h-4 w-4" />
           {issue.issueType}
         </div>

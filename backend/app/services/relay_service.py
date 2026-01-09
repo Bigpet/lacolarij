@@ -168,6 +168,41 @@ class RelayService:
         else:
             raise RelayError(response.status_code, response.body)
 
+    async def get_comments(
+        self, connection: JiraConnection, issue_id_or_key: str
+    ) -> dict[str, Any]:
+        """Get comments for an issue."""
+        response = await self.forward_request(
+            connection=connection,
+            method="GET",
+            path=f"/rest/api/3/issue/{issue_id_or_key}/comment",
+        )
+
+        if response.status_code == 200 and response.body:
+            import json
+
+            return json.loads(response.body)
+        else:
+            raise RelayError(response.status_code, response.body)
+
+    async def add_comment(
+        self, connection: JiraConnection, issue_id_or_key: str, body: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Add a comment to an issue."""
+        response = await self.forward_request(
+            connection=connection,
+            method="POST",
+            path=f"/rest/api/3/issue/{issue_id_or_key}/comment",
+            body=body,
+        )
+
+        if response.status_code in (200, 201) and response.body:
+            import json
+
+            return json.loads(response.body)
+        else:
+            raise RelayError(response.status_code, response.body)
+
 
 class RelayError(Exception):
     """Error from JIRA relay operation."""

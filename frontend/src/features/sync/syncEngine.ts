@@ -8,6 +8,7 @@ import { api, type JiraIssue, type JiraSearchResponse } from "@/lib/api";
 import {
   db,
   issueRepository,
+  commentRepository,
   syncMetaRepository,
   pendingOperationsRepository,
 } from "@/lib/db";
@@ -52,6 +53,19 @@ function mapJiraIssueToLocal(jiraIssue: JiraIssue): Issue {
     _syncStatus: "synced",
     _syncError: null,
     _remoteVersion: fields.updated,
+  };
+}
+
+// Convert JIRA comment to local comment format
+function mapJiraCommentToLocal(jiraComment: { id: string; body: unknown; author: { displayName: string }; created: string; updated: string }, issueId: string) {
+  return {
+    id: jiraComment.id,
+    issueId,
+    body: jiraComment.body,
+    author: jiraComment.author.displayName,
+    created: jiraComment.created,
+    updated: jiraComment.updated,
+    _syncStatus: "synced" as const,
   };
 }
 
@@ -161,7 +175,8 @@ export class SyncEngine {
 
       // Process issues
       for (const jiraIssue of response.issues) {
-        await this.mergeRemoteIssue(jiraIssue);
+        console.log(`[syncEngine] Processing issue ${jiraIssue.key}...`);
+        await this.mergeRemoteIssue(jiraIssue, options.connectionId);
       }
 
       totalFetched += response.issues.length;
@@ -180,7 +195,8 @@ export class SyncEngine {
     await syncMetaRepository.setLastSyncTime(connectionId, Date.now());
   }
 
-  private async mergeRemoteIssue(remote: JiraIssue): Promise<void> {
+  private async mergeRemoteIssue(remote: JiraIssue, connectionId: string): Promise<void> {
+    console.log(`[syncEngine] mergeRemoteIssue called for ${remote.key}, connectionId=${connectionId}`);
     const store = useSyncStore.getState();
     const local = await issueRepository.getById(remote.id);
 
@@ -188,6 +204,9 @@ export class SyncEngine {
       // New issue from remote - add it
       const newIssue = mapJiraIssueToLocal(remote);
       await issueRepository.put(newIssue);
+
+      // Fetch and store comments for the new issue
+      await this.syncCommentsForIssue(connectionId, remote.id, remote.key);
       return;
     }
 
@@ -211,12 +230,51 @@ export class SyncEngine {
           localTimestamp: local._localUpdated,
           remoteTimestamp: remote.fields.updated,
         });
+      } else {
+        // No conflict - keep local version for future push
       }
-      // If remote hasn't changed, keep local version for future push
     } else {
       // No local changes - just update with remote
       const updatedIssue = mapJiraIssueToLocal(remote);
       await issueRepository.put(updatedIssue);
+    }
+
+    // Always sync comments for the issue
+    await this.syncCommentsForIssue(connectionId, remote.id, remote.key);
+  }
+
+  /**
+   * Sync comments for an issue from JIRA.
+   */
+  private async syncCommentsForIssue(
+    connectionId: string,
+    issueId: string,
+    issueKey: string
+  ): Promise<void> {
+    try {
+      console.log(`[syncEngine] Fetching comments for ${issueKey} (issueId=${issueId})...`);
+      const response = await api.getComments(connectionId, issueKey);
+
+      console.log(`[syncEngine] Got ${response.comments.length} comments for ${issueKey}, total=${response.total}`);
+
+      // Convert JIRA comments to local format
+      const localComments = response.comments.map((jiraComment) =>
+        mapJiraCommentToLocal(jiraComment, issueId)
+      );
+
+      console.log(`[syncEngine] Mapped ${localComments.length} comments to local format`);
+
+      // Store all comments (replaces existing)
+      await commentRepository.deleteByIssueId(issueId);
+      if (localComments.length > 0) {
+        await commentRepository.bulkPut(localComments);
+        console.log(`[syncEngine] Stored ${localComments.length} comments for ${issueKey}`);
+      } else {
+        console.log(`[syncEngine] No comments to store for ${issueKey}`);
+      }
+    } catch (error) {
+      console.error(`[syncEngine] Failed to sync comments for ${issueKey}:`, error);
+      // Don't fail the entire sync if comments fail
     }
   }
 
@@ -235,83 +293,42 @@ export class SyncEngine {
     console.log(`Pushing ${pending.length} pending changes`);
 
     for (const op of pending) {
-      // Only process issue operations for now
-      if (op.entityType !== "issue") {
+      // Process both issue and comment operations
+      if (op.entityType !== "issue" && op.entityType !== "comment") {
         continue;
       }
 
       try {
-        // Get local issue to check version
-        const localIssue = await issueRepository.getById(op.entityId);
-        if (!localIssue) {
-          // Issue was deleted locally, remove pending op
-          await pendingOperationsRepository.delete(op.id);
-          continue;
+        if (op.entityType === "comment") {
+          await this.executePendingCommentOperation(connectionId, op);
+        } else {
+          await this.executePendingIssueOperation(connectionId, op);
         }
-
-        // Skip if already in conflict
-        if (localIssue._syncStatus === "conflict") {
-          console.log(`Skipping ${localIssue.key} - already in conflict`);
-          continue;
-        }
-
-        // Version check: GET current issue from JIRA
-        let remoteIssue: JiraIssue;
-        try {
-          remoteIssue = await api.getIssue(connectionId, localIssue.key);
-        } catch (error) {
-          // Issue might not exist on server (new issue) - handle separately
-          console.error(`Failed to fetch remote issue ${localIssue.key}:`, error);
-          await pendingOperationsRepository.updateAttempt(
-            op.id,
-            error instanceof Error ? error.message : "Failed to fetch remote"
-          );
-          continue;
-        }
-
-        // Check for version conflict
-        if (remoteIssue.fields.updated !== localIssue._remoteVersion) {
-          console.log(`Conflict detected for ${localIssue.key}`);
-          await this.handlePushConflict(localIssue, remoteIssue, op.id);
-          continue;
-        }
-
-        // Execute the operation
-        await this.executePendingOperation(connectionId, op, localIssue);
-
-        // Get updated remote version after push
-        const updatedRemote = await api.getIssue(connectionId, localIssue.key);
-
-        // Mark issue as synced with new version
-        await issueRepository.put({
-          ...localIssue,
-          _syncStatus: "synced",
-          _remoteVersion: updatedRemote.fields.updated,
-          _syncError: null,
-        });
-
-        // Remove pending operation
-        await pendingOperationsRepository.delete(op.id);
-
-        console.log(`Successfully pushed ${localIssue.key}`);
       } catch (error) {
         console.error(`Failed to push operation for ${op.entityId}:`, error);
 
         // Check if it's a conflict error (409)
         if (this.isConflictError(error)) {
-          const localIssue = await issueRepository.getById(op.entityId);
-          if (localIssue) {
-            try {
-              const remoteIssue = await api.getIssue(connectionId, localIssue.key);
-              await this.handlePushConflict(localIssue, remoteIssue, op.id);
-            } catch {
-              // Failed to get remote, just mark attempt
-              await pendingOperationsRepository.updateAttempt(
-                op.id,
-                "Conflict detected but failed to fetch remote version"
-              );
+          if (op.entityType === "issue") {
+            const localIssue = await issueRepository.getById(op.entityId);
+            if (localIssue) {
+              try {
+                const remoteIssue = await api.getIssue(connectionId, localIssue.key);
+                await this.handlePushConflict(localIssue, remoteIssue, op.id);
+              } catch {
+                // Failed to get remote, just mark attempt
+                await pendingOperationsRepository.updateAttempt(
+                  op.id,
+                  "Conflict detected but failed to fetch remote version"
+                );
+              }
             }
           }
+          // For comments, just mark the attempt for now
+          await pendingOperationsRepository.updateAttempt(
+            op.id,
+            "Conflict detected"
+          );
         } else {
           // Retry later
           await pendingOperationsRepository.updateAttempt(
@@ -325,6 +342,106 @@ export class SyncEngine {
     // Update pending count
     const remaining = await pendingOperationsRepository.count();
     store.setPendingCount(remaining);
+  }
+
+  /**
+   * Execute a single pending issue operation.
+   */
+  private async executePendingIssueOperation(
+    connectionId: string,
+    op: PendingOperation
+  ): Promise<void> {
+    const localIssue = await issueRepository.getById(op.entityId);
+    if (!localIssue) {
+      // Issue was deleted locally, remove pending op
+      await pendingOperationsRepository.delete(op.id);
+      return;
+    }
+
+    // Skip if already in conflict
+    if (localIssue._syncStatus === "conflict") {
+      console.log(`Skipping ${localIssue.key} - already in conflict`);
+      return;
+    }
+
+    // Version check: GET current issue from JIRA
+    let remoteIssue: JiraIssue;
+    try {
+      remoteIssue = await api.getIssue(connectionId, localIssue.key);
+    } catch (error) {
+      // Issue might not exist on server (new issue) - handle separately
+      console.error(`Failed to fetch remote issue ${localIssue.key}:`, error);
+      await pendingOperationsRepository.updateAttempt(
+        op.id,
+        error instanceof Error ? error.message : "Failed to fetch remote"
+      );
+      return;
+    }
+
+    // Check for version conflict
+    if (remoteIssue.fields.updated !== localIssue._remoteVersion) {
+      console.log(`Conflict detected for ${localIssue.key}`);
+      await this.handlePushConflict(localIssue, remoteIssue, op.id);
+      return;
+    }
+
+    // Execute the operation
+    await this.executePendingOperation(connectionId, op, localIssue);
+
+    // Get updated remote version after push
+    const updatedRemote = await api.getIssue(connectionId, localIssue.key);
+
+    // Mark issue as synced with new version
+    await issueRepository.put({
+      ...localIssue,
+      _syncStatus: "synced",
+      _remoteVersion: updatedRemote.fields.updated,
+      _syncError: null,
+    });
+
+    // Remove pending operation
+    await pendingOperationsRepository.delete(op.id);
+
+    console.log(`Successfully pushed ${localIssue.key}`);
+  }
+
+  /**
+   * Execute a single pending comment operation.
+   */
+  private async executePendingCommentOperation(
+    connectionId: string,
+    op: PendingOperation
+  ): Promise<void> {
+    // Get the issue to find the key
+    const localIssue = await issueRepository.getById(op.entityId);
+    if (!localIssue) {
+      // Issue was deleted locally, remove pending op
+      await pendingOperationsRepository.delete(op.id);
+      return;
+    }
+
+    const payload = op.payload as { body: unknown };
+
+    // Execute the add comment operation
+    const response = await api.addComment(connectionId, localIssue.key, payload.body);
+
+    // Convert response to local format and store
+    const localComment = {
+      id: response.id,
+      issueId: op.entityId,
+      body: response.body,
+      author: response.author.displayName,
+      created: response.created,
+      updated: response.updated,
+      _syncStatus: "synced" as const,
+    };
+
+    await commentRepository.put(localComment);
+
+    // Remove pending operation
+    await pendingOperationsRepository.delete(op.id);
+
+    console.log(`Successfully pushed comment for ${localIssue.key}`);
   }
 
   /**

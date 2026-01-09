@@ -182,9 +182,9 @@ test.describe('Issue Comments (Read-Only)', () => {
     expect(await detailPage.getCommentCount()).toBe(3);
 
     // Verify authors
-    expect(await detailPage.getCommentAuthor(0)).toBe('Alice');
-    expect(await detailPage.getCommentAuthor(1)).toBe('Bob');
     expect(await detailPage.getCommentAuthor(2)).toBe('Charlie');
+    expect(await detailPage.getCommentAuthor(1)).toBe('Bob');
+    expect(await detailPage.getCommentAuthor(0)).toBe('Alice');
   });
 
   test('should show comments card title with count', async ({ page }) => {

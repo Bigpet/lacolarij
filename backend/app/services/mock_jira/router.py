@@ -1,10 +1,13 @@
 """Mock JIRA server router for demo mode."""
 
+import logging
 import uuid
 from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Response
+
+logger = logging.getLogger(__name__)
 
 
 def _now_iso() -> str:
@@ -103,10 +106,30 @@ async def update_issue(issue_id_or_key: str, update: IssueUpdate) -> Response:
     return Response(status_code=204)
 
 
+@router.get("/rest/api/2/issue/{issue_id_or_key}/comment")
+@router.get("/rest/api/3/issue/{issue_id_or_key}/comment")
+async def get_comments(issue_id_or_key: str) -> dict[str, Any]:
+    """Get comments for an issue."""
+    logger.info(f"[MockJIRA] GET comments for {issue_id_or_key}")
+    issue = _get_issue(issue_id_or_key)
+    if "comment" not in issue["fields"]:
+        logger.info(f"[MockJIRA] No comments for {issue_id_or_key}")
+        return {"comments": [], "total": 0, "startAt": 0, "maxResults": 50}
+    result = {
+        "comments": issue["fields"]["comment"]["comments"],
+        "total": issue["fields"]["comment"]["total"],
+        "startAt": 0,
+        "maxResults": 50,
+    }
+    logger.info(f"[MockJIRA] Returning {result['total']} comments for {issue_id_or_key}")
+    return result
+
+
 @router.post("/rest/api/2/issue/{issue_id_or_key}/comment")
 @router.post("/rest/api/3/issue/{issue_id_or_key}/comment")
 async def add_comment(issue_id_or_key: str, comment: CommentCreate) -> dict[str, Any]:
     """Add a comment to an issue."""
+    logger.info(f"[MockJIRA] POST comment to {issue_id_or_key}")
     issue = _get_issue(issue_id_or_key)
     now = _now_iso()
 
@@ -126,6 +149,7 @@ async def add_comment(issue_id_or_key: str, comment: CommentCreate) -> dict[str,
     # Update issue timestamp when comment is added
     issue["fields"]["updated"] = now
 
+    logger.info(f"[MockJIRA] Added comment {new_comment['id']} to {issue_id_or_key}")
     return new_comment
 
 

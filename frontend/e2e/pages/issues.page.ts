@@ -29,7 +29,7 @@ export class IssuesPage extends BasePage {
     this.statusFilterSelect = page.locator('select:has-text("All statuses")');
     this.issueCards = page.locator('.border.rounded-lg.cursor-pointer');
     this.noIssuesText = page.locator('text=No issues yet');
-    this.noConnectionsCard = page.locator('text=No JIRA connections configured');
+    this.noConnectionsCard = page.locator('[data-testid="no-connections-card"]');
     this.loadingText = page.locator('text=Loading...');
 
     // Status counters

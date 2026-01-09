@@ -3,6 +3,8 @@
 These endpoints are only available when JIRALOCAL_ENV=test.
 """
 
+import logging
+from collections import deque
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
@@ -10,6 +12,29 @@ from pydantic import BaseModel
 
 from app.services.mock_jira.router import _issues, reset_storage, _now_iso
 from app.services.mock_jira.models import DEFAULT_TRANSITIONS
+
+
+# In-memory log buffer for E2E test debugging
+_log_buffer: deque[str] = deque(maxlen=500)
+
+
+class LogHandler(logging.Handler):
+    """Custom logging handler that stores logs in memory for E2E tests."""
+
+    def emit(self, record: logging.LogRecord) -> None:
+        log_entry = self.format(record)
+        _log_buffer.append(log_entry)
+
+
+# Set up the custom handler
+_log_handler = LogHandler()
+_log_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+
+# Add handler to relevant loggers
+for logger_name in ['app', 'uvicorn', 'uvicorn.access']:
+    logger = logging.getLogger(logger_name)
+    logger.addHandler(_log_handler)
+    logger.setLevel(logging.DEBUG)
 
 
 router = APIRouter(prefix="/api/test", tags=["test"])
@@ -177,3 +202,25 @@ async def add_test_comment(
     issue["fields"]["updated"] = now
 
     return {"id": comment_id}
+
+
+@router.get("/logs")
+async def get_logs() -> dict[str, Any]:
+    """Get recent server logs for E2E test debugging."""
+    return {
+        "logs": list(_log_buffer),
+        "count": len(_log_buffer),
+    }
+
+
+@router.get("/ping")
+async def ping() -> dict[str, str]:
+    """Simple ping to verify test endpoints are available."""
+    return {"status": "ok", "message": "Test endpoints are available"}
+
+
+@router.post("/logs/clear")
+async def clear_logs() -> dict[str, str]:
+    """Clear the server log buffer."""
+    _log_buffer.clear()
+    return {"status": "cleared"}
