@@ -110,7 +110,7 @@ export function IssuesPage() {
 
       {/* No connections warning */}
       {!isLoadingConnections && connections.length === 0 && (
-        <Card>
+        <Card data-testid="no-connections-card">
           <CardContent className="pt-6">
             <div className="text-center space-y-4">
               <p className="text-muted-foreground">

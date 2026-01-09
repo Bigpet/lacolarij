@@ -55,15 +55,13 @@ export class IssueDetailPage extends BasePage {
     this.summarySaveButton = page.locator('button').filter({ has: page.locator('svg.lucide-save') }).first();
     this.summaryCancelButton = page.locator('button').filter({ has: page.locator('svg.lucide-x') }).first();
 
-    // Sync status - look for badge with specific text
-    this.syncStatusBadge = page.locator('.flex.items-center.gap-1').filter({
-      hasText: /^(Synced|Pending|Conflict)$/
-    });
+    // Sync status - uses data-testid for unambiguous selection
+    this.syncStatusBadge = page.locator('[data-testid="sync-status-badge"]');
 
     // Metadata
     this.statusBadge = page.locator('.inline-flex').first(); // Badge component
     this.statusSelect = page.locator('select').first();
-    this.issueType = page.locator('text=Task').or(page.locator('text=Bug')).or(page.locator('text=Story'));
+    this.issueType = page.locator('[data-testid="issue-type"]');
     this.priority = page.locator('text=Priority:').locator('..').locator('text=Medium');
     this.assignee = page.locator('text=Assignee:').locator('..');
     this.reporter = page.locator('text=Reporter:').locator('..');

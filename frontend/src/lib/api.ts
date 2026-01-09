@@ -34,13 +34,19 @@ class ApiClient {
         `Bearer ${this.token}`;
     }
 
-    const response = await fetch(`${API_BASE}${endpoint}`, {
+    const url = `${API_BASE}${endpoint}`;
+    console.log(`[api] request: ${options.method || 'GET'} ${url}`);
+
+    const response = await fetch(url, {
       ...options,
       headers,
     });
 
+    console.log(`[api] response: ${response.status} ${response.statusText} for ${url}`);
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
+      console.log(`[api] error:`, error);
       throw new Error(error.detail || `Request failed: ${response.status}`);
     }
 
@@ -116,7 +122,9 @@ class ApiClient {
     path: string,
     options: RequestInit = {}
   ): Promise<T> {
-    return this.request<T>(`/jira/${connectionId}${path}`, options);
+    const fullPath = `/jira/${connectionId}${path}`;
+    console.log(`[api] jiraRequest: connectionId=${connectionId}, path=${path}, fullPath=${fullPath}`);
+    return this.request<T>(fullPath, options);
   }
 
   async searchIssues(
@@ -190,6 +198,34 @@ class ApiClient {
       {
         method: "POST",
         body: JSON.stringify({ transition: { id: transitionId } }),
+      }
+    );
+  }
+
+  async getComments(
+    connectionId: string,
+    issueIdOrKey: string
+  ): Promise<{ comments: JiraComment[]; total: number; startAt: number; maxResults: number }> {
+    console.log(`[api] getComments called: connectionId=${connectionId}, issueKey=${issueIdOrKey}`);
+    const result = await this.jiraRequest<{ comments: JiraComment[]; total: number; startAt: number; maxResults: number }>(
+      connectionId,
+      `/rest/api/3/issue/${issueIdOrKey}/comment`
+    );
+    console.log(`[api] getComments result:`, result);
+    return result;
+  }
+
+  async addComment(
+    connectionId: string,
+    issueIdOrKey: string,
+    body: unknown
+  ): Promise<JiraComment> {
+    return this.jiraRequest<JiraComment>(
+      connectionId,
+      `/rest/api/3/issue/${issueIdOrKey}/comment`,
+      {
+        method: "POST",
+        body: JSON.stringify({ body }),
       }
     );
   }
