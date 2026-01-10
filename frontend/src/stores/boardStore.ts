@@ -103,7 +103,8 @@ export const useBoardStore = create<BoardState>()(
       name: "jiralocal-board",
       partialize: (state) => ({
         columns: state.columns,
-        // Don't persist activeFilters or searchTerm
+        activeFilters: state.activeFilters,
+        // Don't persist searchTerm
       }),
     }
   )

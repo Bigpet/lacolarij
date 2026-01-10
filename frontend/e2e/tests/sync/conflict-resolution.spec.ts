@@ -77,13 +77,13 @@ test.describe('Conflict Resolution', () => {
       // Verify pending status
       expect(await detailPage.getSyncStatus()).toBe('Pending');
 
-      // Go back online
-      await indexedDb.setOnlineMode();
-
-      // Simulate remote change (while local change is pending)
-      // Add a small delay to ensure timestamp is different
+      // Simulate remote change BEFORE going online
+      // (This prevents race condition with auto-sync on reconnection)
       await page.waitForTimeout(100);
       await mockJira.simulateRemoteChange('TEST-1', { summary: 'Remote Summary Change' });
+
+      // Go back online
+      await indexedDb.setOnlineMode();
 
       // Trigger sync - this should detect the conflict
       await detailPage.goBack();
@@ -118,11 +118,12 @@ test.describe('Conflict Resolution', () => {
 
       await indexedDb.setOfflineMode();
       await detailPage.editSummary('Local Edit');
-      await indexedDb.setOnlineMode();
 
-      // Simulate remote change (with delay to ensure different timestamp)
+      // Simulate remote change BEFORE going online (prevents race with auto-sync)
       await page.waitForTimeout(100);
       await mockJira.simulateRemoteChange('TEST-1', { summary: 'Remote Edit' });
+
+      await indexedDb.setOnlineMode();
 
       // Sync to trigger conflict
       await detailPage.goBack();
@@ -154,11 +155,12 @@ test.describe('Conflict Resolution', () => {
 
       await indexedDb.setOfflineMode();
       await detailPage.editSummary('Banner Local');
-      await indexedDb.setOnlineMode();
 
-      // Simulate remote change (with delay to ensure different timestamp)
+      // Simulate remote change BEFORE going online (prevents race with auto-sync)
       await page.waitForTimeout(100);
       await mockJira.simulateRemoteChange('TEST-1', { summary: 'Banner Remote' });
+
+      await indexedDb.setOnlineMode();
 
       // Sync to trigger conflict
       await detailPage.goBack();
@@ -192,10 +194,12 @@ test.describe('Conflict Resolution', () => {
 
       await indexedDb.setOfflineMode();
       await detailPage.editSummary('Modal Local');
-      await indexedDb.setOnlineMode();
 
+      // Simulate remote change BEFORE going online (prevents race with auto-sync)
       await page.waitForTimeout(100);
       await mockJira.simulateRemoteChange('TEST-1', { summary: 'Modal Remote' });
+
+      await indexedDb.setOnlineMode();
 
       await detailPage.goBack();
       await issuesPage.waitForLoaded();
@@ -228,10 +232,12 @@ test.describe('Conflict Resolution', () => {
 
       await indexedDb.setOfflineMode();
       await detailPage.editSummary('My Local Version');
-      await indexedDb.setOnlineMode();
 
+      // Simulate remote change BEFORE going online (prevents race with auto-sync)
       await page.waitForTimeout(100);
       await mockJira.simulateRemoteChange('TEST-1', { summary: 'Server Version' });
+
+      await indexedDb.setOnlineMode();
 
       await detailPage.goBack();
       await issuesPage.waitForLoaded();
@@ -270,10 +276,12 @@ test.describe('Conflict Resolution', () => {
 
       await indexedDb.setOfflineMode();
       await detailPage.editSummary('Button Local');
-      await indexedDb.setOnlineMode();
 
+      // Simulate remote change BEFORE going online (prevents race with auto-sync)
       await page.waitForTimeout(100);
       await mockJira.simulateRemoteChange('TEST-1', { summary: 'Button Remote' });
+
+      await indexedDb.setOnlineMode();
 
       await detailPage.goBack();
       await issuesPage.waitForLoaded();
@@ -309,10 +317,12 @@ test.describe('Conflict Resolution', () => {
 
       await indexedDb.setOfflineMode();
       await detailPage.editSummary('Keep This Local');
-      await indexedDb.setOnlineMode();
 
+      // Simulate remote change BEFORE going online (prevents race with auto-sync)
       await page.waitForTimeout(100);
       await mockJira.simulateRemoteChange('TEST-1', { summary: 'Discard This Remote' });
+
+      await indexedDb.setOnlineMode();
 
       await detailPage.goBack();
       await issuesPage.waitForLoaded();
@@ -357,10 +367,12 @@ test.describe('Conflict Resolution', () => {
 
       await indexedDb.setOfflineMode();
       await detailPage.editSummary('Discard This Local');
-      await indexedDb.setOnlineMode();
 
+      // Simulate remote change BEFORE going online (prevents race with auto-sync)
       await page.waitForTimeout(100);
       await mockJira.simulateRemoteChange('TEST-1', { summary: 'Keep This Server' });
+
+      await indexedDb.setOnlineMode();
 
       await detailPage.goBack();
       await issuesPage.waitForLoaded();
@@ -405,10 +417,12 @@ test.describe('Conflict Resolution', () => {
 
       await indexedDb.setOfflineMode();
       await detailPage.editSummary('Clear Badge Local');
-      await indexedDb.setOnlineMode();
 
+      // Simulate remote change BEFORE going online (prevents race with auto-sync)
       await page.waitForTimeout(100);
       await mockJira.simulateRemoteChange('TEST-1', { summary: 'Clear Badge Remote' });
+
+      await indexedDb.setOnlineMode();
 
       await detailPage.goBack();
       await issuesPage.waitForLoaded();
@@ -446,10 +460,12 @@ test.describe('Conflict Resolution', () => {
 
       await indexedDb.setOfflineMode();
       await detailPage.editSummary('Clear Banner Local');
-      await indexedDb.setOnlineMode();
 
+      // Simulate remote change BEFORE going online (prevents race with auto-sync)
       await page.waitForTimeout(100);
       await mockJira.simulateRemoteChange('TEST-1', { summary: 'Clear Banner Remote' });
+
+      await indexedDb.setOnlineMode();
 
       await detailPage.goBack();
       await issuesPage.waitForLoaded();
@@ -498,12 +514,12 @@ test.describe('Conflict Resolution', () => {
       await detailPage.waitForLoaded();
       await detailPage.editSummary('Local Change 2');
 
-      await indexedDb.setOnlineMode();
-
-      // Simulate remote changes to both (with delay to ensure different timestamps)
+      // Simulate remote changes BEFORE going online (prevents race with auto-sync)
       await page.waitForTimeout(100);
       await mockJira.simulateRemoteChange('TEST-1', { summary: 'Remote Change 1' });
       await mockJira.simulateRemoteChange('TEST-2', { summary: 'Remote Change 2' });
+
+      await indexedDb.setOnlineMode();
 
       // Sync to trigger conflicts
       await detailPage.goBack();
@@ -541,12 +557,12 @@ test.describe('Conflict Resolution', () => {
       await detailPage.waitForLoaded();
       await detailPage.editSummary('Count Local 2');
 
-      await indexedDb.setOnlineMode();
-
-      // Simulate remote changes (with delay to ensure different timestamps)
+      // Simulate remote changes BEFORE going online (prevents race with auto-sync)
       await page.waitForTimeout(100);
       await mockJira.simulateRemoteChange('TEST-1', { summary: 'Count Remote 1' });
       await mockJira.simulateRemoteChange('TEST-2', { summary: 'Count Remote 2' });
+
+      await indexedDb.setOnlineMode();
 
       // Sync to trigger conflicts
       await detailPage.goBack();
@@ -588,10 +604,12 @@ test.describe('Conflict Resolution', () => {
 
       await indexedDb.setOfflineMode();
       await detailPage.editSummary('Persist Local');
-      await indexedDb.setOnlineMode();
 
+      // Simulate remote change BEFORE going online (prevents race with auto-sync)
       await page.waitForTimeout(100);
       await mockJira.simulateRemoteChange('TEST-1', { summary: 'Persist Remote' });
+
+      await indexedDb.setOnlineMode();
 
       await detailPage.goBack();
       await issuesPage.waitForLoaded();
