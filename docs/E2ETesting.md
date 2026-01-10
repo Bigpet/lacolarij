@@ -1139,9 +1139,9 @@ test('should load issue list within 2 seconds', async ({ authenticatedPage }) =>
 - [x] Comment functionality tests (read-only)
 
 ### Phase 4: Board View (Week 3)
-- [ ] Board rendering tests
-- [ ] Drag-and-drop tests
-- [ ] Quick filter tests
+- [x] Board rendering tests
+- [x] Drag-and-drop tests
+- [x] Quick filter tests
 
 ### Phase 5: Sync Engine (Week 4-5)
 - [ ] Initial sync tests
@@ -1152,12 +1152,6 @@ test('should load issue list within 2 seconds', async ({ authenticatedPage }) =>
 ### Phase 6: Search (Week 5)
 - [ ] Full-text search tests
 - [ ] Filter tests
-
-### Phase 7: Polish (Week 6)
-- [ ] Visual regression tests
-- [ ] Performance tests
-- [ ] Cross-browser compatibility
-- [ ] Accessibility tests
 
 ---
 

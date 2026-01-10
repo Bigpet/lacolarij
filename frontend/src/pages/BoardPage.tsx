@@ -234,10 +234,10 @@ export function BoardPage() {
   const visibleColumns = columns.filter((col) => col.visible);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full" data-testid="board-page">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Board</h1>
+        <h1 className="text-2xl font-bold" data-testid="board-heading">Board</h1>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -252,7 +252,7 @@ export function BoardPage() {
 
       {/* Column Settings Panel */}
       {showColumnSettings && (
-        <div className="mb-4 p-4 border rounded-lg bg-muted/30">
+        <div className="mb-4 p-4 border rounded-lg bg-muted/30" data-testid="column-settings-panel">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-medium text-sm">Column Visibility</h3>
             <Button variant="ghost" size="sm" onClick={resetColumns}>
@@ -290,6 +290,7 @@ export function BoardPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8 h-9"
+            data-testid="board-search"
           />
         </div>
         <QuickFilters
@@ -302,7 +303,7 @@ export function BoardPage() {
 
       {/* Board Columns - single scroll container */}
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex gap-4 pb-4 overflow-x-auto">
+        <div className="flex gap-4 pb-4 overflow-x-auto" data-testid="board-columns">
           {visibleColumns.map((column) => (
             <BoardColumn
               key={column.id}
@@ -310,6 +311,7 @@ export function BoardPage() {
               title={column.title}
               issues={issuesByColumn[column.id] || []}
               colorClass={column.colorClass}
+              statusCategory={column.statusCategory}
             />
           ))}
         </div>
@@ -317,7 +319,7 @@ export function BoardPage() {
 
       {/* Empty State */}
       {totalCount === 0 && (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="flex flex-col items-center justify-center py-12 text-center" data-testid="board-empty-state">
           <RefreshCw className="h-12 w-12 text-muted-foreground mb-4" />
           <h2 className="text-lg font-medium mb-2">No issues found</h2>
           <p className="text-sm text-muted-foreground max-w-md">
