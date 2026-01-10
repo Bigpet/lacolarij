@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def _now_iso() -> str:
     """Generate ISO 8601 timestamp for JIRA compatibility."""
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000+0000")
+    return datetime.now(timezone.utc).isoformat(timespec='milliseconds')
 
 from app.services.mock_jira.models import (
     IssueCreate,

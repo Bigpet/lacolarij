@@ -7,10 +7,14 @@ import logging
 from collections import deque
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy import delete
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.mock_jira.router import _issues, reset_storage, _now_iso
+from app.db.database import get_session
+from app.models.connection import JiraConnection
 from app.services.mock_jira.models import DEFAULT_TRANSITIONS
 
 
@@ -224,3 +228,13 @@ async def clear_logs() -> dict[str, str]:
     """Clear the server log buffer."""
     _log_buffer.clear()
     return {"status": "cleared"}
+
+
+@router.post("/connections/reset")
+async def reset_connections(
+    db: AsyncSession = Depends(get_session),
+) -> dict[str, str]:
+    """Reset all JIRA connections (delete all for test isolation)."""
+    await db.execute(delete(JiraConnection))
+    await db.commit()
+    return {"status": "reset"}

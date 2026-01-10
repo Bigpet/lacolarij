@@ -191,6 +191,12 @@ test.describe('Issue List View', () => {
   });
 
   test.describe('Without Connection', () => {
+    test.beforeEach(async ({ request }) => {
+      // Clear all JIRA connections from database to test empty state
+      const mockJira = new MockJiraHelper(request);
+      await mockJira.resetConnections();
+    });
+
     test('should show no connections message when none configured', async ({ page }) => {
       const issuesPage = new IssuesPage(page);
       await issuesPage.goto('/issues');

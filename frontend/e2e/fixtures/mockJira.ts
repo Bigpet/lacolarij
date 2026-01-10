@@ -170,4 +170,20 @@ export class MockJiraHelper {
     }
     return results;
   }
+
+  /**
+   * Reset all JIRA connections (delete from database).
+   * Call this to ensure no connections exist for "without connection" tests.
+   */
+  async resetConnections(): Promise<void> {
+    const response = await this.api.post(`${BACKEND_URL}/api/test/connections/reset`);
+    if (response.status() === 404) {
+      throw new Error(
+        'Test endpoints not available. Make sure the backend is started with JIRALOCAL_ENV=test.'
+      );
+    }
+    if (!response.ok()) {
+      throw new Error(`Failed to reset connections: ${response.status()}`);
+    }
+  }
 }

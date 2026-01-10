@@ -18,7 +18,7 @@ export class JiraLocalDatabase extends Dexie {
       // Primary key is 'id', indexed by key, projectKey, status, etc.
       issues:
         "id, key, projectKey, status, statusCategory, assignee, _syncStatus, _localUpdated",
-      comments: "id, issueId, _syncStatus",
+      comments: "id, issueId, _syncStatus, created",
       syncMeta: "id",
       pendingOperations: "id, entityType, entityId, createdAt",
     });
@@ -99,7 +99,7 @@ export const issueRepository = {
 // Comment repository functions
 export const commentRepository = {
   async getByIssueId(issueId: string): Promise<Comment[]> {
-    return db.comments.where("issueId").equals(issueId).toArray();
+    return db.comments.where("issueId").equals(issueId).sortBy("created");
   },
 
   async put(comment: Comment): Promise<string> {
