@@ -8,6 +8,7 @@ interface BoardColumnProps {
   title: string;
   issues: Issue[];
   colorClass?: string;
+  statusCategory?: string;
 }
 
 export function BoardColumn({
@@ -15,9 +16,15 @@ export function BoardColumn({
   title,
   issues,
   colorClass = "bg-muted/50",
+  statusCategory,
 }: BoardColumnProps) {
   return (
-    <div className="flex flex-col min-w-[280px] w-[300px] flex-shrink-0">
+    <div
+      className="flex flex-col min-w-[280px] w-[300px] flex-shrink-0"
+      data-testid="board-column"
+      data-column-id={id}
+      data-status-category={statusCategory}
+    >
       {/* Column Header */}
       <div
         className={cn(
@@ -26,7 +33,10 @@ export function BoardColumn({
         )}
       >
         <h3 className="font-semibold text-sm">{title}</h3>
-        <span className="text-xs text-muted-foreground bg-background px-2 py-0.5 rounded-full">
+        <span
+          className="text-xs text-muted-foreground bg-background px-2 py-0.5 rounded-full"
+          data-testid="column-count"
+        >
           {issues.length}
         </span>
       </div>

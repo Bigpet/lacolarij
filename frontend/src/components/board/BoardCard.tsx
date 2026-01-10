@@ -60,6 +60,10 @@ export function BoardCard({ issue, isDragging }: BoardCardProps) {
         "hover:shadow-md hover:border-primary/50",
         isDragging && "shadow-lg rotate-2 opacity-90"
       )}
+      data-testid="board-card"
+      data-issue-key={issue.key}
+      data-issue-id={issue.id}
+      data-sync-status={issue._syncStatus}
     >
       {/* Header: Key + Sync Status */}
       <div className="flex items-center justify-between mb-2">

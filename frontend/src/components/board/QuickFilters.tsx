@@ -68,7 +68,7 @@ export function QuickFilters({
   });
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-2 flex-wrap" data-testid="quick-filters">
       <div className="flex items-center gap-1 text-sm text-muted-foreground">
         <Filter className="h-4 w-4" />
         <span>Quick Filters:</span>
@@ -84,6 +84,8 @@ export function QuickFilters({
             "h-7 text-xs gap-1",
             activeFilters.includes(filter.id) && "bg-primary text-primary-foreground"
           )}
+          data-testid={`quick-filter-${filter.id}`}
+          data-active={activeFilters.includes(filter.id)}
         >
           {filter.icon}
           {filter.label}
@@ -96,6 +98,7 @@ export function QuickFilters({
           size="sm"
           onClick={onClearFilters}
           className="h-7 text-xs gap-1 text-muted-foreground"
+          data-testid="clear-filters"
         >
           <X className="h-3 w-3" />
           Clear
