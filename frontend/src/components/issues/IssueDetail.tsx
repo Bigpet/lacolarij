@@ -416,9 +416,10 @@ export function IssueDetail({
             placeholder={issue.status}
             className="w-40"
             disabled={isLoadingTransitions}
+            data-testid="status-select"
           />
         ) : (
-          <Badge variant={getStatusCategoryVariant(issue.statusCategory)}>
+          <Badge variant={getStatusCategoryVariant(issue.statusCategory)} data-testid="status-badge">
             {issue.status}
           </Badge>
         )}

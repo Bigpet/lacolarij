@@ -210,6 +210,29 @@ export class SyncEngine {
       return;
     }
 
+    if (local._syncStatus === "conflict") {
+      // Issue is already in conflict - preserve local version, update remote value in conflict store
+      console.log(`[syncEngine] Issue ${remote.key} is in conflict, updating remote value in conflict store`);
+
+      // Find the existing conflict for this issue
+      const existingConflict = store.conflicts.find(
+        (c) => c.entityId === local.id && c.entityType === "issue"
+      );
+
+      if (existingConflict) {
+        // Update the remote value if it changed
+        if (existingConflict.remoteTimestamp !== remote.fields.updated) {
+          store.updateConflict(existingConflict.id, {
+            remoteValue: mapJiraIssueToLocal(remote),
+            remoteTimestamp: remote.fields.updated,
+          });
+        }
+      }
+
+      // Skip updating the issue in IndexedDB - preserve local version
+      return;
+    }
+
     if (local._syncStatus === "pending") {
       // Local has unpushed changes - check for conflict
       if (remote.fields.updated !== local._remoteVersion) {

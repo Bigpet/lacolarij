@@ -30,6 +30,7 @@ interface SyncState {
   setLastSync: (date: Date) => void;
   setPendingCount: (count: number) => void;
   addConflict: (conflict: Conflict) => void;
+  updateConflict: (id: string, updates: Partial<Omit<Conflict, "id">>) => void;
   removeConflict: (id: string) => void;
   clearConflicts: () => void;
   setError: (error: string | null) => void;
@@ -58,6 +59,13 @@ export const useSyncStore = create<SyncState>((set) => ({
   addConflict: (conflict) =>
     set((state) => ({
       conflicts: [...state.conflicts, conflict],
+    })),
+
+  updateConflict: (id, updates) =>
+    set((state) => ({
+      conflicts: state.conflicts.map((c) =>
+        c.id === id ? { ...c, ...updates } : c
+      ),
     })),
 
   removeConflict: (id) =>
