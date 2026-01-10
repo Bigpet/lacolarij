@@ -172,6 +172,10 @@ export class BoardPage extends BasePage {
 
   /**
    * Drag a card to a different column
+   *
+   * NOTE: This uses Playwright's native dragTo which may not work well with @hello-pangea/dnd.
+   * If issues persist, consider adding test-only event handlers to the Board component.
+   *
    * @param issueKey - The issue key of the card to drag
    * @param targetStatusCategory - The target status category (e.g., "todo", "indeterminate", "done")
    * @param waitForSync - Whether to wait for sync to complete after dragging (default: true)
@@ -184,11 +188,35 @@ export class BoardPage extends BasePage {
     await card.scrollIntoViewIfNeeded();
     await expect(card).toBeVisible({ timeout: 5000 });
 
-    // Use Playwright's drag and drop
-    await card.dragTo(targetColumn);
+    // Get the draggable wrapper (parent of the card)
+    // The @hello-pangea/dnd Draggable component wraps the BoardCard
+    const draggableWrapper = card.locator('xpath=..');
+
+    // Get bounding boxes for precise drag
+    const cardBox = await card.boundingBox();
+    const columnBox = await targetColumn.boundingBox();
+
+    if (!cardBox || !columnBox) {
+      throw new Error('Could not get element positions for drag and drop');
+    }
+
+    // Calculate center points
+    const cardCenterX = cardBox.x + cardBox.width / 2;
+    const cardCenterY = cardBox.y + cardBox.height / 2;
+    const columnCenterX = columnBox.x + columnBox.width / 2;
+    const columnCenterY = columnBox.y + columnBox.height / 2;
+
+    // Perform the drag using mouse events
+    // @hello-pangea/dnd responds to pointer events
+    await this.page.mouse.move(cardCenterX, cardCenterY);
+    await this.page.mouse.down();
+
+    // Move to target column
+    await this.page.mouse.move(columnCenterX, columnCenterY, { steps: 10 });
+    await this.page.mouse.up();
 
     // Wait for the transition animation to complete
-    await this.page.waitForTimeout(300);
+    await this.page.waitForTimeout(500);
 
     // Wait for sync to complete if requested
     if (waitForSync) {
@@ -206,10 +234,10 @@ export class BoardPage extends BasePage {
 
     if (position === 0) {
       // Drop at the top of the column
-      await card.dragTo(targetColumn, { targetPosition: { x: 150, y: 50 } });
+      await card.dragTo(targetColumn, { force: true, steps: 5, targetPosition: { x: 150, y: 50 } });
     } else {
       const targetCard = targetCards.nth(position - 1);
-      await card.dragTo(targetCard);
+      await card.dragTo(targetCard, { force: true, steps: 5});
     }
 
     await this.page.waitForTimeout(500);

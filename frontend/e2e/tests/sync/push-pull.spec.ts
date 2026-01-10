@@ -371,18 +371,14 @@ test.describe('Push and Pull Sync', () => {
 
       // Drag to In Progress
       await boardPage.dragCardToColumn('TEST-1', 'indeterminate');
-
-      // Wait for sync and UI update
       await boardPage.waitForSyncIdleWithUiUpdate();
 
-      // Additional wait for board to re-render
+      // Wait for board to re-render
       await page.waitForTimeout(500);
 
       // Verify issue moved to In Progress column
       const inProgressColumn = boardPage.getColumn('indeterminate');
       const card = inProgressColumn.locator(`[data-issue-key="TEST-1"]`);
-
-      // Wait up to 5 seconds for card to appear in new column
       await expect(card).toBeVisible({ timeout: 10000 });
     });
 
@@ -615,12 +611,12 @@ test.describe('Push and Pull Sync', () => {
       // the remote has a different version when we sync
       await mockJira.simulateRemoteChange('TEST-1', { summary: 'Their Version' });
 
-      // Now go back online and sync - should detect conflict
-      await indexedDb.setOnlineMode();
-
-      // Sync - this should detect conflict because:
+      // Now go back online and sync - should detect conflict because:
       // 1. We try to push our local change
       // 2. But the remote has a different version (their change)
+      await indexedDb.setOnlineMode();
+
+      // Sync - this should detect conflict
       await detailPage.goBack();
       await issuesPage.waitForLoaded();
       await issuesPage.triggerSync();

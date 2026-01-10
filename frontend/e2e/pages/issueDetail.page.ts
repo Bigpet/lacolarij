@@ -59,8 +59,8 @@ export class IssueDetailPage extends BasePage {
     this.syncStatusBadge = page.locator('[data-testid="sync-status-badge"]');
 
     // Metadata
-    this.statusBadge = page.locator('.inline-flex').first(); // Badge component
-    this.statusSelect = page.locator('select').first();
+    this.statusBadge = page.locator('[data-testid="status-badge"]');
+    this.statusSelect = page.locator('[data-testid="status-select"]');
     this.issueType = page.locator('[data-testid="issue-type"]');
     this.priority = page.locator('text=Priority:').locator('..').locator('text=Medium');
     this.assignee = page.locator('text=Assignee:').locator('..');
@@ -227,13 +227,29 @@ export class IssueDetailPage extends BasePage {
    * Get the current status text
    */
   async getStatus(): Promise<string> {
-    // Try to get from select placeholder or badge
-    const selectText = await this.statusSelect.locator('option:checked').textContent().catch(() => null);
-    if (selectText) return selectText;
+    // Try the Select first - the placeholder option (value="", disabled) shows the status
+    const selectLocator = this.page.locator('[data-testid="status-select"]');
+    const selectCount = await selectLocator.count();
 
-    const badgeText = await this.statusBadge.textContent();
-    return badgeText || '';
+    if (selectCount > 0) {
+      const selectText = await selectLocator.locator('option[value=""]').textContent();
+      if (selectText) return selectText.trim();
+    }
+
+    // Fallback to Badge - wait for it to be visible first
+    const badgeLocator = this.page.locator('[data-testid="status-badge"]');
+    const badgeCount = await badgeLocator.count();
+
+    if (badgeCount > 0) {
+      // Wait for badge to be visible before getting text
+      await badgeLocator.waitFor({ state: 'visible', timeout: 5000 });
+      const badgeText = await badgeLocator.textContent();
+      return badgeText?.trim() || '';
+    }
+
+    return '';
   }
+
 
   /**
    * Get the count of comments
