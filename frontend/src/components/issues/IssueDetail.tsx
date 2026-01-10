@@ -201,7 +201,7 @@ export function IssueDetail({
 }: IssueDetailProps) {
   const issue = useLiveQuery(() => db.issues.get(issueId), [issueId]);
   const comments = useLiveQuery(
-    () => db.comments.where("issueId").equals(issueId).toArray(),
+    () => db.comments.where("issueId").equals(issueId).sortBy("created"),
     [issueId]
   );
 
