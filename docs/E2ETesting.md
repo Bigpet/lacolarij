@@ -1144,10 +1144,10 @@ test('should load issue list within 2 seconds', async ({ authenticatedPage }) =>
 - [x] Quick filter tests
 
 ### Phase 5: Sync Engine (Week 4-5)
-- [ ] Initial sync tests
-- [ ] Offline editing tests
-- [ ] Conflict resolution tests
-- [ ] Push/pull sync tests
+- [x] Initial sync tests
+- [x] Offline editing tests
+- [x] Conflict resolution tests
+- [x] Push/pull sync tests
 
 ### Phase 6: Search (Week 5)
 - [ ] Full-text search tests

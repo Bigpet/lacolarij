@@ -11,11 +11,24 @@ export class BasePage {
     this.offlineBanner = page.locator('[data-testid="offline-banner"]');
   }
 
+  /**
+   * Wait for sync to complete (status becomes idle)
+   */
   async waitForSyncIdle() {
-    await this.page.waitForFunction(
-      () => document.querySelector('[data-sync-status="idle"]') !== null,
-      { timeout: 10000 }
+    // Wait for the sync status bar to show 'idle' status
+    await this.page.waitForSelector(
+      '[data-testid="sync-status"][data-sync-status="idle"]',
+      { timeout: 15000 }
     );
+  }
+
+  /**
+   * Wait for sync to complete with additional delay for UI update
+   */
+  async waitForSyncIdleWithUiUpdate() {
+    await this.waitForSyncIdle();
+    // Additional wait for the UI to re-render after sync
+    await this.page.waitForTimeout(500);
   }
 
   async goto(url: string) {

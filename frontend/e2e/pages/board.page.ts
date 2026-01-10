@@ -172,16 +172,28 @@ export class BoardPage extends BasePage {
 
   /**
    * Drag a card to a different column
+   * @param issueKey - The issue key of the card to drag
+   * @param targetStatusCategory - The target status category (e.g., "todo", "indeterminate", "done")
+   * @param waitForSync - Whether to wait for sync to complete after dragging (default: true)
    */
-  async dragCardToColumn(issueKey: string, targetStatusCategory: string) {
+  async dragCardToColumn(issueKey: string, targetStatusCategory: string, waitForSync = true) {
     const card = this.getCard(issueKey);
     const targetColumn = this.getColumn(targetStatusCategory);
+
+    // Ensure the card is visible before dragging
+    await card.scrollIntoViewIfNeeded();
+    await expect(card).toBeVisible({ timeout: 5000 });
 
     // Use Playwright's drag and drop
     await card.dragTo(targetColumn);
 
-    // Wait for the transition to complete
-    await this.page.waitForTimeout(500);
+    // Wait for the transition animation to complete
+    await this.page.waitForTimeout(300);
+
+    // Wait for sync to complete if requested
+    if (waitForSync) {
+      await this.waitForSyncIdleWithUiUpdate();
+    }
   }
 
   /**
