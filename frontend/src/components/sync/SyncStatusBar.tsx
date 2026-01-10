@@ -27,7 +27,7 @@ export function SyncStatusBar() {
   const { status, lastSync, pendingCount, conflicts, error, isOnline } = useSyncStore();
 
   return (
-    <div className="flex items-center gap-3 text-sm" data-sync-status={status}>
+    <div className="flex items-center gap-3 text-sm" data-testid="sync-status" data-sync-status={status}>
       {/* Online/Offline indicator */}
       {!isOnline && (
         <div className="flex items-center gap-1 text-muted-foreground">
