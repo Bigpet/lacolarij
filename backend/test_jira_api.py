@@ -1,6 +1,7 @@
-import pytest
-import httpx
 import uuid
+
+import httpx
+import pytest
 
 from config import load_config
 

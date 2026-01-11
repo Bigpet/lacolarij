@@ -1,13 +1,14 @@
 """Authentication API endpoints."""
 
-from fastapi import APIRouter, Depends
-from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
 
-from app.models.schemas import UserCreate, UserResponse, Token
-from app.dependencies import UserRepo, CurrentUser
-from app.core.security import hash_password, verify_password, create_access_token
+from fastapi import APIRouter, Depends
+from fastapi.security import OAuth2PasswordRequestForm
+
 from app.core.exceptions import AuthenticationError, ConflictError
+from app.core.security import create_access_token, hash_password, verify_password
+from app.dependencies import CurrentUser, UserRepo
+from app.models.schemas import Token, UserCreate, UserResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

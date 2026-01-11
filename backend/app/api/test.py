@@ -12,11 +12,10 @@ from pydantic import BaseModel
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.mock_jira.router import _issues, reset_storage, _now_iso
 from app.db.database import get_session
 from app.models.connection import JiraConnection
 from app.services.mock_jira.models import DEFAULT_TRANSITIONS
-
+from app.services.mock_jira.router import _issues, _now_iso, reset_storage
 
 # In-memory log buffer for E2E test debugging
 _log_buffer: deque[str] = deque(maxlen=500)

@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Response, Request
+from fastapi import APIRouter, HTTPException, Request, Response
 
 logger = logging.getLogger(__name__)
 
@@ -16,11 +16,10 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec='milliseconds')
 
 from app.services.mock_jira.models import (
-    IssueCreate,
-    IssueUpdate,
-    CommentCreate,
-    TransitionRequest,
     DEFAULT_TRANSITIONS,
+    CommentCreate,
+    IssueCreate,
+    TransitionRequest,
 )
 
 # Create router for mock JIRA endpoints

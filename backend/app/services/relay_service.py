@@ -6,8 +6,8 @@ from typing import Any
 
 import httpx
 
-from app.models.connection import JiraConnection
 from app.core.security import decrypt_api_token
+from app.models.connection import JiraConnection
 
 
 @dataclass

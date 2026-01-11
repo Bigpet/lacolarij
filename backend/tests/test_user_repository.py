@@ -2,9 +2,9 @@
 
 import pytest
 
+from app.core.security import hash_password
 from app.db.repositories import UserRepository
 from app.models.user import User
-from app.core.security import hash_password
 
 
 class TestUserRepository:
