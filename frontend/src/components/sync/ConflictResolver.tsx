@@ -133,7 +133,7 @@ export function ConflictResolver({
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
-                <Badge variant="warning">Your Version</Badge>
+                <Badge variant="warning" data-testid="conflict-local-badge">Your Version</Badge>
               </CardTitle>
               <p className="text-xs text-muted-foreground">
                 Modified: {formatTimestamp(conflict.localTimestamp)}
@@ -144,7 +144,7 @@ export function ConflictResolver({
                 <p className="text-xs font-medium text-muted-foreground mb-1">
                   Summary
                 </p>
-                <p className="text-sm font-medium">{localIssue.summary}</p>
+                <p className="text-sm font-medium" data-testid="conflict-local-summary">{localIssue.summary}</p>
               </div>
               <div>
                 <p className="text-xs font-medium text-muted-foreground mb-1">
@@ -167,7 +167,7 @@ export function ConflictResolver({
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
-                <Badge variant="secondary">Server Version</Badge>
+                <Badge variant="secondary" data-testid="conflict-remote-badge">Server Version</Badge>
               </CardTitle>
               <p className="text-xs text-muted-foreground">
                 Modified: {formatTimestamp(conflict.remoteTimestamp)}
@@ -178,7 +178,7 @@ export function ConflictResolver({
                 <p className="text-xs font-medium text-muted-foreground mb-1">
                   Summary
                 </p>
-                <p className="text-sm font-medium">{remoteIssue.summary}</p>
+                <p className="text-sm font-medium" data-testid="conflict-remote-summary">{remoteIssue.summary}</p>
               </div>
               <div>
                 <p className="text-xs font-medium text-muted-foreground mb-1">

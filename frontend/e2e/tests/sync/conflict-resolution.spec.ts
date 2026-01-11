@@ -247,15 +247,15 @@ test.describe('Conflict Resolution', () => {
       const reviewButton = page.locator('button:has-text("Review Now")');
       await reviewButton.click();
 
-      // Should show both versions
-      const yourVersion = page.locator('text=Your Version');
-      const serverVersion = page.locator('text=Server Version');
+      // Should show both versions (use testids to target specific badges)
+      const yourVersion = page.locator('[data-testid="conflict-local-badge"]');
+      const serverVersion = page.locator('[data-testid="conflict-remote-badge"]');
       await expect(yourVersion).toBeVisible({ timeout: 5000 });
       await expect(serverVersion).toBeVisible({ timeout: 5000 });
 
-      // Should show the actual values
-      const localSummary = page.locator('text=My Local Version');
-      const remoteSummary = page.locator('text=Server Version').nth(1); // Second occurrence is the value
+      // Should show the actual values (use testids for specific elements)
+      const localSummary = page.locator('[data-testid="conflict-local-summary"]');
+      const remoteSummary = page.locator('[data-testid="conflict-remote-summary"]');
       await expect(localSummary).toBeVisible();
     });
 
