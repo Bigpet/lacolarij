@@ -63,7 +63,9 @@ class Settings(BaseSettings):
             return self.database_url
 
         if self.database_type == "postgresql":
-            password_part = f":{self.postgres_password}" if self.postgres_password else ""
+            password_part = (
+                f":{self.postgres_password}" if self.postgres_password else ""
+            )
             return f"postgresql+asyncpg://{self.postgres_user}{password_part}@{self.postgres_host}:{self.postgres_port}/{self.postgres_database}"
 
         # Default to SQLite
