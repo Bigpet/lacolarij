@@ -106,6 +106,7 @@ describe('syncStore', () => {
       remoteValue: 'Remote summary',
       localTimestamp: Date.now(),
       remoteTimestamp: '2024-01-01T00:00:00Z',
+      connectionId: 'conn-1',
     };
 
     describe('addConflict', () => {
@@ -269,6 +270,7 @@ describe('syncStore', () => {
         remoteValue: {},
         localTimestamp: Date.now(),
         remoteTimestamp: '2024-01-01',
+        connectionId: 'conn-1',
       });
       useSyncStore.getState().setError('Error');
       useSyncStore.getState().setActiveConnection('conn-1');
