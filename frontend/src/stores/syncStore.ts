@@ -14,6 +14,7 @@ export interface Conflict {
   remoteValue: unknown;
   localTimestamp: number;
   remoteTimestamp: string;
+  connectionId: string;
 }
 
 interface SyncState {
@@ -49,17 +50,19 @@ const initialState = {
   isOnline: typeof navigator !== "undefined" ? navigator.onLine : true,
 };
 
-export const useSyncStore = create<SyncState>((set) => ({
+export const useSyncStore = create<SyncState>((set, get) => ({
   ...initialState,
 
   setStatus: (status) => set({ status }),
   setLastSync: (lastSync) => set({ lastSync }),
   setPendingCount: (pendingCount) => set({ pendingCount }),
 
-  addConflict: (conflict) =>
+  addConflict: (conflict) => {
+    console.log('[syncStore] addConflict:', conflict.id);
     set((state) => ({
       conflicts: [...state.conflicts, conflict],
-    })),
+    }));
+  },
 
   updateConflict: (id, updates) =>
     set((state) => ({
@@ -68,10 +71,16 @@ export const useSyncStore = create<SyncState>((set) => ({
       ),
     })),
 
-  removeConflict: (id) =>
-    set((state) => ({
-      conflicts: state.conflicts.filter((c) => c.id !== id),
-    })),
+  removeConflict: (id) => {
+    const currentConflicts = get().conflicts;
+    console.log('[syncStore] removeConflict called with id:', id);
+    console.log('[syncStore] current conflicts:', currentConflicts.map(c => c.id));
+    set((state) => {
+      const newConflicts = state.conflicts.filter((c) => c.id !== id);
+      console.log('[syncStore] new conflicts after filter:', newConflicts.map(c => c.id));
+      return { conflicts: newConflicts };
+    });
+  },
 
   clearConflicts: () => set({ conflicts: [] }),
   setError: (error) => set({ error }),
@@ -79,3 +88,9 @@ export const useSyncStore = create<SyncState>((set) => ({
   setOnline: (isOnline) => set({ isOnline }),
   reset: () => set(initialState),
 }));
+
+// Expose store to window for E2E testing debug
+if (typeof window !== 'undefined') {
+  (window as unknown as { __ZUSTAND_SYNC_STORE__: typeof useSyncStore })
+    .__ZUSTAND_SYNC_STORE__ = useSyncStore;
+}

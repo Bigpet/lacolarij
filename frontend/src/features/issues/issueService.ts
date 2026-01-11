@@ -153,12 +153,16 @@ export const issueService = {
   async markConflict(
     issueId: string,
     remoteIssue: Issue,
+    connectionId?: string,
     _pendingOperationId?: string
   ): Promise<void> {
     const localIssue = await issueRepository.getById(issueId);
     if (!localIssue) {
       throw new Error("Issue not found");
     }
+
+    // Use provided connectionId or fall back to active connection
+    const effectiveConnectionId = connectionId || useSyncStore.getState().activeConnectionId || "";
 
     // Update local issue to conflict status
     await issueRepository.put({
@@ -176,6 +180,7 @@ export const issueService = {
       remoteValue: remoteIssue,
       localTimestamp: localIssue._localUpdated,
       remoteTimestamp: remoteIssue._remoteVersion,
+      connectionId: effectiveConnectionId,
     });
   },
 

@@ -18,6 +18,7 @@ sdist/
 
 # Frontend
 frontend/dist/
+frontend/e2e/test-results/
 frontend/e2e/test-results/junit.xml
 frontend/e2e/playwright-report/index.html
 frontend/test-results/.last-run.json

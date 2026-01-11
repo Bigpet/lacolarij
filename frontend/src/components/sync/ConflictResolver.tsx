@@ -24,7 +24,6 @@ import { ExternalLink, Loader2 } from "lucide-react";
 
 interface ConflictResolverProps {
   conflict: Conflict;
-  connectionId: string;
   jiraUrl?: string;
   onClose: () => void;
 }
@@ -78,7 +77,6 @@ function renderValue(value: unknown): React.ReactNode {
 
 export function ConflictResolver({
   conflict,
-  connectionId,
   jiraUrl,
   onClose,
 }: ConflictResolverProps) {
@@ -92,7 +90,7 @@ export function ConflictResolver({
     setIsResolving(true);
     setError(null);
     try {
-      await resolveConflict(conflict, resolution, connectionId);
+      await resolveConflict(conflict, resolution);
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Resolution failed");

@@ -432,12 +432,62 @@ test.describe('Conflict Resolution', () => {
       const conflictBadge = page.locator('text=/\\d+ conflict/i');
       await expect(conflictBadge).toBeVisible({ timeout: 10000 });
 
+      // Debug: Check store state before resolution
+      const storeStateBefore = await page.evaluate(() => {
+        // @ts-ignore - accessing window for debug
+        const store = window.__ZUSTAND_SYNC_STORE__;
+        if (store) {
+          const state = store.getState();
+          return { conflicts: state.conflicts, pendingCount: state.pendingCount };
+        }
+        return null;
+      });
+      console.log('Store state BEFORE resolution:', JSON.stringify(storeStateBefore, null, 2));
+
+      // Set up console log listener before actions
+      page.on('console', msg => console.log('BROWSER LOG:', msg.type(), msg.text()));
+
       // Resolve conflict
       const reviewButton = page.locator('button:has-text("Review Now")');
       await reviewButton.click();
 
+      // Wait for modal to be visible
+      await expect(page.locator('text=Resolve Conflict')).toBeVisible({ timeout: 5000 });
+      console.log('Modal opened');
+
       const keepMyButton = page.locator('button:has-text("Keep My Version")');
       await keepMyButton.click();
+      console.log('Clicked Keep My Version');
+
+      // Wait a bit for resolution to attempt
+      await page.waitForTimeout(3000);
+
+      // Check for error in modal
+      const errorElement = page.locator('.bg-destructive\\/10');
+      if (await errorElement.isVisible()) {
+        const errorText = await errorElement.textContent();
+        console.log('ERROR IN MODAL:', errorText);
+      }
+
+      // Wait for the modal to close (indicates resolution completed)
+      await expect(page.locator('text=Resolve Conflict')).not.toBeVisible({ timeout: 10000 });
+      console.log('Modal closed');
+
+      // Debug: Check store state after resolution
+      const storeStateAfter = await page.evaluate(() => {
+        // @ts-ignore - accessing window for debug
+        const store = window.__ZUSTAND_SYNC_STORE__;
+        if (store) {
+          const state = store.getState();
+          return { conflicts: state.conflicts, pendingCount: state.pendingCount };
+        }
+        return null;
+      });
+      console.log('Store state AFTER resolution:', JSON.stringify(storeStateAfter, null, 2));
+
+      // Debug: Check what badges are visible
+      const badges = await page.locator('.rounded-md.border').allTextContents();
+      console.log('All badges visible:', badges);
 
       // Conflict badge should be gone
       await expect(conflictBadge).not.toBeVisible({ timeout: 10000 });
@@ -481,6 +531,9 @@ test.describe('Conflict Resolution', () => {
 
       const keepServerButton = page.locator('button:has-text("Keep Server Version")');
       await keepServerButton.click();
+
+      // Wait for the modal to close (indicates resolution completed)
+      await expect(page.locator('text=Resolve Conflict')).not.toBeVisible({ timeout: 10000 });
 
       // Conflict banner should be gone
       await expect(conflictBanner).not.toBeVisible({ timeout: 10000 });
@@ -579,6 +632,9 @@ test.describe('Conflict Resolution', () => {
 
       const keepMyButton = page.locator('button:has-text("Keep My Version")');
       await keepMyButton.click();
+
+      // Wait for the modal to close (indicates resolution completed)
+      await expect(page.locator('text=Resolve Conflict')).not.toBeVisible({ timeout: 10000 });
 
       // Should now show 1 conflict
       const oneConflict = page.locator('text=/1 conflict/i');
