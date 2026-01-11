@@ -7,8 +7,8 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
 
-from app.dependencies import CurrentUser, ConnectionRepo
-from app.services.relay_service import relay_service, RelayError
+from app.dependencies import ConnectionRepo, CurrentUser
+from app.services.relay_service import RelayError, relay_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/jira", tags=["jira-relay"])
@@ -27,7 +27,7 @@ async def _get_connection_for_user(
         logger.error(f"[Relay] User {current_user.id} has these connections:")
         all_connections = await connection_repo.get_by_user_id(current_user.id)
         if not all_connections:
-            logger.error(f"[Relay]   (no connections found for this user)")
+            logger.error("[Relay]   (no connections found for this user)")
         for conn in all_connections:
             logger.error(f"[Relay]   - {conn.id}: {conn.name} ({conn.jira_url})")
         raise HTTPException(status_code=404, detail="Connection not found")

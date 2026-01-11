@@ -2,9 +2,8 @@
 
 import pytest
 
-from app.db.repositories import ConnectionRepository
-from app.models.connection import JiraConnection
 from app.core.security import encrypt_api_token, hash_password
+from app.db.repositories import ConnectionRepository
 
 
 class TestConnectionRepository:

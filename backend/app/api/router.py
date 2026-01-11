@@ -3,8 +3,8 @@
 from fastapi import APIRouter
 
 from app.api.auth import router as auth_router
-from app.api.users import router as users_router
 from app.api.relay import router as relay_router
+from app.api.users import router as users_router
 
 # Main API router
 api_router = APIRouter(prefix="/api")

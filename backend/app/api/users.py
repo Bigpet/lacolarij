@@ -2,14 +2,14 @@
 
 from fastapi import APIRouter
 
+from app.core.exceptions import ForbiddenError, NotFoundError
+from app.core.security import encrypt_api_token
+from app.dependencies import ConnectionRepo, CurrentUser
 from app.models.schemas import (
     JiraConnectionCreate,
-    JiraConnectionUpdate,
     JiraConnectionResponse,
+    JiraConnectionUpdate,
 )
-from app.dependencies import ConnectionRepo, CurrentUser
-from app.core.security import encrypt_api_token
-from app.core.exceptions import NotFoundError, ForbiddenError
 
 router = APIRouter(prefix="/users", tags=["users"])
 

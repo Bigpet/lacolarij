@@ -6,10 +6,10 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.database import get_session
-from app.db.repositories import UserRepository, ConnectionRepository
-from app.core.security import decode_access_token
 from app.core.exceptions import AuthenticationError
+from app.core.security import decode_access_token
+from app.db.database import get_session
+from app.db.repositories import ConnectionRepository, UserRepository
 from app.models.user import User
 
 # OAuth2 scheme for token extraction
