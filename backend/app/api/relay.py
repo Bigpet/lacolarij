@@ -7,8 +7,8 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
 
-from app.dependencies import CurrentUser, ConnectionRepo
-from app.services.relay_service import relay_service, RelayError
+from app.dependencies import ConnectionRepo, CurrentUser
+from app.services.relay_service import RelayError, relay_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/jira", tags=["jira-relay"])
@@ -20,20 +20,26 @@ async def _get_connection_for_user(
     connection_repo: ConnectionRepo,
 ):
     """Get and validate a connection belongs to the current user."""
-    logger.info(f"[Relay] Looking up connection: {connection_id} for user: {current_user.id}")
+    logger.info(
+        f"[Relay] Looking up connection: {connection_id} for user: {current_user.id}"
+    )
     connection = await connection_repo.get_by_id(connection_id)
     if not connection:
         logger.error(f"[Relay] Connection {connection_id} not found in database")
         logger.error(f"[Relay] User {current_user.id} has these connections:")
         all_connections = await connection_repo.get_by_user_id(current_user.id)
         if not all_connections:
-            logger.error(f"[Relay]   (no connections found for this user)")
+            logger.error("[Relay]   (no connections found for this user)")
         for conn in all_connections:
             logger.error(f"[Relay]   - {conn.id}: {conn.name} ({conn.jira_url})")
         raise HTTPException(status_code=404, detail="Connection not found")
     if connection.user_id != current_user.id:
-        logger.error(f"[Relay] Connection {connection_id} belongs to user {connection.user_id}, not {current_user.id}")
-        raise HTTPException(status_code=403, detail="Not authorized to use this connection")
+        logger.error(
+            f"[Relay] Connection {connection_id} belongs to user {connection.user_id}, not {current_user.id}"
+        )
+        raise HTTPException(
+            status_code=403, detail="Not authorized to use this connection"
+        )
     logger.info(f"[Relay] Found connection: {connection.name} ({connection.jira_url})")
     return connection
 
@@ -41,6 +47,7 @@ async def _get_connection_for_user(
 # IMPORTANT: Specific routes must be defined BEFORE the catch-all route
 # This ensures that routes like /{connection_id}/search are matched before
 # the catch-all /{connection_id}/rest/api/{api_version}/{path:path} pattern
+
 
 @router.get("/{connection_id}/search")
 async def search_issues(
@@ -188,6 +195,7 @@ async def _relay_jira_request_impl(
         raise HTTPException(status_code=e.status_code, detail=str(e))
     except Exception as e:
         import traceback
+
         logger.error(f"[Relay] Exception: {e}")
         traceback.print_exc()
         raise HTTPException(status_code=502, detail=f"Relay error: {str(e)}")
@@ -195,11 +203,21 @@ async def _relay_jira_request_impl(
 
 # Catch-all route for JIRA API - must be LAST after all specific routes
 # Using explicit route decorators instead of api_route to avoid 415 errors
-@router.get("/{connection_id}/rest/api/{api_version}/{path:path}", include_in_schema=False)
-@router.post("/{connection_id}/rest/api/{api_version}/{path:path}", include_in_schema=False)
-@router.put("/{connection_id}/rest/api/{api_version}/{path:path}", include_in_schema=False)
-@router.delete("/{connection_id}/rest/api/{api_version}/{path:path}", include_in_schema=False)
-@router.patch("/{connection_id}/rest/api/{api_version}/{path:path}", include_in_schema=False)
+@router.get(
+    "/{connection_id}/rest/api/{api_version}/{path:path}", include_in_schema=False
+)
+@router.post(
+    "/{connection_id}/rest/api/{api_version}/{path:path}", include_in_schema=False
+)
+@router.put(
+    "/{connection_id}/rest/api/{api_version}/{path:path}", include_in_schema=False
+)
+@router.delete(
+    "/{connection_id}/rest/api/{api_version}/{path:path}", include_in_schema=False
+)
+@router.patch(
+    "/{connection_id}/rest/api/{api_version}/{path:path}", include_in_schema=False
+)
 async def relay_jira_request(
     connection_id: str,
     api_version: str,

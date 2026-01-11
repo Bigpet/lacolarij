@@ -1,8 +1,8 @@
 """Tests for mock JIRA router."""
 
 import pytest
-from fastapi.testclient import TestClient
 from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 from app.services.mock_jira import mock_jira_router, reset_storage
 
@@ -64,7 +64,9 @@ class TestCreateIssue:
                         "content": [
                             {
                                 "type": "paragraph",
-                                "content": [{"type": "text", "text": "Test description"}],
+                                "content": [
+                                    {"type": "text", "text": "Test description"}
+                                ],
                             }
                         ],
                     },

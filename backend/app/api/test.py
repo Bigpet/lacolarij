@@ -12,11 +12,10 @@ from pydantic import BaseModel
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.mock_jira.router import _issues, reset_storage, _now_iso
 from app.db.database import get_session
 from app.models.connection import JiraConnection
 from app.services.mock_jira.models import DEFAULT_TRANSITIONS
-
+from app.services.mock_jira.router import _issues, _now_iso, reset_storage
 
 # In-memory log buffer for E2E test debugging
 _log_buffer: deque[str] = deque(maxlen=500)
@@ -32,10 +31,12 @@ class LogHandler(logging.Handler):
 
 # Set up the custom handler
 _log_handler = LogHandler()
-_log_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+_log_handler.setFormatter(
+    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+)
 
 # Add handler to relevant loggers
-for logger_name in ['app', 'uvicorn', 'uvicorn.access']:
+for logger_name in ["app", "uvicorn", "uvicorn.access"]:
     logger = logging.getLogger(logger_name)
     logger.addHandler(_log_handler)
     logger.setLevel(logging.DEBUG)
@@ -193,7 +194,10 @@ async def add_test_comment(
     new_comment = {
         "id": comment_id,
         "body": comment.body,
-        "author": {"name": comment.author.lower().replace(" ", "_"), "displayName": comment.author},
+        "author": {
+            "name": comment.author.lower().replace(" ", "_"),
+            "displayName": comment.author,
+        },
         "created": now,
         "updated": now,
     }

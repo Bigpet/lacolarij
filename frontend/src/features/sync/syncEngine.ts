@@ -4,29 +4,29 @@
  * Phase 3: Push and pull sync with conflict detection
  */
 
-import { api, type JiraIssue, type JiraSearchResponse } from "@/lib/api";
+import { api, type JiraIssue, type JiraSearchResponse } from '@/lib/api';
 import {
   db,
   issueRepository,
   commentRepository,
   syncMetaRepository,
   pendingOperationsRepository,
-} from "@/lib/db";
-import { useSyncStore } from "@/stores/syncStore";
-import type { Issue, PendingOperation } from "@/types";
+} from '@/lib/db';
+import { useSyncStore } from '@/stores/syncStore';
+import type { Issue, PendingOperation } from '@/types';
 
 // Map status category from JIRA to our simplified version
 function mapStatusCategory(
   category: string
-): "todo" | "indeterminate" | "done" {
+): 'todo' | 'indeterminate' | 'done' {
   switch (category.toLowerCase()) {
-    case "new":
-    case "undefined":
-      return "todo";
-    case "done":
-      return "done";
+    case 'new':
+    case 'undefined':
+      return 'todo';
+    case 'done':
+      return 'done';
     default:
-      return "indeterminate";
+      return 'indeterminate';
   }
 }
 
@@ -43,21 +43,30 @@ function mapJiraIssueToLocal(jiraIssue: JiraIssue): Issue {
     status: fields.status.name,
     statusCategory: mapStatusCategory(fields.status.statusCategory.key),
     assignee: fields.assignee?.displayName || null,
-    reporter: fields.reporter?.displayName || "",
-    priority: fields.priority?.name || "Medium",
+    reporter: fields.reporter?.displayName || '',
+    priority: fields.priority?.name || 'Medium',
     issueType: fields.issuetype.name,
     labels: fields.labels || [],
     created: fields.created,
     updated: fields.updated,
     _localUpdated: Date.now(),
-    _syncStatus: "synced",
+    _syncStatus: 'synced',
     _syncError: null,
     _remoteVersion: fields.updated,
   };
 }
 
 // Convert JIRA comment to local comment format
-function mapJiraCommentToLocal(jiraComment: { id: string; body: unknown; author: { displayName: string }; created: string; updated: string }, issueId: string) {
+function mapJiraCommentToLocal(
+  jiraComment: {
+    id: string;
+    body: unknown;
+    author: { displayName: string };
+    created: string;
+    updated: string;
+  },
+  issueId: string
+) {
   return {
     id: jiraComment.id,
     issueId,
@@ -65,7 +74,7 @@ function mapJiraCommentToLocal(jiraComment: { id: string; body: unknown; author:
     author: jiraComment.author.displayName,
     created: jiraComment.created,
     updated: jiraComment.updated,
-    _syncStatus: "synced" as const,
+    _syncStatus: 'synced' as const,
   };
 }
 
@@ -81,7 +90,7 @@ export class SyncEngine {
 
   async startSync(options: SyncOptions): Promise<void> {
     if (this.isRunning) {
-      console.warn("Sync already in progress");
+      console.warn('Sync already in progress');
       return;
     }
 
@@ -89,12 +98,12 @@ export class SyncEngine {
 
     // Check connectivity before syncing
     if (!store.isOnline) {
-      console.log("Cannot sync while offline");
+      console.log('Cannot sync while offline');
       return;
     }
 
     this.isRunning = true;
-    store.setStatus("syncing");
+    store.setStatus('syncing');
     store.setError(null);
     store.setActiveConnection(options.connectionId);
 
@@ -105,16 +114,16 @@ export class SyncEngine {
       // Pull remote changes
       await this.pullRemoteChanges(options);
 
-      store.setStatus("idle");
+      store.setStatus('idle');
       store.setLastSync(new Date());
 
       // Update pending count
       const pendingCount = await db.pendingOperations.count();
       store.setPendingCount(pendingCount);
     } catch (error) {
-      console.error("Sync error:", error);
-      store.setStatus("error");
-      store.setError(error instanceof Error ? error.message : "Sync failed");
+      console.error('Sync error:', error);
+      store.setStatus('error');
+      store.setError(error instanceof Error ? error.message : 'Sync failed');
     } finally {
       this.isRunning = false;
     }
@@ -123,19 +132,23 @@ export class SyncEngine {
   private async pullRemoteChanges(options: SyncOptions): Promise<void> {
     const { connectionId, jql, fullSync, maxResults = 100 } = options;
 
-    console.log(`[syncEngine] pullRemoteChanges: fullSync=${fullSync}, connectionId=${connectionId}`);
+    console.log(
+      `[syncEngine] pullRemoteChanges: fullSync=${fullSync}, connectionId=${connectionId}`
+    );
 
     // Get last sync time if not doing full sync
     let since: number | undefined;
     if (!fullSync) {
       since = await syncMetaRepository.getLastSyncTime(connectionId);
-      console.log(`[syncEngine]   since=${since}, ${since ? new Date(since).toISOString() : 'never'}`);
+      console.log(
+        `[syncEngine]   since=${since}, ${since ? new Date(since).toISOString() : 'never'}`
+      );
     }
 
     // Build JQL for incremental sync
-    let searchJql = jql || "";
+    let searchJql = jql || '';
     if (since && !fullSync) {
-      const sinceDate = new Date(since).toISOString().split("T")[0];
+      const sinceDate = new Date(since).toISOString().split('T')[0];
       const updateFilter = `updated >= "${sinceDate}"`;
       searchJql = searchJql
         ? `(${searchJql}) AND ${updateFilter}`
@@ -144,10 +157,10 @@ export class SyncEngine {
     }
 
     // Add ordering for consistent pagination
-    if (!searchJql.toLowerCase().includes("order by")) {
+    if (!searchJql.toLowerCase().includes('order by')) {
       searchJql = searchJql
         ? `${searchJql} ORDER BY updated ASC`
-        : "created >= -3000w ORDER BY updated ASC";
+        : 'created >= -3000w ORDER BY updated ASC';
     }
 
     let nextPageToken: string | undefined = undefined;
@@ -162,17 +175,17 @@ export class SyncEngine {
           nextPageToken,
           maxResults,
           fields: [
-            "summary",
-            "description",
-            "status",
-            "issuetype",
-            "priority",
-            "assignee",
-            "reporter",
-            "project",
-            "labels",
-            "created",
-            "updated",
+            'summary',
+            'description',
+            'status',
+            'issuetype',
+            'priority',
+            'assignee',
+            'reporter',
+            'project',
+            'labels',
+            'created',
+            'updated',
           ],
         }
       );
@@ -199,8 +212,13 @@ export class SyncEngine {
     await syncMetaRepository.setLastSyncTime(connectionId, Date.now());
   }
 
-  private async mergeRemoteIssue(remote: JiraIssue, connectionId: string): Promise<void> {
-    console.log(`[syncEngine] mergeRemoteIssue called for ${remote.key}, connectionId=${connectionId}`);
+  private async mergeRemoteIssue(
+    remote: JiraIssue,
+    connectionId: string
+  ): Promise<void> {
+    console.log(
+      `[syncEngine] mergeRemoteIssue called for ${remote.key}, connectionId=${connectionId}`
+    );
     const store = useSyncStore.getState();
     const local = await issueRepository.getById(remote.id);
 
@@ -214,15 +232,19 @@ export class SyncEngine {
       return;
     }
 
-    console.log(`[syncEngine] local._syncStatus for ${remote.key}: ${local._syncStatus}`);
+    console.log(
+      `[syncEngine] local._syncStatus for ${remote.key}: ${local._syncStatus}`
+    );
 
-    if (local._syncStatus === "conflict") {
+    if (local._syncStatus === 'conflict') {
       // Issue is already in conflict - preserve local version, update remote value in conflict store
-      console.log(`[syncEngine] Issue ${remote.key} is in conflict, preserving local version`);
+      console.log(
+        `[syncEngine] Issue ${remote.key} is in conflict, preserving local version`
+      );
 
       // Find the existing conflict for this issue
       const existingConflict = store.conflicts.find(
-        (c) => c.entityId === local.id && c.entityType === "issue"
+        (c) => c.entityId === local.id && c.entityType === 'issue'
       );
 
       if (existingConflict) {
@@ -239,22 +261,26 @@ export class SyncEngine {
       return;
     }
 
-    if (local._syncStatus === "pending") {
+    if (local._syncStatus === 'pending') {
       // Local has unpushed changes - check for conflict
-      console.log(`[syncEngine] Issue ${remote.key} has pending changes, checking for conflict`);
-      console.log(`[syncEngine] remote.updated=${remote.fields.updated}, local._remoteVersion=${local._remoteVersion}`);
+      console.log(
+        `[syncEngine] Issue ${remote.key} has pending changes, checking for conflict`
+      );
+      console.log(
+        `[syncEngine] remote.updated=${remote.fields.updated}, local._remoteVersion=${local._remoteVersion}`
+      );
       if (remote.fields.updated !== local._remoteVersion) {
         // Remote changed too - we have a conflict
         console.log(`[syncEngine] CONFLICT detected for ${remote.key}`);
         await issueRepository.put({
           ...local,
-          _syncStatus: "conflict",
+          _syncStatus: 'conflict',
           _remoteVersion: remote.fields.updated,
         });
 
         store.addConflict({
           id: `${local.id}-${Date.now()}`,
-          entityType: "issue",
+          entityType: 'issue',
           entityId: local.id,
           entityKey: local.key,
           localValue: local,
@@ -265,11 +291,15 @@ export class SyncEngine {
         });
       } else {
         // No conflict - keep local version for future push
-        console.log(`[syncEngine] No conflict for ${remote.key}, keeping pending status`);
+        console.log(
+          `[syncEngine] No conflict for ${remote.key}, keeping pending status`
+        );
       }
     } else {
       // No local changes - just update with remote
-      console.log(`[syncEngine] No local changes for ${remote.key}, updating from remote`);
+      console.log(
+        `[syncEngine] No local changes for ${remote.key}, updating from remote`
+      );
       const updatedIssue = mapJiraIssueToLocal(remote);
       await issueRepository.put(updatedIssue);
     }
@@ -287,28 +317,39 @@ export class SyncEngine {
     issueKey: string
   ): Promise<void> {
     try {
-      console.log(`[syncEngine] Fetching comments for ${issueKey} (issueId=${issueId})...`);
+      console.log(
+        `[syncEngine] Fetching comments for ${issueKey} (issueId=${issueId})...`
+      );
       const response = await api.getComments(connectionId, issueKey);
 
-      console.log(`[syncEngine] Got ${response.comments.length} comments for ${issueKey}, total=${response.total}`);
+      console.log(
+        `[syncEngine] Got ${response.comments.length} comments for ${issueKey}, total=${response.total}`
+      );
 
       // Convert JIRA comments to local format
       const localComments = response.comments.map((jiraComment) =>
         mapJiraCommentToLocal(jiraComment, issueId)
       );
 
-      console.log(`[syncEngine] Mapped ${localComments.length} comments to local format`);
+      console.log(
+        `[syncEngine] Mapped ${localComments.length} comments to local format`
+      );
 
       // Store all comments (replaces existing)
       await commentRepository.deleteByIssueId(issueId);
       if (localComments.length > 0) {
         await commentRepository.bulkPut(localComments);
-        console.log(`[syncEngine] Stored ${localComments.length} comments for ${issueKey}`);
+        console.log(
+          `[syncEngine] Stored ${localComments.length} comments for ${issueKey}`
+        );
       } else {
         console.log(`[syncEngine] No comments to store for ${issueKey}`);
       }
     } catch (error) {
-      console.error(`[syncEngine] Failed to sync comments for ${issueKey}:`, error);
+      console.error(
+        `[syncEngine] Failed to sync comments for ${issueKey}:`,
+        error
+      );
       // Don't fail the entire sync if comments fail
     }
   }
@@ -321,7 +362,7 @@ export class SyncEngine {
     const pending = await pendingOperationsRepository.getAll();
 
     if (pending.length === 0) {
-      console.log("No pending changes to push");
+      console.log('No pending changes to push');
       return;
     }
 
@@ -329,12 +370,12 @@ export class SyncEngine {
 
     for (const op of pending) {
       // Process both issue and comment operations
-      if (op.entityType !== "issue" && op.entityType !== "comment") {
+      if (op.entityType !== 'issue' && op.entityType !== 'comment') {
         continue;
       }
 
       try {
-        if (op.entityType === "comment") {
+        if (op.entityType === 'comment') {
           await this.executePendingCommentOperation(connectionId, op);
         } else {
           await this.executePendingIssueOperation(connectionId, op);
@@ -344,17 +385,25 @@ export class SyncEngine {
 
         // Check if it's a conflict error (409)
         if (this.isConflictError(error)) {
-          if (op.entityType === "issue") {
+          if (op.entityType === 'issue') {
             const localIssue = await issueRepository.getById(op.entityId);
             if (localIssue) {
               try {
-                const remoteIssue = await api.getIssue(connectionId, localIssue.key);
-                await this.handlePushConflict(localIssue, remoteIssue, connectionId, op.id);
+                const remoteIssue = await api.getIssue(
+                  connectionId,
+                  localIssue.key
+                );
+                await this.handlePushConflict(
+                  localIssue,
+                  remoteIssue,
+                  connectionId,
+                  op.id
+                );
               } catch {
                 // Failed to get remote, just mark attempt
                 await pendingOperationsRepository.updateAttempt(
                   op.id,
-                  "Conflict detected but failed to fetch remote version"
+                  'Conflict detected but failed to fetch remote version'
                 );
               }
             }
@@ -362,13 +411,13 @@ export class SyncEngine {
           // For comments, just mark the attempt for now
           await pendingOperationsRepository.updateAttempt(
             op.id,
-            "Conflict detected"
+            'Conflict detected'
           );
         } else {
           // Retry later
           await pendingOperationsRepository.updateAttempt(
             op.id,
-            error instanceof Error ? error.message : "Unknown error"
+            error instanceof Error ? error.message : 'Unknown error'
           );
         }
       }
@@ -394,7 +443,7 @@ export class SyncEngine {
     }
 
     // Skip if already in conflict
-    if (localIssue._syncStatus === "conflict") {
+    if (localIssue._syncStatus === 'conflict') {
       console.log(`Skipping ${localIssue.key} - already in conflict`);
       return;
     }
@@ -408,20 +457,31 @@ export class SyncEngine {
       console.error(`Failed to fetch remote issue ${localIssue.key}:`, error);
       await pendingOperationsRepository.updateAttempt(
         op.id,
-        error instanceof Error ? error.message : "Failed to fetch remote"
+        error instanceof Error ? error.message : 'Failed to fetch remote'
       );
       return;
     }
 
-    console.log(`[syncEngine] executePendingIssueOperation for ${localIssue.key}:`);
-    console.log(`[syncEngine]   local._remoteVersion: ${localIssue._remoteVersion}`);
+    console.log(
+      `[syncEngine] executePendingIssueOperation for ${localIssue.key}:`
+    );
+    console.log(
+      `[syncEngine]   local._remoteVersion: ${localIssue._remoteVersion}`
+    );
     console.log(`[syncEngine]   remote.updated: ${remoteIssue.fields.updated}`);
-    console.log(`[syncEngine]   versions match? ${remoteIssue.fields.updated === localIssue._remoteVersion}`);
+    console.log(
+      `[syncEngine]   versions match? ${remoteIssue.fields.updated === localIssue._remoteVersion}`
+    );
 
     // Check for version conflict
     if (remoteIssue.fields.updated !== localIssue._remoteVersion) {
       console.log(`Conflict detected for ${localIssue.key}`);
-      await this.handlePushConflict(localIssue, remoteIssue, connectionId, op.id);
+      await this.handlePushConflict(
+        localIssue,
+        remoteIssue,
+        connectionId,
+        op.id
+      );
       // Remove the pending operation since we're not pushing it
       await pendingOperationsRepository.delete(op.id);
       return;
@@ -436,7 +496,7 @@ export class SyncEngine {
     // Mark issue as synced with new version
     await issueRepository.put({
       ...localIssue,
-      _syncStatus: "synced",
+      _syncStatus: 'synced',
       _remoteVersion: updatedRemote.fields.updated,
       _syncError: null,
     });
@@ -465,7 +525,11 @@ export class SyncEngine {
     const payload = op.payload as { body: unknown };
 
     // Execute the add comment operation
-    const response = await api.addComment(connectionId, localIssue.key, payload.body);
+    const response = await api.addComment(
+      connectionId,
+      localIssue.key,
+      payload.body
+    );
 
     // Convert response to local format and store
     const localComment = {
@@ -475,7 +539,7 @@ export class SyncEngine {
       author: response.author.displayName,
       created: response.created,
       updated: response.updated,
-      _syncStatus: "synced" as const,
+      _syncStatus: 'synced' as const,
     };
 
     await commentRepository.put(localComment);
@@ -528,21 +592,25 @@ export class SyncEngine {
     console.log(`[syncEngine] handlePushConflict for ${localIssue.key}`);
     console.log(`[syncEngine]   local.summary: ${localIssue.summary}`);
     console.log(`[syncEngine]   remote.summary: ${remoteIssue.fields.summary}`);
-    console.log(`[syncEngine]   local._remoteVersion: ${localIssue._remoteVersion}`);
+    console.log(
+      `[syncEngine]   local._remoteVersion: ${localIssue._remoteVersion}`
+    );
     console.log(`[syncEngine]   remote.updated: ${remoteIssue.fields.updated}`);
 
     // Update local issue to conflict status
     await issueRepository.put({
       ...localIssue,
-      _syncStatus: "conflict",
+      _syncStatus: 'conflict',
     });
 
-    console.log(`[syncEngine]   Marked ${localIssue.key} as conflict in IndexedDB`);
+    console.log(
+      `[syncEngine]   Marked ${localIssue.key} as conflict in IndexedDB`
+    );
 
     // Add conflict to store
     store.addConflict({
       id: `${localIssue.id}-${Date.now()}`,
-      entityType: "issue",
+      entityType: 'issue',
       entityId: localIssue.id,
       entityKey: localIssue.key,
       localValue: localIssue,
@@ -560,7 +628,9 @@ export class SyncEngine {
    */
   private isConflictError(error: unknown): boolean {
     if (error instanceof Error) {
-      return error.message.includes("409") || error.message.includes("Conflict");
+      return (
+        error.message.includes('409') || error.message.includes('Conflict')
+      );
     }
     return false;
   }
@@ -578,7 +648,7 @@ export class SyncEngine {
       return issue;
     } catch (error) {
       store.setError(
-        error instanceof Error ? error.message : "Failed to fetch issue"
+        error instanceof Error ? error.message : 'Failed to fetch issue'
       );
       throw error;
     }

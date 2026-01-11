@@ -1,13 +1,13 @@
-import { useState, useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { IssueList } from "@/components/issues";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useSync } from "@/features/sync/syncEngine";
-import { api } from "@/lib/api";
-import type { Issue, JiraConnection } from "@/types";
-import { RefreshCw, Settings } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { IssueList } from '@/components/issues';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useSync } from '@/features/sync/syncEngine';
+import { api } from '@/lib/api';
+import type { Issue, JiraConnection } from '@/types';
+import { RefreshCw, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export function IssuesPage() {
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ export function IssuesPage() {
           setSelectedConnectionId(defaultConn.id);
         }
       } catch (error) {
-        console.error("Failed to load connections:", error);
+        console.error('Failed to load connections:', error);
       } finally {
         setIsLoadingConnections(false);
       }
@@ -40,10 +40,13 @@ export function IssuesPage() {
     loadConnections();
   }, []);
 
-  const handleIssueSelect = useCallback((issue: Issue) => {
-    setSelectedIssue(issue);
-    navigate(`/issues/${issue.id}`);
-  }, [navigate]);
+  const handleIssueSelect = useCallback(
+    (issue: Issue) => {
+      setSelectedIssue(issue);
+      navigate(`/issues/${issue.id}`);
+    },
+    [navigate]
+  );
 
   const handleRefresh = useCallback(async () => {
     if (!selectedConnectionId) return;
@@ -61,7 +64,7 @@ export function IssuesPage() {
     });
   }, [selectedConnectionId, sync]);
 
-  const isSyncing = syncStatus === "syncing";
+  const isSyncing = syncStatus === 'syncing';
 
   return (
     <div className="space-y-6">
@@ -72,7 +75,7 @@ export function IssuesPage() {
           {/* Connection selector */}
           {connections.length > 0 && (
             <select
-              value={selectedConnectionId || ""}
+              value={selectedConnectionId || ''}
               onChange={(e) => setSelectedConnectionId(e.target.value)}
               className="h-9 rounded-md border border-input bg-background px-3 text-sm"
               disabled={isSyncing}
@@ -92,7 +95,7 @@ export function IssuesPage() {
             disabled={!selectedConnectionId || isSyncing}
           >
             <RefreshCw
-              className={`h-4 w-4 mr-2 ${isSyncing ? "animate-spin" : ""}`}
+              className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`}
             />
             Sync
           </Button>

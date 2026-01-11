@@ -9,9 +9,9 @@ import type {
   AuthToken,
   JiraConnection,
   JiraConnectionCreate,
-} from "@/types";
+} from '@/types';
 
-const API_BASE = "/api";
+const API_BASE = '/api';
 
 class ApiClient {
   private token: string | null = null;
@@ -25,12 +25,12 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const headers: HeadersInit = {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       ...options.headers,
     };
 
     if (this.token) {
-      (headers as Record<string, string>)["Authorization"] =
+      (headers as Record<string, string>)['Authorization'] =
         `Bearer ${this.token}`;
     }
 
@@ -42,7 +42,9 @@ class ApiClient {
       headers,
     });
 
-    console.log(`[api] response: ${response.status} ${response.statusText} for ${url}`);
+    console.log(
+      `[api] response: ${response.status} ${response.statusText} for ${url}`
+    );
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
@@ -62,53 +64,53 @@ class ApiClient {
   async login(credentials: LoginCredentials): Promise<AuthToken> {
     // FastAPI expects form data for OAuth2
     const formData = new URLSearchParams();
-    formData.append("username", credentials.username);
-    formData.append("password", credentials.password);
+    formData.append('username', credentials.username);
+    formData.append('password', credentials.password);
 
     const response = await fetch(`${API_BASE}/auth/login`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: formData,
     });
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(error.detail || "Login failed");
+      throw new Error(error.detail || 'Login failed');
     }
 
     return response.json();
   }
 
   async register(credentials: RegisterCredentials): Promise<User> {
-    return this.request<User>("/auth/register", {
-      method: "POST",
+    return this.request<User>('/auth/register', {
+      method: 'POST',
       body: JSON.stringify(credentials),
     });
   }
 
   async getCurrentUser(): Promise<User> {
-    return this.request<User>("/auth/me");
+    return this.request<User>('/auth/me');
   }
 
   // Connection endpoints
   async listConnections(): Promise<JiraConnection[]> {
-    return this.request<JiraConnection[]>("/users/connections");
+    return this.request<JiraConnection[]>('/users/connections');
   }
 
   async createConnection(
     connection: JiraConnectionCreate
   ): Promise<JiraConnection> {
-    return this.request<JiraConnection>("/users/connections", {
-      method: "POST",
+    return this.request<JiraConnection>('/users/connections', {
+      method: 'POST',
       body: JSON.stringify(connection),
     });
   }
 
   async deleteConnection(id: string): Promise<void> {
     return this.request<void>(`/users/connections/${id}`, {
-      method: "DELETE",
+      method: 'DELETE',
     });
   }
 
@@ -123,7 +125,9 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const fullPath = `/jira/${connectionId}${path}`;
-    console.log(`[api] jiraRequest: connectionId=${connectionId}, path=${path}, fullPath=${fullPath}`);
+    console.log(
+      `[api] jiraRequest: connectionId=${connectionId}, path=${path}, fullPath=${fullPath}`
+    );
     return this.request<T>(fullPath, options);
   }
 
@@ -137,18 +141,17 @@ class ApiClient {
     } = {}
   ): Promise<JiraSearchResponse> {
     const queryParams = new URLSearchParams();
-    if (params.jql) queryParams.set("jql", params.jql);
+    if (params.jql) queryParams.set('jql', params.jql);
     if (params.nextPageToken)
-      queryParams.set("nextPageToken", params.nextPageToken);
+      queryParams.set('nextPageToken', params.nextPageToken);
     if (params.maxResults !== undefined)
-      queryParams.set("maxResults", params.maxResults.toString());
-    if (params.fields)
-      queryParams.set("fields", params.fields.join(","));
+      queryParams.set('maxResults', params.maxResults.toString());
+    if (params.fields) queryParams.set('fields', params.fields.join(','));
 
     const query = queryParams.toString();
     return this.jiraRequest<JiraSearchResponse>(
       connectionId,
-      `/rest/api/3/search/jql${query ? `?${query}` : ""}`
+      `/rest/api/3/search/jql${query ? `?${query}` : ''}`
     );
   }
 
@@ -171,7 +174,7 @@ class ApiClient {
       connectionId,
       `/rest/api/3/issue/${issueIdOrKey}`,
       {
-        method: "PUT",
+        method: 'PUT',
         body: JSON.stringify(update),
       }
     );
@@ -196,7 +199,7 @@ class ApiClient {
       connectionId,
       `/rest/api/3/issue/${issueIdOrKey}/transitions`,
       {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({ transition: { id: transitionId } }),
       }
     );
@@ -205,12 +208,21 @@ class ApiClient {
   async getComments(
     connectionId: string,
     issueIdOrKey: string
-  ): Promise<{ comments: JiraComment[]; total: number; startAt: number; maxResults: number }> {
-    console.log(`[api] getComments called: connectionId=${connectionId}, issueKey=${issueIdOrKey}`);
-    const result = await this.jiraRequest<{ comments: JiraComment[]; total: number; startAt: number; maxResults: number }>(
-      connectionId,
-      `/rest/api/3/issue/${issueIdOrKey}/comment`
+  ): Promise<{
+    comments: JiraComment[];
+    total: number;
+    startAt: number;
+    maxResults: number;
+  }> {
+    console.log(
+      `[api] getComments called: connectionId=${connectionId}, issueKey=${issueIdOrKey}`
     );
+    const result = await this.jiraRequest<{
+      comments: JiraComment[];
+      total: number;
+      startAt: number;
+      maxResults: number;
+    }>(connectionId, `/rest/api/3/issue/${issueIdOrKey}/comment`);
     console.log(`[api] getComments result:`, result);
     return result;
   }
@@ -224,7 +236,7 @@ class ApiClient {
       connectionId,
       `/rest/api/3/issue/${issueIdOrKey}/comment`,
       {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({ body }),
       }
     );

@@ -1,43 +1,43 @@
-import { cn } from "@/lib/utils";
-import type { Issue } from "@/types";
-import { AlertCircle, CheckCircle, Clock, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { cn } from '@/lib/utils';
+import type { Issue } from '@/types';
+import { AlertCircle, CheckCircle, Clock, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface BoardCardProps {
   issue: Issue;
   isDragging?: boolean;
 }
 
-function getSyncStatusIcon(status: Issue["_syncStatus"]) {
+function getSyncStatusIcon(status: Issue['_syncStatus']) {
   switch (status) {
-    case "synced":
+    case 'synced':
       return <CheckCircle className="h-3 w-3 text-green-500" />;
-    case "pending":
+    case 'pending':
       return <Clock className="h-3 w-3 text-yellow-500" />;
-    case "conflict":
+    case 'conflict':
       return <AlertCircle className="h-3 w-3 text-red-500" />;
   }
 }
 
 function getIssueTypeEmoji(type: string): string {
   const typeLower = type.toLowerCase();
-  if (typeLower.includes("bug")) return "🐛";
-  if (typeLower.includes("story")) return "📖";
-  if (typeLower.includes("epic")) return "⚡";
-  if (typeLower.includes("subtask") || typeLower.includes("sub-task"))
-    return "📌";
-  return "📋";
+  if (typeLower.includes('bug')) return '🐛';
+  if (typeLower.includes('story')) return '📖';
+  if (typeLower.includes('epic')) return '⚡';
+  if (typeLower.includes('subtask') || typeLower.includes('sub-task'))
+    return '📌';
+  return '📋';
 }
 
 function getPriorityColor(priority: string): string {
   const priorityLower = priority.toLowerCase();
-  if (priorityLower.includes("highest") || priorityLower.includes("blocker"))
-    return "text-red-600";
-  if (priorityLower.includes("high")) return "text-orange-500";
-  if (priorityLower.includes("medium")) return "text-yellow-500";
-  if (priorityLower.includes("low")) return "text-blue-500";
-  if (priorityLower.includes("lowest")) return "text-gray-400";
-  return "text-muted-foreground";
+  if (priorityLower.includes('highest') || priorityLower.includes('blocker'))
+    return 'text-red-600';
+  if (priorityLower.includes('high')) return 'text-orange-500';
+  if (priorityLower.includes('medium')) return 'text-yellow-500';
+  if (priorityLower.includes('low')) return 'text-blue-500';
+  if (priorityLower.includes('lowest')) return 'text-gray-400';
+  return 'text-muted-foreground';
 }
 
 export function BoardCard({ issue, isDragging }: BoardCardProps) {
@@ -56,9 +56,9 @@ export function BoardCard({ issue, isDragging }: BoardCardProps) {
     <div
       onClick={handleClick}
       className={cn(
-        "bg-card border rounded-lg p-3 cursor-pointer transition-all",
-        "hover:shadow-md hover:border-primary/50",
-        isDragging && "shadow-lg rotate-2 opacity-90"
+        'bg-card border rounded-lg p-3 cursor-pointer transition-all',
+        'hover:shadow-md hover:border-primary/50',
+        isDragging && 'shadow-lg rotate-2 opacity-90'
       )}
       data-testid="board-card"
       data-issue-key={issue.key}
@@ -82,7 +82,7 @@ export function BoardCard({ issue, isDragging }: BoardCardProps) {
       {/* Footer: Priority + Assignee */}
       <div className="flex items-center justify-between text-xs">
         {issue.priority && (
-          <span className={cn("font-medium", getPriorityColor(issue.priority))}>
+          <span className={cn('font-medium', getPriorityColor(issue.priority))}>
             {issue.priority}
           </span>
         )}

@@ -2,8 +2,8 @@
  * Conflict banner - shows when there are unresolved conflicts.
  */
 
-import { useSyncStore } from "@/stores/syncStore";
-import { AlertTriangle, ChevronRight } from "lucide-react";
+import { useSyncStore } from '@/stores/syncStore';
+import { AlertTriangle, ChevronRight } from 'lucide-react';
 
 interface ConflictBannerProps {
   onReviewClick: () => void;
@@ -26,7 +26,7 @@ export function ConflictBanner({ onReviewClick }: ConflictBannerProps) {
           <AlertTriangle className="h-4 w-4" />
           <span className="text-sm font-medium">
             {conflicts.length === 1
-              ? "1 issue has a conflict that needs resolution"
+              ? '1 issue has a conflict that needs resolution'
               : `${conflicts.length} issues have conflicts that need resolution`}
           </span>
         </div>

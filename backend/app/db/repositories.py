@@ -3,8 +3,8 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.user import User
 from app.models.connection import JiraConnection
+from app.models.user import User
 
 
 class UserRepository:
@@ -84,9 +84,7 @@ class ConnectionRepository:
         )
         return list(result.scalars().all())
 
-    async def update(
-        self, connection: JiraConnection, **kwargs
-    ) -> JiraConnection:
+    async def update(self, connection: JiraConnection, **kwargs) -> JiraConnection:
         """Update a connection."""
         for key, value in kwargs.items():
             if value is not None and hasattr(connection, key):
