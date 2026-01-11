@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react";
-import { api } from "@/lib/api";
-import type { JiraConnection, JiraConnectionCreate } from "@/types";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
+import type { JiraConnection, JiraConnectionCreate } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Trash2, Plus } from "lucide-react";
+} from '@/components/ui/card';
+import { Trash2, Plus } from 'lucide-react';
 
 export function SettingsPage() {
   const [connections, setConnections] = useState<JiraConnection[]>([]);
@@ -20,17 +20,19 @@ export function SettingsPage() {
   const [showForm, setShowForm] = useState(false);
 
   // Form state
-  const [name, setName] = useState("");
-  const [jiraUrl, setJiraUrl] = useState("");
-  const [email, setEmail] = useState("");
-  const [apiToken, setApiToken] = useState("");
+  const [name, setName] = useState('');
+  const [jiraUrl, setJiraUrl] = useState('');
+  const [email, setEmail] = useState('');
+  const [apiToken, setApiToken] = useState('');
 
   const loadConnections = async () => {
     try {
       const data = await api.listConnections();
       setConnections(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load connections");
+      setError(
+        err instanceof Error ? err.message : 'Failed to load connections'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -55,13 +57,15 @@ export function SettingsPage() {
     try {
       await api.createConnection(connection);
       setShowForm(false);
-      setName("");
-      setJiraUrl("");
-      setEmail("");
-      setApiToken("");
+      setName('');
+      setJiraUrl('');
+      setEmail('');
+      setApiToken('');
       loadConnections();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create connection");
+      setError(
+        err instanceof Error ? err.message : 'Failed to create connection'
+      );
     }
   };
 
@@ -70,7 +74,9 @@ export function SettingsPage() {
       await api.deleteConnection(id);
       loadConnections();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete connection");
+      setError(
+        err instanceof Error ? err.message : 'Failed to delete connection'
+      );
     }
   };
 
@@ -81,9 +87,7 @@ export function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>JIRA Connections</CardTitle>
-          <CardDescription>
-            Manage your JIRA server connections
-          </CardDescription>
+          <CardDescription>Manage your JIRA server connections</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {error && (

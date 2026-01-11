@@ -1,15 +1,18 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
-import { DragDropContext, type DropResult } from "@hello-pangea/dnd";
-import { api } from "@/lib/api";
-import { issueService } from "@/features/issues/issueService";
-import { useSyncStore } from "@/stores/syncStore";
-import { useBoardStore } from "@/stores/boardStore";
-import { useAuthStore } from "@/stores/authStore";
-import { useSearch } from "@/hooks/useSearch";
-import { BoardColumn } from "@/components/board/BoardColumn";
-import { QuickFilters, defaultQuickFilters } from "@/components/board/QuickFilters";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
+import { api } from '@/lib/api';
+import { issueService } from '@/features/issues/issueService';
+import { useSyncStore } from '@/stores/syncStore';
+import { useBoardStore } from '@/stores/boardStore';
+import { useAuthStore } from '@/stores/authStore';
+import { useSearch } from '@/hooks/useSearch';
+import { BoardColumn } from '@/components/board/BoardColumn';
+import {
+  QuickFilters,
+  defaultQuickFilters,
+} from '@/components/board/QuickFilters';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   RefreshCw,
   Settings2,
@@ -17,8 +20,8 @@ import {
   Eye,
   EyeOff,
   RotateCcw,
-} from "lucide-react";
-import type { Issue } from "@/types";
+} from 'lucide-react';
+import type { Issue } from '@/types';
 
 export function BoardPage() {
   const { activeConnectionId } = useSyncStore();
@@ -36,7 +39,10 @@ export function BoardPage() {
 
   const [showColumnSettings, setShowColumnSettings] = useState(false);
   const [transitionsCache, setTransitionsCache] = useState<
-    Record<string, { id: string; name: string; toStatus: string; toCategory: string }[]>
+    Record<
+      string,
+      { id: string; name: string; toStatus: string; toCategory: string }[]
+    >
   >({});
 
   // Full-text search with MiniSearch
@@ -57,7 +63,7 @@ export function BoardPage() {
         }));
         setTransitionsCache((prev) => ({ ...prev, [issueId]: mapped }));
       } catch (error) {
-        console.error("Failed to fetch transitions:", error);
+        console.error('Failed to fetch transitions:', error);
       }
     },
     [activeConnectionId, transitionsCache]
@@ -88,7 +94,7 @@ export function BoardPage() {
           if (!filterDef) return true;
 
           // Special handling for "my-issues" filter
-          if (filterId === "my-issues" && user?.username) {
+          if (filterId === 'my-issues' && user?.username) {
             return issue.assignee
               ?.toLowerCase()
               .includes(user.username.toLowerCase());
@@ -137,11 +143,11 @@ export function BoardPage() {
   // Map JIRA status category keys to our internal category names
   const mapJiraCategoryToInternal = (
     jiraCategory: string
-  ): "todo" | "indeterminate" | "done" => {
+  ): 'todo' | 'indeterminate' | 'done' => {
     const key = jiraCategory.toLowerCase();
-    if (key === "new" || key === "todo") return "todo";
-    if (key === "done") return "done";
-    return "indeterminate";
+    if (key === 'new' || key === 'todo') return 'todo';
+    if (key === 'done') return 'done';
+    return 'indeterminate';
   };
 
   // Handle drag end
@@ -160,10 +166,12 @@ export function BoardPage() {
 
       // Find the issue and target column
       const issue = filteredIssues.find((i) => i.id === draggableId);
-      const targetColumn = columns.find((c) => c.id === destination.droppableId);
+      const targetColumn = columns.find(
+        (c) => c.id === destination.droppableId
+      );
 
       if (!issue || !targetColumn) {
-        console.warn("Issue or target column not found");
+        console.warn('Issue or target column not found');
         return;
       }
 
@@ -174,10 +182,10 @@ export function BoardPage() {
         if (!issueTransitions || issueTransitions.length === 0) {
           // If no connection or no cached transitions, just update locally
           // The sync will handle the actual transition later
-          console.log("No transitions cached, updating locally only");
+          console.log('No transitions cached, updating locally only');
           await issueService.transitionIssue(
             issue.id,
-            "local-only", // Placeholder transition ID
+            'local-only', // Placeholder transition ID
             {
               name: targetColumn.statuses[0] || targetColumn.title,
               category: targetColumn.statusCategory,
@@ -199,7 +207,12 @@ export function BoardPage() {
 
         if (matchingTransition) {
           // Perform the transition
-          console.log("Transitioning issue", issue.key, "to", matchingTransition.toStatus);
+          console.log(
+            'Transitioning issue',
+            issue.key,
+            'to',
+            matchingTransition.toStatus
+          );
           await issueService.transitionIssue(issue.id, matchingTransition.id, {
             name: matchingTransition.toStatus,
             category: mapJiraCategoryToInternal(matchingTransition.toCategory),
@@ -212,16 +225,25 @@ export function BoardPage() {
           });
 
           if (fallbackTransition) {
-            console.log("Using fallback transition to", fallbackTransition.toStatus);
-            await issueService.transitionIssue(issue.id, fallbackTransition.id, {
-              name: fallbackTransition.toStatus,
-              category: mapJiraCategoryToInternal(fallbackTransition.toCategory),
-            });
+            console.log(
+              'Using fallback transition to',
+              fallbackTransition.toStatus
+            );
+            await issueService.transitionIssue(
+              issue.id,
+              fallbackTransition.id,
+              {
+                name: fallbackTransition.toStatus,
+                category: mapJiraCategoryToInternal(
+                  fallbackTransition.toCategory
+                ),
+              }
+            );
           } else {
             console.warn(
-              "No matching transition found for target column:",
+              'No matching transition found for target column:',
               targetColumn.title,
-              "Available transitions:",
+              'Available transitions:',
               issueTransitions
             );
           }
@@ -237,7 +259,9 @@ export function BoardPage() {
     <div className="flex flex-col h-full" data-testid="board-page">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold" data-testid="board-heading">Board</h1>
+        <h1 className="text-2xl font-bold" data-testid="board-heading">
+          Board
+        </h1>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -252,7 +276,10 @@ export function BoardPage() {
 
       {/* Column Settings Panel */}
       {showColumnSettings && (
-        <div className="mb-4 p-4 border rounded-lg bg-muted/30" data-testid="column-settings-panel">
+        <div
+          className="mb-4 p-4 border rounded-lg bg-muted/30"
+          data-testid="column-settings-panel"
+        >
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-medium text-sm">Column Visibility</h3>
             <Button variant="ghost" size="sm" onClick={resetColumns}>
@@ -264,7 +291,7 @@ export function BoardPage() {
             {columns.map((col) => (
               <Button
                 key={col.id}
-                variant={col.visible ? "default" : "outline"}
+                variant={col.visible ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => toggleColumnVisibility(col.id)}
                 className="gap-1"
@@ -303,7 +330,10 @@ export function BoardPage() {
 
       {/* Board Columns - single scroll container */}
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex gap-4 pb-4 overflow-x-auto" data-testid="board-columns">
+        <div
+          className="flex gap-4 pb-4 overflow-x-auto"
+          data-testid="board-columns"
+        >
           {visibleColumns.map((column) => (
             <BoardColumn
               key={column.id}
@@ -319,7 +349,10 @@ export function BoardPage() {
 
       {/* Empty State */}
       {totalCount === 0 && (
-        <div className="flex flex-col items-center justify-center py-12 text-center" data-testid="board-empty-state">
+        <div
+          className="flex flex-col items-center justify-center py-12 text-center"
+          data-testid="board-empty-state"
+        >
           <RefreshCw className="h-12 w-12 text-muted-foreground mb-4" />
           <h2 className="text-lg font-medium mb-2">No issues found</h2>
           <p className="text-sm text-muted-foreground max-w-md">

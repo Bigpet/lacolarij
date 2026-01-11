@@ -2,8 +2,8 @@
  * Dexie database for local-first storage.
  */
 
-import Dexie, { type Table } from "dexie";
-import type { Issue, Comment, SyncMeta, PendingOperation } from "@/types";
+import Dexie, { type Table } from 'dexie';
+import type { Issue, Comment, SyncMeta, PendingOperation } from '@/types';
 
 export class JiraLocalDatabase extends Dexie {
   issues!: Table<Issue, string>;
@@ -12,15 +12,15 @@ export class JiraLocalDatabase extends Dexie {
   pendingOperations!: Table<PendingOperation, string>;
 
   constructor() {
-    super("jiralocal");
+    super('jiralocal');
 
     this.version(1).stores({
       // Primary key is 'id', indexed by key, projectKey, status, etc.
       issues:
-        "id, key, projectKey, status, statusCategory, assignee, _syncStatus, _localUpdated",
-      comments: "id, issueId, _syncStatus, created",
-      syncMeta: "id",
-      pendingOperations: "id, entityType, entityId, createdAt",
+        'id, key, projectKey, status, statusCategory, assignee, _syncStatus, _localUpdated',
+      comments: 'id, issueId, _syncStatus, created',
+      syncMeta: 'id',
+      pendingOperations: 'id, entityType, entityId, createdAt',
     });
   }
 }
@@ -35,7 +35,7 @@ export const issueRepository = {
   },
 
   async getByKey(key: string): Promise<Issue | undefined> {
-    return db.issues.where("key").equals(key).first();
+    return db.issues.where('key').equals(key).first();
   },
 
   async getById(id: string): Promise<Issue | undefined> {
@@ -43,25 +43,25 @@ export const issueRepository = {
   },
 
   async getByProject(projectKey: string): Promise<Issue[]> {
-    return db.issues.where("projectKey").equals(projectKey).toArray();
+    return db.issues.where('projectKey').equals(projectKey).toArray();
   },
 
   async getByStatus(status: string): Promise<Issue[]> {
-    return db.issues.where("status").equals(status).toArray();
+    return db.issues.where('status').equals(status).toArray();
   },
 
   async getByStatusCategory(
-    category: "todo" | "indeterminate" | "done"
+    category: 'todo' | 'indeterminate' | 'done'
   ): Promise<Issue[]> {
-    return db.issues.where("statusCategory").equals(category).toArray();
+    return db.issues.where('statusCategory').equals(category).toArray();
   },
 
   async getPending(): Promise<Issue[]> {
-    return db.issues.where("_syncStatus").equals("pending").toArray();
+    return db.issues.where('_syncStatus').equals('pending').toArray();
   },
 
   async getConflicts(): Promise<Issue[]> {
-    return db.issues.where("_syncStatus").equals("conflict").toArray();
+    return db.issues.where('_syncStatus').equals('conflict').toArray();
   },
 
   async put(issue: Issue): Promise<string> {
@@ -99,7 +99,7 @@ export const issueRepository = {
 // Comment repository functions
 export const commentRepository = {
   async getByIssueId(issueId: string): Promise<Comment[]> {
-    return db.comments.where("issueId").equals(issueId).sortBy("created");
+    return db.comments.where('issueId').equals(issueId).sortBy('created');
   },
 
   async put(comment: Comment): Promise<string> {
@@ -115,7 +115,7 @@ export const commentRepository = {
   },
 
   async deleteByIssueId(issueId: string): Promise<void> {
-    await db.comments.where("issueId").equals(issueId).delete();
+    await db.comments.where('issueId').equals(issueId).delete();
   },
 };
 
@@ -150,14 +150,14 @@ export const syncMetaRepository = {
 // Pending operations queue
 export const pendingOperationsRepository = {
   async getAll(): Promise<PendingOperation[]> {
-    return db.pendingOperations.orderBy("createdAt").toArray();
+    return db.pendingOperations.orderBy('createdAt').toArray();
   },
 
   async getByEntityId(entityId: string): Promise<PendingOperation[]> {
-    return db.pendingOperations.where("entityId").equals(entityId).toArray();
+    return db.pendingOperations.where('entityId').equals(entityId).toArray();
   },
 
-  async add(operation: Omit<PendingOperation, "id">): Promise<string> {
+  async add(operation: Omit<PendingOperation, 'id'>): Promise<string> {
     const id = crypto.randomUUID();
     await db.pendingOperations.add({ ...operation, id });
     return id;
@@ -168,7 +168,7 @@ export const pendingOperationsRepository = {
   },
 
   async deleteByEntityId(entityId: string): Promise<void> {
-    await db.pendingOperations.where("entityId").equals(entityId).delete();
+    await db.pendingOperations.where('entityId').equals(entityId).delete();
   },
 
   async updateAttempt(id: string, error: string | null): Promise<void> {

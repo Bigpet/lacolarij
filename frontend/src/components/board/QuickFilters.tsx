@@ -1,12 +1,16 @@
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { User, Clock, AlertTriangle, Filter, X } from "lucide-react";
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { User, Clock, AlertTriangle, Filter, X } from 'lucide-react';
 
 export interface QuickFilter {
   id: string;
   label: string;
   icon?: React.ReactNode;
-  filter: (issue: { assignee: string | null; priority: string; _localUpdated: number }) => boolean;
+  filter: (issue: {
+    assignee: string | null;
+    priority: string;
+    _localUpdated: number;
+  }) => boolean;
 }
 
 interface QuickFiltersProps {
@@ -18,14 +22,14 @@ interface QuickFiltersProps {
 
 export const defaultQuickFilters: QuickFilter[] = [
   {
-    id: "my-issues",
-    label: "My Issues",
+    id: 'my-issues',
+    label: 'My Issues',
     icon: <User className="h-3 w-3" />,
     filter: () => true, // Will be overridden with actual user
   },
   {
-    id: "recently-updated",
-    label: "Recently Updated",
+    id: 'recently-updated',
+    label: 'Recently Updated',
     icon: <Clock className="h-3 w-3" />,
     filter: (issue) => {
       const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
@@ -33,16 +37,16 @@ export const defaultQuickFilters: QuickFilter[] = [
     },
   },
   {
-    id: "high-priority",
-    label: "High Priority",
+    id: 'high-priority',
+    label: 'High Priority',
     icon: <AlertTriangle className="h-3 w-3" />,
     filter: (issue) => {
       const priority = issue.priority.toLowerCase();
       return (
-        priority.includes("highest") ||
-        priority.includes("high") ||
-        priority.includes("blocker") ||
-        priority.includes("critical")
+        priority.includes('highest') ||
+        priority.includes('high') ||
+        priority.includes('blocker') ||
+        priority.includes('critical')
       );
     },
   },
@@ -56,7 +60,7 @@ export function QuickFilters({
 }: QuickFiltersProps) {
   // Create filters with currentUser context
   const filters = defaultQuickFilters.map((f) => {
-    if (f.id === "my-issues" && currentUser) {
+    if (f.id === 'my-issues' && currentUser) {
       return {
         ...f,
         filter: (issue: { assignee: string | null }) =>
@@ -68,7 +72,10 @@ export function QuickFilters({
   });
 
   return (
-    <div className="flex items-center gap-2 flex-wrap" data-testid="quick-filters">
+    <div
+      className="flex items-center gap-2 flex-wrap"
+      data-testid="quick-filters"
+    >
       <div className="flex items-center gap-1 text-sm text-muted-foreground">
         <Filter className="h-4 w-4" />
         <span>Quick Filters:</span>
@@ -77,12 +84,13 @@ export function QuickFilters({
       {filters.map((filter) => (
         <Button
           key={filter.id}
-          variant={activeFilters.includes(filter.id) ? "default" : "outline"}
+          variant={activeFilters.includes(filter.id) ? 'default' : 'outline'}
           size="sm"
           onClick={() => onToggleFilter(filter.id)}
           className={cn(
-            "h-7 text-xs gap-1",
-            activeFilters.includes(filter.id) && "bg-primary text-primary-foreground"
+            'h-7 text-xs gap-1',
+            activeFilters.includes(filter.id) &&
+              'bg-primary text-primary-foreground'
           )}
           data-testid={`quick-filter-${filter.id}`}
           data-active={activeFilters.includes(filter.id)}

@@ -1,5 +1,5 @@
-import { useAuthStore } from "@/stores/authStore";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuthStore } from '@/stores/authStore';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function DashboardPage() {
   const { user } = useAuthStore();

@@ -2,7 +2,7 @@
  * Conflict resolution modal - shows side-by-side comparison of local and remote versions.
  */
 
-import * as React from "react";
+import * as React from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,17 +10,17 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   resolveConflict,
   type ConflictResolution,
-} from "@/features/sync/conflictService";
-import { type Conflict } from "@/stores/syncStore";
-import type { Issue } from "@/types";
-import { ExternalLink, Loader2 } from "lucide-react";
+} from '@/features/sync/conflictService';
+import { type Conflict } from '@/stores/syncStore';
+import type { Issue } from '@/types';
+import { ExternalLink, Loader2 } from 'lucide-react';
 
 interface ConflictResolverProps {
   conflict: Conflict;
@@ -29,10 +29,10 @@ interface ConflictResolverProps {
 }
 
 function formatTimestamp(ts: number | string): string {
-  const date = typeof ts === "number" ? new Date(ts) : new Date(ts);
+  const date = typeof ts === 'number' ? new Date(ts) : new Date(ts);
   return date.toLocaleString(undefined, {
-    dateStyle: "short",
-    timeStyle: "short",
+    dateStyle: 'short',
+    timeStyle: 'short',
   });
 }
 
@@ -41,28 +41,32 @@ function renderValue(value: unknown): React.ReactNode {
     return <span className="text-muted-foreground italic">None</span>;
   }
 
-  if (typeof value === "string") {
+  if (typeof value === 'string') {
     return <span className="whitespace-pre-wrap">{value}</span>;
   }
 
-  if (typeof value === "object") {
+  if (typeof value === 'object') {
     // Check if it's an ADF document
     const obj = value as { type?: string; content?: unknown[] };
-    if (obj.type === "doc" && Array.isArray(obj.content)) {
+    if (obj.type === 'doc' && Array.isArray(obj.content)) {
       // Extract text from ADF
       const extractText = (content: unknown[]): string => {
         return content
           .map((node) => {
-            if (typeof node !== "object" || node === null) return "";
-            const n = node as { type: string; text?: string; content?: unknown[] };
-            if (n.type === "text") return n.text || "";
+            if (typeof node !== 'object' || node === null) return '';
+            const n = node as {
+              type: string;
+              text?: string;
+              content?: unknown[];
+            };
+            if (n.type === 'text') return n.text || '';
             if (n.content) return extractText(n.content);
-            return "";
+            return '';
           })
-          .join("");
+          .join('');
       };
       const text = extractText(obj.content);
-      return <span className="whitespace-pre-wrap">{text || "(empty)"}</span>;
+      return <span className="whitespace-pre-wrap">{text || '(empty)'}</span>;
     }
 
     return (
@@ -93,7 +97,7 @@ export function ConflictResolver({
       await resolveConflict(conflict, resolution);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Resolution failed");
+      setError(err instanceof Error ? err.message : 'Resolution failed');
     } finally {
       setIsResolving(false);
     }
@@ -133,7 +137,9 @@ export function ConflictResolver({
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
-                <Badge variant="warning" data-testid="conflict-local-badge">Your Version</Badge>
+                <Badge variant="warning" data-testid="conflict-local-badge">
+                  Your Version
+                </Badge>
               </CardTitle>
               <p className="text-xs text-muted-foreground">
                 Modified: {formatTimestamp(conflict.localTimestamp)}
@@ -144,7 +150,12 @@ export function ConflictResolver({
                 <p className="text-xs font-medium text-muted-foreground mb-1">
                   Summary
                 </p>
-                <p className="text-sm font-medium" data-testid="conflict-local-summary">{localIssue.summary}</p>
+                <p
+                  className="text-sm font-medium"
+                  data-testid="conflict-local-summary"
+                >
+                  {localIssue.summary}
+                </p>
               </div>
               <div>
                 <p className="text-xs font-medium text-muted-foreground mb-1">
@@ -167,7 +178,9 @@ export function ConflictResolver({
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
-                <Badge variant="secondary" data-testid="conflict-remote-badge">Server Version</Badge>
+                <Badge variant="secondary" data-testid="conflict-remote-badge">
+                  Server Version
+                </Badge>
               </CardTitle>
               <p className="text-xs text-muted-foreground">
                 Modified: {formatTimestamp(conflict.remoteTimestamp)}
@@ -178,7 +191,12 @@ export function ConflictResolver({
                 <p className="text-xs font-medium text-muted-foreground mb-1">
                   Summary
                 </p>
-                <p className="text-sm font-medium" data-testid="conflict-remote-summary">{remoteIssue.summary}</p>
+                <p
+                  className="text-sm font-medium"
+                  data-testid="conflict-remote-summary"
+                >
+                  {remoteIssue.summary}
+                </p>
               </div>
               <div>
                 <p className="text-xs font-medium text-muted-foreground mb-1">
@@ -201,13 +219,13 @@ export function ConflictResolver({
         <DialogFooter className="gap-2 sm:gap-0">
           <Button
             variant="outline"
-            onClick={() => handleResolve({ type: "keep_remote" })}
+            onClick={() => handleResolve({ type: 'keep_remote' })}
             disabled={isResolving}
           >
             Keep Server Version
           </Button>
           <Button
-            onClick={() => handleResolve({ type: "keep_local" })}
+            onClick={() => handleResolve({ type: 'keep_local' })}
             disabled={isResolving}
           >
             {isResolving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}

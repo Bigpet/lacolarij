@@ -1,7 +1,7 @@
-import { Droppable, Draggable } from "@hello-pangea/dnd";
-import { cn } from "@/lib/utils";
-import type { Issue } from "@/types";
-import { BoardCard } from "./BoardCard";
+import { Droppable, Draggable } from '@hello-pangea/dnd';
+import { cn } from '@/lib/utils';
+import type { Issue } from '@/types';
+import { BoardCard } from './BoardCard';
 
 interface BoardColumnProps {
   id: string;
@@ -15,7 +15,7 @@ export function BoardColumn({
   id,
   title,
   issues,
-  colorClass = "bg-muted/50",
+  colorClass = 'bg-muted/50',
   statusCategory,
 }: BoardColumnProps) {
   return (
@@ -28,7 +28,7 @@ export function BoardColumn({
       {/* Column Header */}
       <div
         className={cn(
-          "flex items-center justify-between px-3 py-2 rounded-t-lg border-b",
+          'flex items-center justify-between px-3 py-2 rounded-t-lg border-b',
           colorClass
         )}
       >
@@ -48,8 +48,8 @@ export function BoardColumn({
             ref={provided.innerRef}
             {...provided.droppableProps}
             className={cn(
-              "flex-1 p-2 space-y-2 rounded-b-lg border border-t-0 min-h-[200px]",
-              snapshot.isDraggingOver && "bg-accent/50"
+              'flex-1 p-2 space-y-2 rounded-b-lg border border-t-0 min-h-[200px]',
+              snapshot.isDraggingOver && 'bg-accent/50'
             )}
           >
             {issues.map((issue, index) => (
@@ -60,10 +60,7 @@ export function BoardColumn({
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
                   >
-                    <BoardCard
-                      issue={issue}
-                      isDragging={snapshot.isDragging}
-                    />
+                    <BoardCard issue={issue} isDragging={snapshot.isDragging} />
                   </div>
                 )}
               </Draggable>

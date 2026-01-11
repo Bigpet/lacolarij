@@ -2,8 +2,8 @@
  * Banner displayed when the user is offline.
  */
 
-import { useSyncStore } from "@/stores/syncStore";
-import { WifiOff } from "lucide-react";
+import { useSyncStore } from '@/stores/syncStore';
+import { WifiOff } from 'lucide-react';
 
 export function OfflineBanner() {
   const isOnline = useSyncStore((state) => state.isOnline);
@@ -16,8 +16,9 @@ export function OfflineBanner() {
       <WifiOff className="h-4 w-4" />
       <span>
         You're offline.
-        {pendingCount > 0 && ` ${pendingCount} pending change${pendingCount > 1 ? "s" : ""} will sync when you reconnect.`}
-        {pendingCount === 0 && " Changes will sync when you reconnect."}
+        {pendingCount > 0 &&
+          ` ${pendingCount} pending change${pendingCount > 1 ? 's' : ''} will sync when you reconnect.`}
+        {pendingCount === 0 && ' Changes will sync when you reconnect.'}
       </span>
     </div>
   );

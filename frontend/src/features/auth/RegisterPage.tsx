@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuthStore } from "@/stores/authStore";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/authStore';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Card,
   CardContent,
@@ -11,14 +11,14 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 
 export function RegisterPage() {
   const navigate = useNavigate();
   const { register, isLoading, error, clearError } = useAuthStore();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,18 +27,18 @@ export function RegisterPage() {
     setLocalError(null);
 
     if (password !== confirmPassword) {
-      setLocalError("Passwords do not match");
+      setLocalError('Passwords do not match');
       return;
     }
 
     if (password.length < 8) {
-      setLocalError("Password must be at least 8 characters");
+      setLocalError('Password must be at least 8 characters');
       return;
     }
 
     try {
       await register(username, password);
-      navigate("/");
+      navigate('/');
     } catch {
       // Error is handled by the store
     }
@@ -58,7 +58,10 @@ export function RegisterPage() {
         <form onSubmit={handleSubmit} noValidate>
           <CardContent className="space-y-4">
             {displayError && (
-              <div role="alert" className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
+              <div
+                role="alert"
+                className="p-3 text-sm text-destructive bg-destructive/10 rounded-md"
+              >
                 {displayError}
               </div>
             )}
@@ -103,10 +106,10 @@ export function RegisterPage() {
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Creating account..." : "Create account"}
+              {isLoading ? 'Creating account...' : 'Create account'}
             </Button>
             <p className="text-sm text-muted-foreground text-center">
-              Already have an account?{" "}
+              Already have an account?{' '}
               <Link to="/login" className="text-primary hover:underline">
                 Sign in
               </Link>

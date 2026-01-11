@@ -1,12 +1,12 @@
-import * as React from "react";
-import { Outlet, Navigate } from "react-router-dom";
-import { useAuthStore } from "@/stores/authStore";
-import { useSyncStore } from "@/stores/syncStore";
-import { useConnectivity } from "@/hooks/useConnectivity";
-import { Header } from "./Header";
-import { OfflineBanner } from "@/components/sync/OfflineBanner";
-import { ConflictBanner } from "@/components/sync/ConflictBanner";
-import { ConflictResolver } from "@/components/sync/ConflictResolver";
+import * as React from 'react';
+import { Outlet, Navigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/authStore';
+import { useSyncStore } from '@/stores/syncStore';
+import { useConnectivity } from '@/hooks/useConnectivity';
+import { Header } from './Header';
+import { OfflineBanner } from '@/components/sync/OfflineBanner';
+import { ConflictBanner } from '@/components/sync/ConflictBanner';
+import { ConflictResolver } from '@/components/sync/ConflictResolver';
 
 export function AppShell() {
   const { token } = useAuthStore();

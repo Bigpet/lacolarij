@@ -7,9 +7,9 @@
  * 3. Update the sync store's pending count
  */
 
-import { issueRepository, pendingOperationsRepository } from "@/lib/db";
-import { useSyncStore } from "@/stores/syncStore";
-import type { Issue } from "@/types";
+import { issueRepository, pendingOperationsRepository } from '@/lib/db';
+import { useSyncStore } from '@/stores/syncStore';
+import type { Issue } from '@/types';
 
 async function updatePendingCount(): Promise<void> {
   const count = await pendingOperationsRepository.count();
@@ -23,7 +23,7 @@ export const issueService = {
   async updateSummary(issueId: string, summary: string): Promise<void> {
     const issue = await issueRepository.getById(issueId);
     if (!issue) {
-      throw new Error("Issue not found");
+      throw new Error('Issue not found');
     }
 
     const now = Date.now();
@@ -33,14 +33,14 @@ export const issueService = {
       ...issue,
       summary,
       _localUpdated: now,
-      _syncStatus: "pending",
+      _syncStatus: 'pending',
     });
 
     // 2. Queue pending operation
     await pendingOperationsRepository.add({
-      entityType: "issue",
+      entityType: 'issue',
       entityId: issueId,
-      operation: "update",
+      operation: 'update',
       payload: { fields: { summary } },
       createdAt: now,
       attempts: 0,
@@ -60,7 +60,7 @@ export const issueService = {
   ): Promise<void> {
     const issue = await issueRepository.getById(issueId);
     if (!issue) {
-      throw new Error("Issue not found");
+      throw new Error('Issue not found');
     }
 
     const now = Date.now();
@@ -70,14 +70,14 @@ export const issueService = {
       ...issue,
       description,
       _localUpdated: now,
-      _syncStatus: "pending",
+      _syncStatus: 'pending',
     });
 
     // 2. Queue pending operation
     await pendingOperationsRepository.add({
-      entityType: "issue",
+      entityType: 'issue',
       entityId: issueId,
-      operation: "update",
+      operation: 'update',
       payload: { fields: { description } },
       createdAt: now,
       attempts: 0,
@@ -96,12 +96,12 @@ export const issueService = {
     transitionId: string,
     targetStatus: {
       name: string;
-      category: "todo" | "indeterminate" | "done";
+      category: 'todo' | 'indeterminate' | 'done';
     }
   ): Promise<void> {
     const issue = await issueRepository.getById(issueId);
     if (!issue) {
-      throw new Error("Issue not found");
+      throw new Error('Issue not found');
     }
 
     const now = Date.now();
@@ -112,14 +112,14 @@ export const issueService = {
       status: targetStatus.name,
       statusCategory: targetStatus.category,
       _localUpdated: now,
-      _syncStatus: "pending",
+      _syncStatus: 'pending',
     });
 
     // 2. Queue pending operation (transition is a special type)
     await pendingOperationsRepository.add({
-      entityType: "issue",
+      entityType: 'issue',
       entityId: issueId,
-      operation: "update",
+      operation: 'update',
       payload: { transition: { id: transitionId } },
       createdAt: now,
       attempts: 0,
@@ -136,12 +136,12 @@ export const issueService = {
   async markSynced(issueId: string, newRemoteVersion: string): Promise<void> {
     const issue = await issueRepository.getById(issueId);
     if (!issue) {
-      throw new Error("Issue not found");
+      throw new Error('Issue not found');
     }
 
     await issueRepository.put({
       ...issue,
-      _syncStatus: "synced",
+      _syncStatus: 'synced',
       _remoteVersion: newRemoteVersion,
       _syncError: null,
     });
@@ -158,22 +158,23 @@ export const issueService = {
   ): Promise<void> {
     const localIssue = await issueRepository.getById(issueId);
     if (!localIssue) {
-      throw new Error("Issue not found");
+      throw new Error('Issue not found');
     }
 
     // Use provided connectionId or fall back to active connection
-    const effectiveConnectionId = connectionId || useSyncStore.getState().activeConnectionId || "";
+    const effectiveConnectionId =
+      connectionId || useSyncStore.getState().activeConnectionId || '';
 
     // Update local issue to conflict status
     await issueRepository.put({
       ...localIssue,
-      _syncStatus: "conflict",
+      _syncStatus: 'conflict',
     });
 
     // Add conflict to store
     useSyncStore.getState().addConflict({
       id: `${issueId}-${Date.now()}`,
-      entityType: "issue",
+      entityType: 'issue',
       entityId: issueId,
       entityKey: localIssue.key,
       localValue: localIssue,
@@ -187,11 +188,14 @@ export const issueService = {
   /**
    * Discard local changes and use remote version.
    */
-  async discardLocalChanges(issueId: string, remoteIssue: Issue): Promise<void> {
+  async discardLocalChanges(
+    issueId: string,
+    remoteIssue: Issue
+  ): Promise<void> {
     // Replace local with remote
     await issueRepository.put({
       ...remoteIssue,
-      _syncStatus: "synced",
+      _syncStatus: 'synced',
     });
 
     // Remove any pending operations for this issue
