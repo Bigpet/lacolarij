@@ -5,9 +5,9 @@
  * key, summary, description, labels, assignee, and reporter.
  */
 
-import MiniSearch from "minisearch";
-import type { Issue } from "@/types";
-import { extractTextFromAdf } from "@/lib/adf";
+import MiniSearch from 'minisearch';
+import type { Issue } from '@/types';
+import { extractTextFromAdf } from '@/lib/adf';
 
 interface SearchableIssue {
   id: string;
@@ -26,14 +26,14 @@ class SearchService {
   constructor() {
     this.miniSearch = new MiniSearch({
       fields: [
-        "key",
-        "summary",
-        "descriptionText",
-        "labels",
-        "assignee",
-        "reporter",
+        'key',
+        'summary',
+        'descriptionText',
+        'labels',
+        'assignee',
+        'reporter',
       ],
-      storeFields: ["id"],
+      storeFields: ['id'],
       searchOptions: {
         // Use term-wise prefix matching (only prefix within a single term)
         // 'word' mode would match 'test' in 'test case' but not 'test' in 'latest'
@@ -50,8 +50,8 @@ class SearchService {
    */
   private toSearchable(issue: Issue): SearchableIssue {
     // Handle description - could be ADF object, plain string, or null
-    let descriptionText = "";
-    if (typeof issue.description === "string") {
+    let descriptionText = '';
+    if (typeof issue.description === 'string') {
       descriptionText = issue.description;
     } else if (issue.description) {
       descriptionText = extractTextFromAdf(issue.description);
@@ -62,9 +62,9 @@ class SearchService {
       key: issue.key,
       summary: issue.summary,
       descriptionText,
-      labels: issue.labels.join(" "),
-      assignee: issue.assignee || "",
-      reporter: issue.reporter || "",
+      labels: issue.labels.join(' '),
+      assignee: issue.assignee || '',
+      reporter: issue.reporter || '',
     };
   }
 

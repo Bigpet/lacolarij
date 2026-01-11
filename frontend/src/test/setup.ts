@@ -1,8 +1,8 @@
-import "@testing-library/jest-dom";
-import "fake-indexeddb/auto";
-import { cleanup } from "@testing-library/react";
-import { afterEach, beforeEach } from "vitest";
-import { db } from "@/lib/db";
+import '@testing-library/jest-dom';
+import 'fake-indexeddb/auto';
+import { cleanup } from '@testing-library/react';
+import { afterEach, beforeEach } from 'vitest';
+import { db } from '@/lib/db';
 
 // Cleanup after each test
 afterEach(() => {

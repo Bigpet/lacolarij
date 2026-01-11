@@ -2,10 +2,10 @@
  * Zustand store for authentication state.
  */
 
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import type { User } from "@/types";
-import { api } from "@/lib/api";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import type { User } from '@/types';
+import { api } from '@/lib/api';
 
 interface AuthState {
   token: string | null;
@@ -39,7 +39,7 @@ export const useAuthStore = create<AuthState>()(
           // Fetch user info after login
           await get().fetchCurrentUser();
         } catch (err) {
-          set({ error: err instanceof Error ? err.message : "Login failed" });
+          set({ error: err instanceof Error ? err.message : 'Login failed' });
           throw err;
         } finally {
           set({ isLoading: false });
@@ -54,7 +54,7 @@ export const useAuthStore = create<AuthState>()(
           await get().login(username, password);
         } catch (err) {
           set({
-            error: err instanceof Error ? err.message : "Registration failed",
+            error: err instanceof Error ? err.message : 'Registration failed',
           });
           throw err;
         } finally {
@@ -84,7 +84,7 @@ export const useAuthStore = create<AuthState>()(
       clearError: () => set({ error: null }),
     }),
     {
-      name: "jiralocal-auth",
+      name: 'jiralocal-auth',
       partialize: (state) => ({ token: state.token }),
       onRehydrateStorage: () => (state) => {
         // Restore API token and fetch user on rehydration

@@ -1,15 +1,15 @@
-import * as React from "react";
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/lib/db";
-import { api, type JiraTransition } from "@/lib/api";
-import { issueService } from "@/features/issues/issueService";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select";
-import type { Issue } from "@/types";
+import * as React from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '@/lib/db';
+import { api, type JiraTransition } from '@/lib/api';
+import { issueService } from '@/features/issues/issueService';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select } from '@/components/ui/select';
+import type { Issue } from '@/types';
 import {
   ArrowLeft,
   User,
@@ -23,7 +23,7 @@ import {
   Save,
   X,
   Loader2,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface IssueDetailProps {
   issueId: string;
@@ -32,25 +32,37 @@ interface IssueDetailProps {
   jiraUrl?: string;
 }
 
-function getSyncStatusBadge(status: Issue["_syncStatus"]) {
+function getSyncStatusBadge(status: Issue['_syncStatus']) {
   switch (status) {
-    case "synced":
+    case 'synced':
       return (
-        <Badge variant="success" className="flex items-center gap-1" data-testid="sync-status-badge">
+        <Badge
+          variant="success"
+          className="flex items-center gap-1"
+          data-testid="sync-status-badge"
+        >
           <CheckCircle className="h-3 w-3" />
           Synced
         </Badge>
       );
-    case "pending":
+    case 'pending':
       return (
-        <Badge variant="warning" className="flex items-center gap-1" data-testid="sync-status-badge">
+        <Badge
+          variant="warning"
+          className="flex items-center gap-1"
+          data-testid="sync-status-badge"
+        >
           <Clock className="h-3 w-3" />
           Pending
         </Badge>
       );
-    case "conflict":
+    case 'conflict':
       return (
-        <Badge variant="destructive" className="flex items-center gap-1" data-testid="sync-status-badge">
+        <Badge
+          variant="destructive"
+          className="flex items-center gap-1"
+          data-testid="sync-status-badge"
+        >
           <AlertCircle className="h-3 w-3" />
           Conflict
         </Badge>
@@ -59,25 +71,25 @@ function getSyncStatusBadge(status: Issue["_syncStatus"]) {
 }
 
 function getStatusCategoryVariant(
-  category: "todo" | "indeterminate" | "done"
-): "info" | "warning" | "success" {
+  category: 'todo' | 'indeterminate' | 'done'
+): 'info' | 'warning' | 'success' {
   switch (category) {
-    case "todo":
-      return "info";
-    case "indeterminate":
-      return "warning";
-    case "done":
-      return "success";
+    case 'todo':
+      return 'info';
+    case 'indeterminate':
+      return 'warning';
+    case 'done':
+      return 'success';
   }
 }
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 }
 
@@ -89,9 +101,9 @@ function renderDescription(description: unknown): React.ReactNode {
   }
 
   // If it's an ADF document, try to render it as simple text for now
-  if (typeof description === "object" && description !== null) {
+  if (typeof description === 'object' && description !== null) {
     const adf = description as { type?: string; content?: unknown[] };
-    if (adf.type === "doc" && Array.isArray(adf.content)) {
+    if (adf.type === 'doc' && Array.isArray(adf.content)) {
       return (
         <div className="prose prose-sm max-w-none">
           {renderAdfContent(adf.content)}
@@ -101,7 +113,7 @@ function renderDescription(description: unknown): React.ReactNode {
   }
 
   // Plain text fallback
-  if (typeof description === "string") {
+  if (typeof description === 'string') {
     return <p className="whitespace-pre-wrap">{description}</p>;
   }
 
@@ -114,7 +126,7 @@ function renderDescription(description: unknown): React.ReactNode {
 
 function renderAdfContent(content: unknown[]): React.ReactNode[] {
   return content.map((node, index) => {
-    if (typeof node !== "object" || node === null) return null;
+    if (typeof node !== 'object' || node === null) return null;
 
     const n = node as {
       type: string;
@@ -124,15 +136,13 @@ function renderAdfContent(content: unknown[]): React.ReactNode[] {
     };
 
     switch (n.type) {
-      case "paragraph":
+      case 'paragraph':
         return (
-          <p key={index}>
-            {n.content ? renderAdfContent(n.content) : null}
-          </p>
+          <p key={index}>{n.content ? renderAdfContent(n.content) : null}</p>
         );
-      case "text":
+      case 'text':
         return <span key={index}>{n.text}</span>;
-      case "heading":
+      case 'heading':
         const level = (n.attrs?.level as number) || 1;
         const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
         return (
@@ -140,31 +150,25 @@ function renderAdfContent(content: unknown[]): React.ReactNode[] {
             {n.content ? renderAdfContent(n.content) : null}
           </HeadingTag>
         );
-      case "bulletList":
+      case 'bulletList':
         return (
-          <ul key={index}>
-            {n.content ? renderAdfContent(n.content) : null}
-          </ul>
+          <ul key={index}>{n.content ? renderAdfContent(n.content) : null}</ul>
         );
-      case "orderedList":
+      case 'orderedList':
         return (
-          <ol key={index}>
-            {n.content ? renderAdfContent(n.content) : null}
-          </ol>
+          <ol key={index}>{n.content ? renderAdfContent(n.content) : null}</ol>
         );
-      case "listItem":
+      case 'listItem':
         return (
-          <li key={index}>
-            {n.content ? renderAdfContent(n.content) : null}
-          </li>
+          <li key={index}>{n.content ? renderAdfContent(n.content) : null}</li>
         );
-      case "codeBlock":
+      case 'codeBlock':
         return (
           <pre key={index} className="bg-muted p-2 rounded">
             <code>{n.content ? renderAdfContent(n.content) : null}</code>
           </pre>
         );
-      case "blockquote":
+      case 'blockquote':
         return (
           <blockquote key={index} className="border-l-4 border-muted pl-4">
             {n.content ? renderAdfContent(n.content) : null}
@@ -173,7 +177,7 @@ function renderAdfContent(content: unknown[]): React.ReactNode[] {
       default:
         return (
           <span key={index}>
-            {n.content ? renderAdfContent(n.content) : n.text || ""}
+            {n.content ? renderAdfContent(n.content) : n.text || ''}
           </span>
         );
     }
@@ -181,15 +185,15 @@ function renderAdfContent(content: unknown[]): React.ReactNode[] {
 }
 
 // Map status category key to our simplified category
-function mapStatusCategoryKey(key: string): "todo" | "indeterminate" | "done" {
+function mapStatusCategoryKey(key: string): 'todo' | 'indeterminate' | 'done' {
   switch (key.toLowerCase()) {
-    case "new":
-    case "undefined":
-      return "todo";
-    case "done":
-      return "done";
+    case 'new':
+    case 'undefined':
+      return 'todo';
+    case 'done':
+      return 'done';
     default:
-      return "indeterminate";
+      return 'indeterminate';
   }
 }
 
@@ -201,15 +205,15 @@ export function IssueDetail({
 }: IssueDetailProps) {
   const issue = useLiveQuery(() => db.issues.get(issueId), [issueId]);
   const comments = useLiveQuery(
-    () => db.comments.where("issueId").equals(issueId).sortBy("created"),
+    () => db.comments.where('issueId').equals(issueId).sortBy('created'),
     [issueId]
   );
 
   // Editing state
   const [isEditingSummary, setIsEditingSummary] = React.useState(false);
-  const [editedSummary, setEditedSummary] = React.useState("");
+  const [editedSummary, setEditedSummary] = React.useState('');
   const [isEditingDescription, setIsEditingDescription] = React.useState(false);
-  const [editedDescription, setEditedDescription] = React.useState("");
+  const [editedDescription, setEditedDescription] = React.useState('');
   const [isSaving, setIsSaving] = React.useState(false);
 
   // Status transitions
@@ -223,7 +227,7 @@ export function IssueDetail({
       api
         .getTransitions(connectionId, issue.key)
         .then((result) => setTransitions(result.transitions))
-        .catch((err) => console.error("Failed to load transitions:", err))
+        .catch((err) => console.error('Failed to load transitions:', err))
         .finally(() => setIsLoadingTransitions(false));
     }
   }, [connectionId, issue?.key]);
@@ -235,7 +239,7 @@ export function IssueDetail({
       await issueService.updateSummary(issue.id, editedSummary.trim());
       setIsEditingSummary(false);
     } catch (error) {
-      console.error("Failed to save summary:", error);
+      console.error('Failed to save summary:', error);
     } finally {
       setIsSaving(false);
     }
@@ -248,12 +252,12 @@ export function IssueDetail({
       // Store as simple ADF document
       const adfDescription = editedDescription.trim()
         ? {
-            type: "doc",
+            type: 'doc',
             version: 1,
             content: [
               {
-                type: "paragraph",
-                content: [{ type: "text", text: editedDescription.trim() }],
+                type: 'paragraph',
+                content: [{ type: 'text', text: editedDescription.trim() }],
               },
             ],
           }
@@ -261,7 +265,7 @@ export function IssueDetail({
       await issueService.updateDescription(issue.id, adfDescription);
       setIsEditingDescription(false);
     } catch (error) {
-      console.error("Failed to save description:", error);
+      console.error('Failed to save description:', error);
     } finally {
       setIsSaving(false);
     }
@@ -278,7 +282,7 @@ export function IssueDetail({
         category: mapStatusCategoryKey(transition.to.statusCategory.key),
       });
     } catch (error) {
-      console.error("Failed to transition issue:", error);
+      console.error('Failed to transition issue:', error);
     }
   };
 
@@ -293,29 +297,35 @@ export function IssueDetail({
     if (issue) {
       // Extract text from ADF if possible
       const desc = issue.description;
-      if (typeof desc === "string") {
+      if (typeof desc === 'string') {
         setEditedDescription(desc);
       } else if (
         desc &&
-        typeof desc === "object" &&
-        "content" in desc &&
+        typeof desc === 'object' &&
+        'content' in desc &&
         Array.isArray((desc as { content: unknown[] }).content)
       ) {
         // Try to extract text from ADF
         const extractText = (content: unknown[]): string => {
           return content
             .map((node) => {
-              if (typeof node !== "object" || node === null) return "";
-              const n = node as { type: string; text?: string; content?: unknown[] };
-              if (n.type === "text") return n.text || "";
+              if (typeof node !== 'object' || node === null) return '';
+              const n = node as {
+                type: string;
+                text?: string;
+                content?: unknown[];
+              };
+              if (n.type === 'text') return n.text || '';
               if (n.content) return extractText(n.content);
-              return "";
+              return '';
             })
-            .join("");
+            .join('');
         };
-        setEditedDescription(extractText((desc as { content: unknown[] }).content));
+        setEditedDescription(
+          extractText((desc as { content: unknown[] }).content)
+        );
       } else {
-        setEditedDescription("");
+        setEditedDescription('');
       }
       setIsEditingDescription(true);
     }
@@ -367,8 +377,8 @@ export function IssueDetail({
               className="text-xl font-bold"
               autoFocus
               onKeyDown={(e) => {
-                if (e.key === "Enter") handleSaveSummary();
-                if (e.key === "Escape") setIsEditingSummary(false);
+                if (e.key === 'Enter') handleSaveSummary();
+                if (e.key === 'Escape') setIsEditingSummary(false);
               }}
             />
             <Button
@@ -419,12 +429,18 @@ export function IssueDetail({
             data-testid="status-select"
           />
         ) : (
-          <Badge variant={getStatusCategoryVariant(issue.statusCategory)} data-testid="status-badge">
+          <Badge
+            variant={getStatusCategoryVariant(issue.statusCategory)}
+            data-testid="status-badge"
+          >
             {issue.status}
           </Badge>
         )}
 
-        <div className="flex items-center gap-1 text-sm text-muted-foreground" data-testid="issue-type">
+        <div
+          className="flex items-center gap-1 text-sm text-muted-foreground"
+          data-testid="issue-type"
+        >
           <Tag className="h-4 w-4" />
           {issue.issueType}
         </div>
@@ -441,7 +457,7 @@ export function IssueDetail({
         <div className="flex items-center gap-2">
           <User className="h-4 w-4 text-muted-foreground" />
           <span className="text-muted-foreground">Assignee:</span>
-          <span>{issue.assignee || "Unassigned"}</span>
+          <span>{issue.assignee || 'Unassigned'}</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -530,7 +546,7 @@ export function IssueDetail({
       <Card>
         <CardHeader>
           <CardTitle>
-            Comments {comments?.length ? `(${comments.length})` : ""}
+            Comments {comments?.length ? `(${comments.length})` : ''}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -546,7 +562,9 @@ export function IssueDetail({
                       {formatDate(comment.created)}
                     </span>
                   </div>
-                  <div className="text-sm">{renderDescription(comment.body)}</div>
+                  <div className="text-sm">
+                    {renderDescription(comment.body)}
+                  </div>
                 </div>
               ))}
             </div>

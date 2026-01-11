@@ -13,13 +13,13 @@ interface AdfNode {
  * Recursively traverses the document tree to collect all text content.
  */
 export function extractTextFromAdf(adf: unknown): string {
-  if (!adf || typeof adf !== "object") return "";
+  if (!adf || typeof adf !== 'object') return '';
 
   const doc = adf as AdfNode;
 
   // If this is a text node, return its text content
-  if (doc.type === "text") {
-    return doc.text || "";
+  if (doc.type === 'text') {
+    return doc.text || '';
   }
 
   // If this node has content, recursively extract text from children
@@ -27,20 +27,20 @@ export function extractTextFromAdf(adf: unknown): string {
     return doc.content
       .map((node) => extractTextFromAdf(node))
       .filter(Boolean)
-      .join(" ");
+      .join(' ');
   }
 
-  return "";
+  return '';
 }
 
 /**
  * Check if a value is a valid ADF document.
  */
 export function isAdfDocument(value: unknown): boolean {
-  if (!value || typeof value !== "object") return false;
+  if (!value || typeof value !== 'object') return false;
 
   const doc = value as { type?: string; content?: unknown[] };
-  return doc.type === "doc" && Array.isArray(doc.content);
+  return doc.type === 'doc' && Array.isArray(doc.content);
 }
 
 /**
@@ -48,14 +48,14 @@ export function isAdfDocument(value: unknown): boolean {
  */
 export function textToAdf(text: string): object {
   return {
-    type: "doc",
+    type: 'doc',
     version: 1,
     content: [
       {
-        type: "paragraph",
+        type: 'paragraph',
         content: [
           {
-            type: "text",
+            type: 'text',
             text: text,
           },
         ],

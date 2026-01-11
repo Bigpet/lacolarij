@@ -1,8 +1,8 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { IssueDetail } from "@/components/issues";
-import { api } from "@/lib/api";
-import { db } from "@/lib/db";
+import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { IssueDetail } from '@/components/issues';
+import { api } from '@/lib/api';
+import { db } from '@/lib/db';
 
 export function IssueDetailPage() {
   const { issueId } = useParams<{ issueId: string }>();
@@ -46,7 +46,7 @@ export function IssueDetailPage() {
     <div className="max-w-4xl mx-auto">
       <IssueDetail
         issueId={issueId}
-        onBack={() => navigate("/issues")}
+        onBack={() => navigate('/issues')}
         jiraUrl={jiraUrl}
       />
     </div>

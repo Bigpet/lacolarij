@@ -1,7 +1,7 @@
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-import type { Issue } from "@/types";
-import { AlertCircle, CheckCircle, Clock, User } from "lucide-react";
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import type { Issue } from '@/types';
+import { AlertCircle, CheckCircle, Clock, User } from 'lucide-react';
 
 interface IssueCardProps {
   issue: Issue;
@@ -10,37 +10,37 @@ interface IssueCardProps {
 }
 
 function getStatusCategoryVariant(
-  category: "todo" | "indeterminate" | "done"
-): "info" | "warning" | "success" {
+  category: 'todo' | 'indeterminate' | 'done'
+): 'info' | 'warning' | 'success' {
   switch (category) {
-    case "todo":
-      return "info";
-    case "indeterminate":
-      return "warning";
-    case "done":
-      return "success";
+    case 'todo':
+      return 'info';
+    case 'indeterminate':
+      return 'warning';
+    case 'done':
+      return 'success';
   }
 }
 
-function getSyncStatusIcon(status: Issue["_syncStatus"]) {
+function getSyncStatusIcon(status: Issue['_syncStatus']) {
   switch (status) {
-    case "synced":
+    case 'synced':
       return <CheckCircle className="h-3 w-3 text-green-500" />;
-    case "pending":
+    case 'pending':
       return <Clock className="h-3 w-3 text-yellow-500" />;
-    case "conflict":
+    case 'conflict':
       return <AlertCircle className="h-3 w-3 text-red-500" />;
   }
 }
 
 function getIssueTypeEmoji(type: string): string {
   const typeLower = type.toLowerCase();
-  if (typeLower.includes("bug")) return "🐛";
-  if (typeLower.includes("story")) return "📖";
-  if (typeLower.includes("epic")) return "⚡";
-  if (typeLower.includes("subtask") || typeLower.includes("sub-task"))
-    return "📌";
-  return "📋";
+  if (typeLower.includes('bug')) return '🐛';
+  if (typeLower.includes('story')) return '📖';
+  if (typeLower.includes('epic')) return '⚡';
+  if (typeLower.includes('subtask') || typeLower.includes('sub-task'))
+    return '📌';
+  return '📋';
 }
 
 export function IssueCard({ issue, onClick, selected }: IssueCardProps) {
@@ -48,9 +48,9 @@ export function IssueCard({ issue, onClick, selected }: IssueCardProps) {
     <div
       onClick={onClick}
       className={cn(
-        "flex items-center gap-4 p-3 border rounded-lg cursor-pointer transition-colors",
-        "hover:bg-accent/50",
-        selected && "bg-accent border-primary"
+        'flex items-center gap-4 p-3 border rounded-lg cursor-pointer transition-colors',
+        'hover:bg-accent/50',
+        selected && 'bg-accent border-primary'
       )}
       data-testid="issue-card"
       data-issue-key={issue.key}

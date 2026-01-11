@@ -3,13 +3,13 @@
  * Handles quick filters and column configuration.
  */
 
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export interface BoardColumn {
   id: string;
   title: string;
-  statusCategory: "todo" | "indeterminate" | "done";
+  statusCategory: 'todo' | 'indeterminate' | 'done';
   statuses: string[]; // Status names that map to this column
   colorClass: string;
   visible: boolean;
@@ -38,27 +38,27 @@ interface BoardState {
 // Default column configuration based on JIRA status categories
 const defaultColumns: BoardColumn[] = [
   {
-    id: "todo",
-    title: "To Do",
-    statusCategory: "todo",
-    statuses: ["To Do", "Open", "Backlog", "New"],
-    colorClass: "bg-slate-100 dark:bg-slate-800",
+    id: 'todo',
+    title: 'To Do',
+    statusCategory: 'todo',
+    statuses: ['To Do', 'Open', 'Backlog', 'New'],
+    colorClass: 'bg-slate-100 dark:bg-slate-800',
     visible: true,
   },
   {
-    id: "in-progress",
-    title: "In Progress",
-    statusCategory: "indeterminate",
-    statuses: ["In Progress", "In Review", "In Development", "Testing"],
-    colorClass: "bg-blue-50 dark:bg-blue-950",
+    id: 'in-progress',
+    title: 'In Progress',
+    statusCategory: 'indeterminate',
+    statuses: ['In Progress', 'In Review', 'In Development', 'Testing'],
+    colorClass: 'bg-blue-50 dark:bg-blue-950',
     visible: true,
   },
   {
-    id: "done",
-    title: "Done",
-    statusCategory: "done",
-    statuses: ["Done", "Closed", "Resolved", "Complete"],
-    colorClass: "bg-green-50 dark:bg-green-950",
+    id: 'done',
+    title: 'Done',
+    statusCategory: 'done',
+    statuses: ['Done', 'Closed', 'Resolved', 'Complete'],
+    colorClass: 'bg-green-50 dark:bg-green-950',
     visible: true,
   },
 ];
@@ -68,7 +68,7 @@ export const useBoardStore = create<BoardState>()(
     (set) => ({
       activeFilters: [],
       columns: defaultColumns,
-      searchTerm: "",
+      searchTerm: '',
 
       toggleFilter: (filterId) =>
         set((state) => ({
@@ -77,7 +77,7 @@ export const useBoardStore = create<BoardState>()(
             : [...state.activeFilters, filterId],
         })),
 
-      clearFilters: () => set({ activeFilters: [], searchTerm: "" }),
+      clearFilters: () => set({ activeFilters: [], searchTerm: '' }),
 
       setSearchTerm: (searchTerm) => set({ searchTerm }),
 
@@ -100,7 +100,7 @@ export const useBoardStore = create<BoardState>()(
       resetColumns: () => set({ columns: defaultColumns }),
     }),
     {
-      name: "jiralocal-board",
+      name: 'jiralocal-board',
       partialize: (state) => ({
         columns: state.columns,
         activeFilters: state.activeFilters,

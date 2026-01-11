@@ -1,7 +1,8 @@
 """Pydantic models for the mock JIRA server."""
 
-from pydantic import BaseModel
 from typing import Any
+
+from pydantic import BaseModel
 
 
 class IssueFields(BaseModel):

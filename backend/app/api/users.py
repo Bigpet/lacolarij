@@ -2,14 +2,14 @@
 
 from fastapi import APIRouter
 
+from app.core.exceptions import ForbiddenError, NotFoundError
+from app.core.security import encrypt_api_token
+from app.dependencies import ConnectionRepo, CurrentUser
 from app.models.schemas import (
     JiraConnectionCreate,
-    JiraConnectionUpdate,
     JiraConnectionResponse,
+    JiraConnectionUpdate,
 )
-from app.dependencies import ConnectionRepo, CurrentUser
-from app.core.security import encrypt_api_token
-from app.core.exceptions import NotFoundError, ForbiddenError
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -92,7 +92,9 @@ async def update_connection(
 
     # Encrypt new API token if provided
     if "api_token" in update_data:
-        update_data["api_token_encrypted"] = encrypt_api_token(update_data.pop("api_token"))
+        update_data["api_token_encrypted"] = encrypt_api_token(
+            update_data.pop("api_token")
+        )
 
     connection = await conn_repo.update(connection, **update_data)
 

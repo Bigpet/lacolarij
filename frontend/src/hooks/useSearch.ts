@@ -4,23 +4,23 @@
  * Automatically indexes issues and provides search results.
  */
 
-import { useState, useEffect, useMemo } from "react";
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/lib/db";
-import { searchService } from "@/features/search/searchService";
-import { extractTextFromAdf } from "@/lib/adf";
-import type { Issue } from "@/types";
+import { useState, useEffect, useMemo } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '@/lib/db';
+import { searchService } from '@/features/search/searchService';
+import { extractTextFromAdf } from '@/lib/adf';
+import type { Issue } from '@/types';
 
 /**
  * Extract searchable text from a description (handles both ADF and plain text).
  */
-function getDescriptionText(description: Issue["description"]): string {
-  if (typeof description === "string") {
+function getDescriptionText(description: Issue['description']): string {
+  if (typeof description === 'string') {
     return description;
   } else if (description) {
     return extractTextFromAdf(description);
   }
-  return "";
+  return '';
 }
 
 /**
@@ -54,7 +54,7 @@ export function useSearch(searchQuery: string): UseSearchResult {
 
   // Get all issues for indexing (live query updates when issues change)
   const allIssues = useLiveQuery(
-    () => db.issues.orderBy("_localUpdated").reverse().toArray(),
+    () => db.issues.orderBy('_localUpdated').reverse().toArray(),
     []
   );
 

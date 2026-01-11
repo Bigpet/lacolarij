@@ -2,7 +2,6 @@
 
 import asyncio
 from collections.abc import AsyncGenerator, Generator
-from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -10,11 +9,9 @@ import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.config import get_settings
-from app.db.database import Base
-from app.db.repositories import UserRepository, ConnectionRepository
 from app.core.security import hash_password
-
+from app.db.database import Base
+from app.db.repositories import ConnectionRepository, UserRepository
 
 # In-memory SQLite database for testing
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -44,6 +41,7 @@ async def engine() -> AsyncGenerator[Any, None]:
         cursor.close()
 
     from sqlalchemy import event
+
     event.listen(engine.sync_engine, "connect", enable_foreign_keys)
 
     # Create tables
