@@ -35,7 +35,8 @@ async def _get_connection_for_user(
         raise HTTPException(status_code=404, detail="Connection not found")
     if connection.user_id != current_user.id:
         logger.error(
-            f"[Relay] Connection {connection_id} belongs to user {connection.user_id}, not {current_user.id}"
+            f"[Relay] Connection {connection_id} belongs to user "
+            f"{connection.user_id}, not {current_user.id}"
         )
         raise HTTPException(
             status_code=403, detail="Not authorized to use this connection"

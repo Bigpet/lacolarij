@@ -399,7 +399,8 @@ class TestSearch:
         # Should return both issues
         assert data["total"] == 2
         assert len(data["issues"]) == 2
-        # Verify the search parsed the JQL (would have different behavior without ORDER BY)
+        # Verify the search parsed the JQL
+        # (would have different behavior without ORDER BY)
 
     def test_search_order_by_ascending(self, client: TestClient):
         """Test search with ORDER BY updated ASC."""
