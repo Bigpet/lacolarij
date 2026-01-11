@@ -15,6 +15,14 @@ function dynamicProxyPlugin(): Plugin {
     }
   });
 
+  // Log proxy responses for debugging
+  proxy.on("proxyRes", (proxyRes, req) => {
+    console.log(`[Vite Proxy Response] ${req.method} ${req.url} -> ${proxyRes.statusCode}`);
+    if (proxyRes.statusCode && proxyRes.statusCode >= 400) {
+      console.log(`[Vite Proxy Response] Headers: ${JSON.stringify(proxyRes.headers)}`);
+    }
+  });
+
   return {
     name: "dynamic-proxy",
     configureServer(server) {
@@ -23,6 +31,10 @@ function dynamicProxyPlugin(): Plugin {
         if (!req.url?.startsWith("/api")) {
           return next();
         }
+
+        // Debug logging for proxy
+        console.log(`[Vite Proxy] ${req.method} ${req.url}`);
+        console.log(`[Vite Proxy] Content-Type: ${req.headers['content-type']}`);
 
         // Get target URL from header or use default backend
         const targetUrl =

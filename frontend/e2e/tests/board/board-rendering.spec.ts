@@ -85,20 +85,20 @@ test.describe('Board Rendering', () => {
       await connectionSelect.selectOption({ label: MOCK_CONNECTION_NAME });
       const fullSyncButton = page.locator('button:has-text("Full Sync")');
       await fullSyncButton.click();
-      await page.waitForTimeout(2000); // Wait for sync
+      await boardPage.waitForSyncIdle();
 
       // Navigate back to board
       await boardPage.goto('/board');
       await boardPage.waitForLoaded();
 
-      // Verify cards are in correct columns
+      // Verify cards are in correct columns (with timeout for Dexie live query)
       const todoCards = boardPage.getCardsInColumn('todo');
       const inProgressCards = boardPage.getCardsInColumn('indeterminate');
       const doneCards = boardPage.getCardsInColumn('done');
 
-      await expect(todoCards).toHaveCount(1);
-      await expect(inProgressCards).toHaveCount(1);
-      await expect(doneCards).toHaveCount(1);
+      await expect(todoCards).toHaveCount(1, { timeout: 10000 });
+      await expect(inProgressCards).toHaveCount(1, { timeout: 10000 });
+      await expect(doneCards).toHaveCount(1, { timeout: 10000 });
     });
 
     test('should display issue cards with correct data', async ({ page }) => {
@@ -120,14 +120,14 @@ test.describe('Board Rendering', () => {
       await connectionSelect.selectOption({ label: MOCK_CONNECTION_NAME });
       const fullSyncButton = page.locator('button:has-text("Full Sync")');
       await fullSyncButton.click();
-      await page.waitForTimeout(2000);
+      await boardPage.waitForSyncIdle();
 
       await boardPage.goto('/board');
       await boardPage.waitForLoaded();
 
-      // Verify the card is visible
+      // Wait for the card to appear (Dexie live query may take a moment)
       const card = boardPage.getCard('TEST-1');
-      await expect(card).toBeVisible();
+      await expect(card).toBeVisible({ timeout: 10000 });
 
       // Verify card content
       await expect(card).toContainText('TEST-1');
@@ -149,10 +149,13 @@ test.describe('Board Rendering', () => {
       await connectionSelect.selectOption({ label: MOCK_CONNECTION_NAME });
       const fullSyncButton = page.locator('button:has-text("Full Sync")');
       await fullSyncButton.click();
-      await page.waitForTimeout(2000);
+      await boardPage.waitForSyncIdle();
 
       await boardPage.goto('/board');
       await boardPage.waitForLoaded();
+
+      // Wait for cards to appear before checking counts
+      await expect(boardPage.cards).toHaveCount(3, { timeout: 10000 });
 
       // Verify column counts
       const todoCount = await boardPage.getColumnIssueCount('todo');
@@ -177,12 +180,13 @@ test.describe('Board Rendering', () => {
       await connectionSelect.selectOption({ label: MOCK_CONNECTION_NAME });
       const fullSyncButton = page.locator('button:has-text("Full Sync")');
       await fullSyncButton.click();
-      await page.waitForTimeout(2000);
+      await boardPage.waitForSyncIdle();
 
       await boardPage.goto('/board');
       await boardPage.waitForLoaded();
 
-      // Click on the card
+      // Wait for the card to appear, then click
+      await expect(boardPage.getCard('TEST-1')).toBeVisible({ timeout: 10000 });
       await boardPage.clickCard('TEST-1');
 
       // Verify navigation to detail page
@@ -213,28 +217,25 @@ test.describe('Board Rendering', () => {
       await connectionSelect.selectOption({ label: MOCK_CONNECTION_NAME });
       const fullSyncButton = page.locator('button:has-text("Full Sync")');
       await fullSyncButton.click();
-      await page.waitForTimeout(2000);
+      await boardPage.waitForSyncIdle();
 
       await boardPage.goto('/board');
       await boardPage.waitForLoaded();
 
-      // Verify both cards are visible initially
-      let totalCards = await boardPage.getTotalCardCount();
-      expect(totalCards).toBe(2);
+      // Wait for both cards to be visible initially
+      await expect(boardPage.cards).toHaveCount(2, { timeout: 10000 });
 
       // Search for "authentication"
       await boardPage.search('authentication');
 
       // Verify only matching card is shown
-      totalCards = await boardPage.getTotalCardCount();
-      expect(totalCards).toBe(1);
+      await expect(boardPage.cards).toHaveCount(1, { timeout: 5000 });
       await expect(boardPage.getCard('TEST-1')).toBeVisible();
       await expect(boardPage.getCard('TEST-2')).not.toBeVisible();
 
       // Clear search
       await boardPage.clearSearch();
-      totalCards = await boardPage.getTotalCardCount();
-      expect(totalCards).toBe(2);
+      await expect(boardPage.cards).toHaveCount(2, { timeout: 5000 });
     });
 
     test('should toggle column visibility', async ({ page }) => {

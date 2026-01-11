@@ -11,7 +11,6 @@ import { ConflictResolver } from "@/components/sync/ConflictResolver";
 export function AppShell() {
   const { token } = useAuthStore();
   const conflicts = useSyncStore((state) => state.conflicts);
-  const activeConnectionId = useSyncStore((state) => state.activeConnectionId);
 
   // Initialize connectivity monitoring
   useConnectivity();
@@ -51,10 +50,9 @@ export function AppShell() {
       </main>
 
       {/* Conflict resolver modal */}
-      {showConflictResolver && currentConflict && activeConnectionId && (
+      {showConflictResolver && currentConflict && (
         <ConflictResolver
           conflict={currentConflict}
-          connectionId={activeConnectionId}
           onClose={handleCloseResolver}
         />
       )}

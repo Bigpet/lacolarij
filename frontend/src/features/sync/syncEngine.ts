@@ -261,6 +261,7 @@ export class SyncEngine {
           remoteValue: mapJiraIssueToLocal(remote),
           localTimestamp: local._localUpdated,
           remoteTimestamp: remote.fields.updated,
+          connectionId,
         });
       } else {
         // No conflict - keep local version for future push
@@ -348,7 +349,7 @@ export class SyncEngine {
             if (localIssue) {
               try {
                 const remoteIssue = await api.getIssue(connectionId, localIssue.key);
-                await this.handlePushConflict(localIssue, remoteIssue, op.id);
+                await this.handlePushConflict(localIssue, remoteIssue, connectionId, op.id);
               } catch {
                 // Failed to get remote, just mark attempt
                 await pendingOperationsRepository.updateAttempt(
@@ -420,7 +421,7 @@ export class SyncEngine {
     // Check for version conflict
     if (remoteIssue.fields.updated !== localIssue._remoteVersion) {
       console.log(`Conflict detected for ${localIssue.key}`);
-      await this.handlePushConflict(localIssue, remoteIssue, op.id);
+      await this.handlePushConflict(localIssue, remoteIssue, connectionId, op.id);
       // Remove the pending operation since we're not pushing it
       await pendingOperationsRepository.delete(op.id);
       return;
@@ -519,6 +520,7 @@ export class SyncEngine {
   private async handlePushConflict(
     localIssue: Issue,
     remoteIssue: JiraIssue,
+    connectionId: string,
     _pendingOpId: string
   ): Promise<void> {
     const store = useSyncStore.getState();
@@ -547,6 +549,7 @@ export class SyncEngine {
       remoteValue: mapJiraIssueToLocal(remoteIssue),
       localTimestamp: localIssue._localUpdated,
       remoteTimestamp: remoteIssue.fields.updated,
+      connectionId,
     });
 
     console.log(`[syncEngine]   Added conflict to syncStore`);

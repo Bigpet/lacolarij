@@ -107,12 +107,8 @@ async def get_issue(
         raise HTTPException(status_code=502, detail=f"Relay error: {str(e)}")
 
 
-# Catch-all route for JIRA API - must be LAST after all specific routes
-@router.api_route(
-    "/{connection_id}/rest/api/{api_version}/{path:path}",
-    methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
-)
-async def relay_jira_request(
+# Core handler function for all relay requests
+async def _relay_jira_request_impl(
     connection_id: str,
     api_version: str,
     path: str,
@@ -126,8 +122,6 @@ async def relay_jira_request(
     This endpoint acts as a proxy, forwarding requests to the configured JIRA
     server while handling authentication and CORS.
     """
-    logger.info(f"[Relay] Catch-all route matched: {connection_id}/{api_version}/{path}")
-
     # Validate connection
     connection = await _get_connection_for_user(
         connection_id, current_user, connection_repo
@@ -197,3 +191,29 @@ async def relay_jira_request(
         logger.error(f"[Relay] Exception: {e}")
         traceback.print_exc()
         raise HTTPException(status_code=502, detail=f"Relay error: {str(e)}")
+
+
+# Catch-all route for JIRA API - must be LAST after all specific routes
+# Using explicit route decorators instead of api_route to avoid 415 errors
+@router.get("/{connection_id}/rest/api/{api_version}/{path:path}", include_in_schema=False)
+@router.post("/{connection_id}/rest/api/{api_version}/{path:path}", include_in_schema=False)
+@router.put("/{connection_id}/rest/api/{api_version}/{path:path}", include_in_schema=False)
+@router.delete("/{connection_id}/rest/api/{api_version}/{path:path}", include_in_schema=False)
+@router.patch("/{connection_id}/rest/api/{api_version}/{path:path}", include_in_schema=False)
+async def relay_jira_request(
+    connection_id: str,
+    api_version: str,
+    path: str,
+    request: Request,
+    current_user: CurrentUser,
+    connection_repo: ConnectionRepo,
+) -> Response:
+    """Route handler wrapper that delegates to the implementation."""
+    return await _relay_jira_request_impl(
+        connection_id=connection_id,
+        api_version=api_version,
+        path=path,
+        request=request,
+        current_user=current_user,
+        connection_repo=connection_repo,
+    )

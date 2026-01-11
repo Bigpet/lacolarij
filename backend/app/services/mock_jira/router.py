@@ -1,11 +1,12 @@
 """Mock JIRA server router for demo mode."""
 
+import json
 import logging
 import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response, Request
 
 logger = logging.getLogger(__name__)
 
@@ -91,17 +92,37 @@ async def get_issue(issue_id_or_key: str) -> dict[str, Any]:
 
 @router.put("/rest/api/2/issue/{issue_id_or_key}")
 @router.put("/rest/api/3/issue/{issue_id_or_key}")
-async def update_issue(issue_id_or_key: str, update: IssueUpdate) -> Response:
-    """Update an issue."""
+async def update_issue(issue_id_or_key: str, request: Request) -> Response:
+    """Update an issue.
+
+    Note: We manually parse the body instead of using Pydantic to handle
+    cases where Content-Type header is lost during 307 redirects.
+    """
+    logger.info(f"[MockJIRA] PUT issue {issue_id_or_key}")
+    logger.info(f"[MockJIRA] Headers: {dict(request.headers)}")
+
     issue = _get_issue(issue_id_or_key)
 
-    if update.fields:
-        if update.fields.summary:
-            issue["fields"]["summary"] = update.fields.summary
-        if update.fields.description:
-            issue["fields"]["description"] = update.fields.description
-        # Update the timestamp to enable conflict detection
-        issue["fields"]["updated"] = _now_iso()
+    # Parse body manually to handle missing Content-Type after redirect
+    try:
+        body_bytes = await request.body()
+        logger.info(f"[MockJIRA] Body bytes: {body_bytes}")
+        if body_bytes:
+            update = json.loads(body_bytes)
+            logger.info(f"[MockJIRA] Parsed update: {update}")
+
+            if "fields" in update:
+                fields = update["fields"]
+                if fields.get("summary"):
+                    issue["fields"]["summary"] = fields["summary"]
+                if fields.get("description") is not None:
+                    issue["fields"]["description"] = fields["description"]
+                # Update the timestamp to enable conflict detection
+                issue["fields"]["updated"] = _now_iso()
+                logger.info(f"[MockJIRA] Updated issue {issue_id_or_key}")
+    except json.JSONDecodeError as e:
+        logger.error(f"[MockJIRA] JSON decode error: {e}")
+        raise HTTPException(status_code=400, detail="Invalid JSON body")
 
     return Response(status_code=204)
 

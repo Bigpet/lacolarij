@@ -33,8 +33,9 @@ export default defineConfig({
       command: 'uv run uvicorn app.main:app --host 127.0.0.1 --port 8000',
       url: 'http://127.0.0.1:8000/health',
       timeout: 120 * 1000,
-      reuseExistingServer: false,
+      reuseExistingServer: !process.env.CI,
       stderr: 'pipe',
+      stdout: 'pipe',
       cwd: '../../backend',
       env: {
         ...process.env,
@@ -45,6 +46,7 @@ export default defineConfig({
       command: 'npm run dev',
       url: 'http://127.0.0.1:5173/',
       stderr: 'pipe',
+      stdout: 'pipe',
       timeout: 60 * 1000,
       reuseExistingServer: !process.env.CI,
     },
