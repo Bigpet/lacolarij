@@ -4,7 +4,6 @@ from datetime import timedelta
 
 import pytest
 
-from app.config import get_settings
 from app.core.security import (
     create_access_token,
     decode_access_token,
@@ -35,7 +34,7 @@ class TestPasswordHashing:
         assert hashed.startswith("$argon2")
 
     def test_hash_password_different_for_same_password(self):
-        """Test that hashing the same password twice produces different hashes (due to salt)."""
+        """Test that hashing same password twice produces different hashes (salt)."""
         password = "mypassword123"
         hash1 = hash_password(password)
         hash2 = hash_password(password)
@@ -163,7 +162,6 @@ class TestJWTTokens:
 
     def test_token_uses_settings_algorithm(self):
         """Test that tokens use the algorithm from settings."""
-        settings = get_settings()
         token = create_access_token({"sub": "user123"})
 
         # JWT tokens have 3 parts separated by dots
@@ -174,7 +172,7 @@ class TestJWTTokens:
         import base64
         import json
 
-        payload = json.loads(base64.urlsafe_b64decode(parts[1] + "=="))
+        json.loads(base64.urlsafe_b64decode(parts[1] + "=="))
         # Note: The header contains the algorithm, not the payload
         # But we can verify the token is valid
 
@@ -214,7 +212,7 @@ class TestAPITokenEncryption:
             decrypt_api_token(invalid_encrypted)
 
     def test_encrypt_different_results_for_same_token(self):
-        """Test that encrypting the same token produces different results (due to IV/nonce)."""
+        """Test that encrypting same token produces different results (IV/nonce)."""
         token = "my-api-token-12345"
         encrypted1 = encrypt_api_token(token)
         encrypted2 = encrypt_api_token(token)

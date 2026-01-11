@@ -8,20 +8,19 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request, Response
 
-logger = logging.getLogger(__name__)
-
-
-def _now_iso() -> str:
-    """Generate ISO 8601 timestamp for JIRA compatibility."""
-    return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
-
-
 from app.services.mock_jira.models import (
     DEFAULT_TRANSITIONS,
     CommentCreate,
     IssueCreate,
     TransitionRequest,
 )
+
+logger = logging.getLogger(__name__)
+
+
+def _now_iso() -> str:
+    """Generate ISO 8601 timestamp for JIRA compatibility."""
+    return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
 
 # Create router for mock JIRA endpoints
 # This will be mounted at /api/jira/mock in the main app
