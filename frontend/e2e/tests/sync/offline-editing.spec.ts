@@ -328,6 +328,8 @@ test.describe('Offline Editing', () => {
       // Navigate back to issues and sync
       await detailPage.goBack();
       await issuesPage.waitForLoaded();
+      // IMPORTANT: Need to reselect the connection after navigation
+      await issuesPage.selectConnection(MOCK_CONNECTION_NAME);
       await issuesPage.triggerSync();
 
       // Navigate back to detail and check status
@@ -361,6 +363,8 @@ test.describe('Offline Editing', () => {
       await indexedDb.setOnlineMode();
       await detailPage.goBack();
       await issuesPage.waitForLoaded();
+      // IMPORTANT: Need to reselect the connection after navigation
+      await issuesPage.selectConnection(MOCK_CONNECTION_NAME);
       await issuesPage.triggerSync();
 
       // Pending operations should be cleared
@@ -383,15 +387,46 @@ test.describe('Offline Editing', () => {
       await indexedDb.setOfflineMode();
       await detailPage.editSummary('Badge Clear Test');
 
-      // Verify pending badge appears
-      const pendingBadge = page.locator('text=/\\d+ pending/');
+      // Verify pending badge appears (target the badge within sync-status to avoid matching offline banner)
+      const pendingBadge = page.locator('[data-testid="sync-status"] >> .rounded-md >> text=/\\d+ pending/');
       await expect(pendingBadge).toBeVisible({ timeout: 5000 });
 
       // Go back online and sync
       await indexedDb.setOnlineMode();
       await detailPage.goBack();
       await issuesPage.waitForLoaded();
+      // IMPORTANT: Need to reselect the connection after navigation
+      // because the IssuesPage component resets its state on mount
+      await issuesPage.selectConnection(MOCK_CONNECTION_NAME);
       await issuesPage.triggerSync();
+
+      // Debug: Check pending operations after sync
+      const pendingOpsAfter = await indexedDb.getPendingOperations();
+      console.log('Pending operations after sync:', pendingOpsAfter.length);
+
+      // Debug: Check sync store state
+      const storeState = await page.evaluate(() => {
+        // @ts-ignore
+        const store = window.__ZUSTAND_SYNC_STORE__;
+        if (store) {
+          const state = store.getState();
+          return {
+            pendingCount: state.pendingCount,
+            status: state.status,
+          };
+        }
+        return null;
+      });
+      console.log('Sync store state after sync:', JSON.stringify(storeState, null, 2));
+
+      // Debug: Check if pending badge is still visible
+      const badgeVisible = await pendingBadge.isVisible().catch(() => false);
+      console.log('Pending badge visible?', badgeVisible);
+
+      // Wait a bit more and check again
+      await page.waitForTimeout(2000);
+      const pendingOpsAfterWait = await indexedDb.getPendingOperations();
+      console.log('Pending operations after 2s wait:', pendingOpsAfterWait.length);
 
       // Pending badge should be gone
       await expect(pendingBadge).not.toBeVisible({ timeout: 5000 });
