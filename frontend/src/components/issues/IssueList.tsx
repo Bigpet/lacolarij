@@ -67,6 +67,7 @@ export function IssueList({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
+            data-testid="issue-list-search"
           />
         </div>
 

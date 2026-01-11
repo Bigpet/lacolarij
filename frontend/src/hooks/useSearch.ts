@@ -8,7 +8,35 @@ import { useState, useEffect, useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { searchService } from "@/features/search/searchService";
+import { extractTextFromAdf } from "@/lib/adf";
 import type { Issue } from "@/types";
+
+/**
+ * Extract searchable text from a description (handles both ADF and plain text).
+ */
+function getDescriptionText(description: Issue["description"]): string {
+  if (typeof description === "string") {
+    return description;
+  } else if (description) {
+    return extractTextFromAdf(description);
+  }
+  return "";
+}
+
+/**
+ * Check if all query words match as prefixes of words in the target text.
+ * E.g., "perf test" matches "Performance Testing" because "perf" is prefix of "Performance"
+ * and "test" is prefix of "Testing".
+ */
+function matchesAllWords(query: string, target: string): boolean {
+  const queryWords = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const targetWords = target.toLowerCase().split(/\s+/).filter(Boolean);
+
+  // Every query word must match as a prefix of at least one target word
+  return queryWords.every((qWord) =>
+    targetWords.some((tWord) => tWord.startsWith(qWord))
+  );
+}
 
 interface UseSearchResult {
   /** Search results (filtered issues) or all issues if no query */
@@ -47,21 +75,31 @@ export function useSearch(searchQuery: string): UseSearchResult {
       return allIssues;
     }
 
-    // If index not ready, fall back to simple filter
-    if (!isIndexReady) {
-      const query = searchQuery.toLowerCase();
-      return allIssues.filter(
-        (issue) =>
-          issue.key.toLowerCase().includes(query) ||
-          issue.summary.toLowerCase().includes(query)
-      );
+    const query = searchQuery.trim();
+
+    // First pass: find exact matches using word-prefix matching
+    // Each query word must match as a prefix of a word in key, summary, or description
+    const exactMatches = allIssues.filter(
+      (issue) =>
+        matchesAllWords(query, issue.key) ||
+        matchesAllWords(query, issue.summary) ||
+        matchesAllWords(query, getDescriptionText(issue.description))
+    );
+
+    // If we have exact matches, return only those (precise search)
+    if (exactMatches.length > 0) {
+      return exactMatches;
     }
 
-    // Use MiniSearch for full-text search
-    const matchingIds = searchService.search(searchQuery);
-    const issueMap = new Map(allIssues.map((i) => [i.id, i]));
+    // No exact matches - fall back to fuzzy/prefix matches from MiniSearch
+    // This helps with typos like "authntication" -> "authentication"
+    if (!isIndexReady) {
+      return [];
+    }
 
-    return matchingIds
+    const fuzzyMatchIds = searchService.search(searchQuery);
+    const issueMap = new Map(allIssues.map((i) => [i.id, i]));
+    return fuzzyMatchIds
       .map((id) => issueMap.get(id))
       .filter((i): i is Issue => i !== undefined);
   }, [searchQuery, isIndexReady, allIssues]);
