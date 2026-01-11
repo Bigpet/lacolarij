@@ -231,7 +231,7 @@ class TestConnectionRepository:
         api_token_encrypted = encrypt_api_token("test-api-token")
 
         # Create multiple connections with is_default=True
-        conn1 = await connection_repository.create(
+        await connection_repository.create(
             user_id=test_user.id,
             name="Connection 1",
             jira_url="https://test1.atlassian.net",
@@ -239,7 +239,7 @@ class TestConnectionRepository:
             api_token_encrypted=api_token_encrypted,
             is_default=True,
         )
-        conn2 = await connection_repository.create(
+        await connection_repository.create(
             user_id=test_user.id,
             name="Connection 2",
             jira_url="https://test2.atlassian.net",

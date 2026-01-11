@@ -151,4 +151,5 @@ def test_transition_issue(client):
     )
     assert response.status_code == 204
 
-    # Verify status change (if we knew what status it mapped to, but for now just success of call)
+    # Verify status change (if we knew what status it mapped to,
+    # but for now just success of call)
