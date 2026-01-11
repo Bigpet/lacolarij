@@ -25,6 +25,7 @@ frontend/test-results/.last-run.json
 frontend/e2e/playwright-report/trace/
 frontend/e2e/playwright-report/data/
 frontend/test-results/
+frontend/tsconfig.tsbuildinfo
 
 # Node.js
 node_modules/
