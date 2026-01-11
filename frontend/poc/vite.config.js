@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { defineConfig } from 'vite';
 import httpProxy from 'http-proxy';
 
@@ -10,7 +11,7 @@ export default defineConfig({
                 changeOrigin: true,
                 secure: false,
                 rewrite: (path) => path.replace(/^\/api/, ''),
-                configure: (proxy, options) => {
+                configure: () => {
                     // Default Vite proxy doesn't handle dynamic targets well,
                     // so we use the custom middleware below for /api/
                 }
