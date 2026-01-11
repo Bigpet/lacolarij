@@ -291,7 +291,9 @@ class TestConnectionRepository:
         assert all(c.is_default is False for c in test_user_connections)
 
         # Verify other_user's connections are unchanged
-        other_user_connections = await connection_repository.get_by_user_id(other_user.id)
+        other_user_connections = await connection_repository.get_by_user_id(
+            other_user.id
+        )
         assert all(c.is_default is True for c in other_user_connections)
 
     @pytest.mark.asyncio

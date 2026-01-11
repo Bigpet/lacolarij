@@ -41,6 +41,7 @@ async def engine() -> AsyncGenerator[Any, None]:
         cursor.close()
 
     from sqlalchemy import event
+
     event.listen(engine.sync_engine, "connect", enable_foreign_keys)
 
     # Create tables

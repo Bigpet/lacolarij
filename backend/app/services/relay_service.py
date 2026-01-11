@@ -103,9 +103,9 @@ class RelayService:
                 "transfer-encoding",
                 "upgrade",
                 "content-length",  # Let FastAPI recalculate this
-                "authorization",   # Don't leak auth headers
+                "authorization",  # Don't leak auth headers
             }
-            
+
             response_headers = {}
             for key, value in response.headers.items():
                 if key.lower() not in hop_by_hop_headers:
@@ -130,10 +130,10 @@ class RelayService:
             "jql": jql or "",
             "maxResults": str(max_results),
         }
-        
+
         if next_page_token:
             query_params["nextPageToken"] = next_page_token
-            
+
         if fields:
             query_params["fields"] = ",".join(fields)
 

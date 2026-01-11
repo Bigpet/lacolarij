@@ -31,10 +31,12 @@ class LogHandler(logging.Handler):
 
 # Set up the custom handler
 _log_handler = LogHandler()
-_log_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+_log_handler.setFormatter(
+    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+)
 
 # Add handler to relevant loggers
-for logger_name in ['app', 'uvicorn', 'uvicorn.access']:
+for logger_name in ["app", "uvicorn", "uvicorn.access"]:
     logger = logging.getLogger(logger_name)
     logger.addHandler(_log_handler)
     logger.setLevel(logging.DEBUG)
@@ -192,7 +194,10 @@ async def add_test_comment(
     new_comment = {
         "id": comment_id,
         "body": comment.body,
-        "author": {"name": comment.author.lower().replace(" ", "_"), "displayName": comment.author},
+        "author": {
+            "name": comment.author.lower().replace(" ", "_"),
+            "displayName": comment.author,
+        },
         "created": now,
         "updated": now,
     }

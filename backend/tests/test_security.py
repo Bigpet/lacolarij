@@ -173,6 +173,7 @@ class TestJWTTokens:
         # The payload should contain the algorithm
         import base64
         import json
+
         payload = json.loads(base64.urlsafe_b64decode(parts[1] + "=="))
         # Note: The header contains the algorithm, not the payload
         # But we can verify the token is valid

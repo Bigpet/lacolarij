@@ -92,7 +92,9 @@ async def update_connection(
 
     # Encrypt new API token if provided
     if "api_token" in update_data:
-        update_data["api_token_encrypted"] = encrypt_api_token(update_data.pop("api_token"))
+        update_data["api_token_encrypted"] = encrypt_api_token(
+            update_data.pop("api_token")
+        )
 
     connection = await conn_repo.update(connection, **update_data)
 

@@ -84,9 +84,7 @@ class ConnectionRepository:
         )
         return list(result.scalars().all())
 
-    async def update(
-        self, connection: JiraConnection, **kwargs
-    ) -> JiraConnection:
+    async def update(self, connection: JiraConnection, **kwargs) -> JiraConnection:
         """Update a connection."""
         for key, value in kwargs.items():
             if value is not None and hasattr(connection, key):

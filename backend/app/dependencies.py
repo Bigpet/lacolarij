@@ -25,14 +25,14 @@ async def get_db_session() -> AsyncSession:
 
 # Repository dependencies
 async def get_user_repository(
-    session: Annotated[AsyncSession, Depends(get_db_session)]
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> UserRepository:
     """Get user repository."""
     return UserRepository(session)
 
 
 async def get_connection_repository(
-    session: Annotated[AsyncSession, Depends(get_db_session)]
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> ConnectionRepository:
     """Get connection repository."""
     return ConnectionRepository(session)

@@ -24,7 +24,9 @@ class TestUserRepository:
         assert user.created_at is not None
 
     @pytest.mark.asyncio
-    async def test_create_user_returns_user_object(self, user_repository: UserRepository):
+    async def test_create_user_returns_user_object(
+        self, user_repository: UserRepository
+    ):
         """Test that create returns a User object."""
         user = await user_repository.create("alice", hash_password("pass"))
 
@@ -61,7 +63,9 @@ class TestUserRepository:
         assert found_user is None
 
     @pytest.mark.asyncio
-    async def test_get_by_username_with_existing_user(self, user_repository: UserRepository):
+    async def test_get_by_username_with_existing_user(
+        self, user_repository: UserRepository
+    ):
         """Test getting a user by existing username."""
         username = "david"
         await user_repository.create(username, hash_password("pass"))
@@ -72,14 +76,18 @@ class TestUserRepository:
         assert found_user.username == username
 
     @pytest.mark.asyncio
-    async def test_get_by_username_with_nonexistent_username(self, user_repository: UserRepository):
+    async def test_get_by_username_with_nonexistent_username(
+        self, user_repository: UserRepository
+    ):
         """Test getting a user by nonexistent username."""
         found_user = await user_repository.get_by_username("nonexistent-user")
 
         assert found_user is None
 
     @pytest.mark.asyncio
-    async def test_get_by_username_is_case_sensitive(self, user_repository: UserRepository):
+    async def test_get_by_username_is_case_sensitive(
+        self, user_repository: UserRepository
+    ):
         """Test that username lookup is case sensitive."""
         username = "Eve"
         await user_repository.create(username, hash_password("pass"))
@@ -107,16 +115,21 @@ class TestUserRepository:
         assert found is None
 
     @pytest.mark.asyncio
-    async def test_delete_nonexistent_user_raises(self, user_repository: UserRepository):
+    async def test_delete_nonexistent_user_raises(
+        self, user_repository: UserRepository
+    ):
         """Test that deleting a non-persisted user raises an error."""
         from sqlalchemy.exc import InvalidRequestError
+
         user = User(id="fake-id", username="fake", password_hash="fake")
         # SQLAlchemy raises InvalidRequestError for non-persisted objects
         with pytest.raises(InvalidRequestError):
             await user_repository.delete(user)
 
     @pytest.mark.asyncio
-    async def test_multiple_users_have_unique_ids(self, user_repository: UserRepository):
+    async def test_multiple_users_have_unique_ids(
+        self, user_repository: UserRepository
+    ):
         """Test that multiple users have unique IDs."""
         user1 = await user_repository.create("user1", hash_password("pass1"))
         user2 = await user_repository.create("user2", hash_password("pass2"))
@@ -137,7 +150,9 @@ class TestUserRepository:
         assert len(set(u.id for u in users)) == 3
 
     @pytest.mark.asyncio
-    async def test_get_by_id_after_multiple_creates(self, user_repository: UserRepository):
+    async def test_get_by_id_after_multiple_creates(
+        self, user_repository: UserRepository
+    ):
         """Test getting users after creating multiple."""
         user1 = await user_repository.create("user1", hash_password("pass1"))
         user2 = await user_repository.create("user2", hash_password("pass2"))
@@ -159,7 +174,9 @@ class TestUserRepository:
             await user_repository.create("duplicate", hash_password("pass2"))
 
     @pytest.mark.asyncio
-    async def test_created_at_is_set_automatically(self, user_repository: UserRepository):
+    async def test_created_at_is_set_automatically(
+        self, user_repository: UserRepository
+    ):
         """Test that created_at is set automatically on creation."""
         from datetime import datetime, timezone
 
@@ -171,11 +188,17 @@ class TestUserRepository:
         # Check it's a recent time (within last minute)
         # Note: SQLite stores datetimes as naive, so we compare with naive datetime
         now = datetime.now(timezone.utc).replace(tzinfo=None)
-        user_created_naive = user.created_at.replace(tzinfo=None) if user.created_at.tzinfo else user.created_at
+        user_created_naive = (
+            user.created_at.replace(tzinfo=None)
+            if user.created_at.tzinfo
+            else user.created_at
+        )
         assert (now - user_created_naive).total_seconds() < 60
 
     @pytest.mark.asyncio
-    async def test_password_hash_is_stored_correctly(self, user_repository: UserRepository):
+    async def test_password_hash_is_stored_correctly(
+        self, user_repository: UserRepository
+    ):
         """Test that password hash is stored correctly."""
         password_hash = "$argon2id$v=19$m=65536,t=3,p=4$salt$hash"
         user = await user_repository.create("henry", password_hash)
