@@ -2,69 +2,69 @@
  * Tests for SyncStatusBar component
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
-import { render, screen } from "@/test/testUtils";
-import { SyncStatusBar } from "./SyncStatusBar";
-import { useSyncStore } from "@/stores/syncStore";
+import { describe, it, expect, beforeEach } from 'vitest';
+import { render, screen } from '@/test/testUtils';
+import { SyncStatusBar } from './SyncStatusBar';
+import { useSyncStore } from '@/stores/syncStore';
 
-describe("SyncStatusBar", () => {
+describe('SyncStatusBar', () => {
   beforeEach(() => {
     // Reset store before each test
     useSyncStore.getState().reset();
   });
 
-  it("should render synced state when idle and online", () => {
-    useSyncStore.getState().setStatus("idle");
+  it('should render synced state when idle and online', () => {
+    useSyncStore.getState().setStatus('idle');
     useSyncStore.getState().setOnline(true);
 
     render(<SyncStatusBar />);
 
-    expect(screen.getByText("Synced")).toBeInTheDocument();
-    expect(screen.queryByText("Offline")).not.toBeInTheDocument();
+    expect(screen.getByText('Synced')).toBeInTheDocument();
+    expect(screen.queryByText('Offline')).not.toBeInTheDocument();
   });
 
-  it("should render syncing state", () => {
-    useSyncStore.getState().setStatus("syncing");
+  it('should render syncing state', () => {
+    useSyncStore.getState().setStatus('syncing');
 
     render(<SyncStatusBar />);
 
-    expect(screen.getByText("Syncing...")).toBeInTheDocument();
+    expect(screen.getByText('Syncing...')).toBeInTheDocument();
   });
 
-  it("should render error state", () => {
-    useSyncStore.getState().setStatus("error");
-    useSyncStore.getState().setError("Connection failed");
+  it('should render error state', () => {
+    useSyncStore.getState().setStatus('error');
+    useSyncStore.getState().setError('Connection failed');
 
     render(<SyncStatusBar />);
 
-    expect(screen.getByText("Error")).toBeInTheDocument();
+    expect(screen.getByText('Error')).toBeInTheDocument();
   });
 
-  it("should render offline indicator when offline", () => {
+  it('should render offline indicator when offline', () => {
     useSyncStore.getState().setOnline(false);
 
     render(<SyncStatusBar />);
 
-    expect(screen.getByText("Offline")).toBeInTheDocument();
+    expect(screen.getByText('Offline')).toBeInTheDocument();
   });
 
-  it("should not render offline indicator when online", () => {
+  it('should not render offline indicator when online', () => {
     useSyncStore.getState().setOnline(true);
 
     render(<SyncStatusBar />);
 
-    expect(screen.queryByText("Offline")).not.toBeInTheDocument();
+    expect(screen.queryByText('Offline')).not.toBeInTheDocument();
   });
 
-  it("should display pending count badge", () => {
+  it('should display pending count badge', () => {
     useSyncStore.getState().setPendingCount(5);
 
     render(<SyncStatusBar />);
 
-    expect(screen.getByText("5 pending")).toBeInTheDocument();
+    expect(screen.getByText('5 pending')).toBeInTheDocument();
   });
 
-  it("should not display pending badge when count is zero", () => {
+  it('should not display pending badge when count is zero', () => {
     useSyncStore.getState().setPendingCount(0);
 
     render(<SyncStatusBar />);
@@ -72,54 +72,54 @@ describe("SyncStatusBar", () => {
     expect(screen.queryByText(/pending/)).not.toBeInTheDocument();
   });
 
-  it("should display single conflict badge", () => {
+  it('should display single conflict badge', () => {
     useSyncStore.getState().addConflict({
-      id: "conflict-1",
-      entityType: "issue",
-      entityId: "issue-1",
+      id: 'conflict-1',
+      entityType: 'issue',
+      entityId: 'issue-1',
       localValue: {},
       remoteValue: {},
       localTimestamp: Date.now(),
-      remoteTimestamp: "2024-01-01",
+      remoteTimestamp: '2024-01-01',
     });
 
     render(<SyncStatusBar />);
 
-    expect(screen.getByText("1 conflict")).toBeInTheDocument();
+    expect(screen.getByText('1 conflict')).toBeInTheDocument();
   });
 
-  it("should display multiple conflicts badge", () => {
+  it('should display multiple conflicts badge', () => {
     useSyncStore.getState().addConflict({
-      id: "conflict-1",
-      entityType: "issue",
-      entityId: "issue-1",
+      id: 'conflict-1',
+      entityType: 'issue',
+      entityId: 'issue-1',
       localValue: {},
       remoteValue: {},
       localTimestamp: Date.now(),
-      remoteTimestamp: "2024-01-01",
+      remoteTimestamp: '2024-01-01',
     });
     useSyncStore.getState().addConflict({
-      id: "conflict-2",
-      entityType: "issue",
-      entityId: "issue-2",
+      id: 'conflict-2',
+      entityType: 'issue',
+      entityId: 'issue-2',
       localValue: {},
       remoteValue: {},
       localTimestamp: Date.now(),
-      remoteTimestamp: "2024-01-01",
+      remoteTimestamp: '2024-01-01',
     });
 
     render(<SyncStatusBar />);
 
-    expect(screen.getByText("2 conflicts")).toBeInTheDocument();
+    expect(screen.getByText('2 conflicts')).toBeInTheDocument();
   });
 
-  it("should not display conflicts badge when no conflicts", () => {
+  it('should not display conflicts badge when no conflicts', () => {
     render(<SyncStatusBar />);
 
     expect(screen.queryByText(/conflict/)).not.toBeInTheDocument();
   });
 
-  it("should display last sync time", () => {
+  it('should display last sync time', () => {
     const now = new Date();
     useSyncStore.getState().setLastSync(now);
 
@@ -133,10 +133,10 @@ describe("SyncStatusBar", () => {
 
     render(<SyncStatusBar />);
 
-    expect(screen.getByText("Last sync: Never")).toBeInTheDocument();
+    expect(screen.getByText('Last sync: Never')).toBeInTheDocument();
   });
 
-  it("should display relative time for recent sync", () => {
+  it('should display relative time for recent sync', () => {
     const justNow = new Date();
     useSyncStore.getState().setLastSync(justNow);
 
@@ -145,51 +145,51 @@ describe("SyncStatusBar", () => {
     expect(screen.getByText(/Last sync: Just now/)).toBeInTheDocument();
   });
 
-  it("should display both pending and conflicts badges", () => {
+  it('should display both pending and conflicts badges', () => {
     useSyncStore.getState().setPendingCount(3);
     useSyncStore.getState().addConflict({
-      id: "conflict-1",
-      entityType: "issue",
-      entityId: "issue-1",
+      id: 'conflict-1',
+      entityType: 'issue',
+      entityId: 'issue-1',
       localValue: {},
       remoteValue: {},
       localTimestamp: Date.now(),
-      remoteTimestamp: "2024-01-01",
+      remoteTimestamp: '2024-01-01',
     });
 
     render(<SyncStatusBar />);
 
-    expect(screen.getByText("3 pending")).toBeInTheDocument();
-    expect(screen.getByText("1 conflict")).toBeInTheDocument();
+    expect(screen.getByText('3 pending')).toBeInTheDocument();
+    expect(screen.getByText('1 conflict')).toBeInTheDocument();
   });
 
-  it("should display offline indicator with synced state when offline", () => {
-    useSyncStore.getState().setStatus("idle");
+  it('should display offline indicator with synced state when offline', () => {
+    useSyncStore.getState().setStatus('idle');
     useSyncStore.getState().setOnline(false);
 
     render(<SyncStatusBar />);
 
-    expect(screen.getByText("Offline")).toBeInTheDocument();
-    expect(screen.queryByText("Synced")).not.toBeInTheDocument();
+    expect(screen.getByText('Offline')).toBeInTheDocument();
+    expect(screen.queryByText('Synced')).not.toBeInTheDocument();
   });
 
-  it("should display syncing indicator even when offline", () => {
-    useSyncStore.getState().setStatus("syncing");
+  it('should display syncing indicator even when offline', () => {
+    useSyncStore.getState().setStatus('syncing');
     useSyncStore.getState().setOnline(false);
 
     render(<SyncStatusBar />);
 
-    expect(screen.getByText("Syncing...")).toBeInTheDocument();
-    expect(screen.getByText("Offline")).toBeInTheDocument();
+    expect(screen.getByText('Syncing...')).toBeInTheDocument();
+    expect(screen.getByText('Offline')).toBeInTheDocument();
   });
 
-  it("should display error message in title attribute", () => {
-    useSyncStore.getState().setStatus("error");
-    useSyncStore.getState().setError("Network timeout");
+  it('should display error message in title attribute', () => {
+    useSyncStore.getState().setStatus('error');
+    useSyncStore.getState().setError('Network timeout');
 
     render(<SyncStatusBar />);
 
-    const errorElement = screen.getByText("Error");
-    expect(errorElement).toHaveAttribute("title", "Network timeout");
+    const errorElement = screen.getByText('Error');
+    expect(errorElement).toHaveAttribute('title', 'Network timeout');
   });
 });

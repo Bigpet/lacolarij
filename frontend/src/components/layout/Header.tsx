@@ -1,8 +1,8 @@
-import { Link } from "react-router-dom";
-import { useAuthStore } from "@/stores/authStore";
-import { Button } from "@/components/ui/button";
-import { SyncStatusBar } from "@/components/sync/SyncStatusBar";
-import { LogOut, Settings } from "lucide-react";
+import { Link } from 'react-router-dom';
+import { useAuthStore } from '@/stores/authStore';
+import { Button } from '@/components/ui/button';
+import { SyncStatusBar } from '@/components/sync/SyncStatusBar';
+import { LogOut, Settings } from 'lucide-react';
 
 export function Header() {
   const { user, logout } = useAuthStore();

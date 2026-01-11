@@ -49,7 +49,7 @@ export interface Issue {
   summary: string;
   description: unknown | null;
   status: string;
-  statusCategory: "todo" | "indeterminate" | "done";
+  statusCategory: 'todo' | 'indeterminate' | 'done';
   assignee: string | null;
   reporter: string;
   priority: string;
@@ -59,7 +59,7 @@ export interface Issue {
   updated: string;
   // Local metadata
   _localUpdated: number;
-  _syncStatus: "synced" | "pending" | "conflict";
+  _syncStatus: 'synced' | 'pending' | 'conflict';
   _syncError: string | null;
   _remoteVersion: string;
 }
@@ -71,7 +71,7 @@ export interface Comment {
   author: string;
   created: string;
   updated: string;
-  _syncStatus: "synced" | "pending" | "conflict";
+  _syncStatus: 'synced' | 'pending' | 'conflict';
 }
 
 export interface SyncMeta {
@@ -82,9 +82,9 @@ export interface SyncMeta {
 
 export interface PendingOperation {
   id: string;
-  entityType: "issue" | "comment";
+  entityType: 'issue' | 'comment';
   entityId: string;
-  operation: "create" | "update" | "delete";
+  operation: 'create' | 'update' | 'delete';
   payload: unknown;
   createdAt: number;
   attempts: number;

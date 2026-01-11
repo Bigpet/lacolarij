@@ -1,10 +1,10 @@
-import { useState, useMemo } from "react";
-import type { Issue } from "@/types";
-import { useSearch } from "@/hooks/useSearch";
-import { IssueCard } from "./IssueCard";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, RefreshCw } from "lucide-react";
+import { useState, useMemo } from 'react';
+import type { Issue } from '@/types';
+import { useSearch } from '@/hooks/useSearch';
+import { IssueCard } from './IssueCard';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Search, RefreshCw } from 'lucide-react';
 
 interface IssueListProps {
   onIssueSelect?: (issue: Issue) => void;
@@ -19,11 +19,15 @@ export function IssueList({
   onRefresh,
   isLoading,
 }: IssueListProps) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   // Full-text search with MiniSearch
-  const { results: searchResults, totalCount, isIndexReady } = useSearch(searchQuery);
+  const {
+    results: searchResults,
+    totalCount,
+    isIndexReady,
+  } = useSearch(searchQuery);
 
   // Get unique statuses for filter (from all issues via search results when no query)
   const uniqueStatuses = useMemo(() => {
@@ -73,7 +77,7 @@ export function IssueList({
 
         {/* Status filter dropdown */}
         <select
-          value={statusFilter || ""}
+          value={statusFilter || ''}
           onChange={(e) => setStatusFilter(e.target.value || null)}
           className="h-9 rounded-md border border-input bg-background px-3 text-sm"
         >
@@ -93,7 +97,7 @@ export function IssueList({
             disabled={isLoading}
           >
             <RefreshCw
-              className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+              className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
             />
           </Button>
         )}

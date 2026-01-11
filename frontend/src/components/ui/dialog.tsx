@@ -1,6 +1,6 @@
-import * as React from "react";
-import { cn } from "@/lib/utils";
-import { X } from "lucide-react";
+import * as React from 'react';
+import { cn } from '@/lib/utils';
+import { X } from 'lucide-react';
 
 interface DialogContextType {
   open: boolean;
@@ -31,7 +31,7 @@ function Dialog({ open, onOpenChange, children }: DialogProps) {
 function useDialog() {
   const context = React.useContext(DialogContext);
   if (!context) {
-    throw new Error("Dialog components must be used within a Dialog");
+    throw new Error('Dialog components must be used within a Dialog');
   }
   return context;
 }
@@ -45,9 +45,12 @@ function DialogTrigger({ children, asChild }: DialogTriggerProps) {
   const { onOpenChange } = useDialog();
 
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children as React.ReactElement<{ onClick?: () => void }>, {
-      onClick: () => onOpenChange(true),
-    });
+    return React.cloneElement(
+      children as React.ReactElement<{ onClick?: () => void }>,
+      {
+        onClick: () => onOpenChange(true),
+      }
+    );
   }
 
   return (
@@ -77,7 +80,7 @@ function DialogContent({ children, className }: DialogContentProps) {
       {/* Content */}
       <div
         className={cn(
-          "relative z-50 w-full max-w-lg rounded-lg border bg-background p-6 shadow-lg",
+          'relative z-50 w-full max-w-lg rounded-lg border bg-background p-6 shadow-lg',
           className
         )}
       >
@@ -104,7 +107,7 @@ function DialogHeader({ children, className }: DialogHeaderProps) {
   return (
     <div
       className={cn(
-        "flex flex-col space-y-1.5 text-center sm:text-left",
+        'flex flex-col space-y-1.5 text-center sm:text-left',
         className
       )}
     >
@@ -122,7 +125,7 @@ function DialogTitle({ children, className }: DialogTitleProps) {
   return (
     <h2
       className={cn(
-        "text-lg font-semibold leading-none tracking-tight",
+        'text-lg font-semibold leading-none tracking-tight',
         className
       )}
     >
@@ -138,7 +141,7 @@ interface DialogDescriptionProps {
 
 function DialogDescription({ children, className }: DialogDescriptionProps) {
   return (
-    <p className={cn("text-sm text-muted-foreground", className)}>{children}</p>
+    <p className={cn('text-sm text-muted-foreground', className)}>{children}</p>
   );
 }
 
@@ -151,7 +154,7 @@ function DialogFooter({ children, className }: DialogFooterProps) {
   return (
     <div
       className={cn(
-        "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+        'flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2',
         className
       )}
     >
