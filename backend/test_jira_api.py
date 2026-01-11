@@ -1,26 +1,34 @@
 import uuid
 
-import httpx
 import pytest
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
-from config import load_config
+from app.services.mock_jira.router import reset_storage, router as mock_jira_router
 
-# Load configuration (env vars > config.toml > defaults)
-_config = load_config()
-JIRA_URL = _config.url
-JIRA_EMAIL = _config.email
-JIRA_PASSWORD = _config.token
-JIRA_PROJECT_KEY = _config.project_key
-JIRA_API_VERSION = _config.api_version
-
-# Setup auth headers for basic auth (used by real JIRA, and ignored/accepted by mock)
-AUTH = (JIRA_EMAIL, JIRA_PASSWORD)
+# Use API version 3 for testing
+JIRA_API_VERSION = "3"
+JIRA_PROJECT_KEY = "TEST"
 
 
 @pytest.fixture
-def client():
-    with httpx.Client(base_url=JIRA_URL, auth=AUTH, timeout=10.0) as client:
-        yield client
+def app() -> FastAPI:
+    """Create a test app with the mock JIRA router."""
+    app = FastAPI()
+    app.include_router(mock_jira_router)
+    return app
+
+
+@pytest.fixture
+def client(app: FastAPI) -> TestClient:
+    """Create a test client."""
+    return TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def reset_mock_storage() -> None:
+    """Reset mock storage before each test."""
+    reset_storage()
 
 
 def make_adf_description(text):
