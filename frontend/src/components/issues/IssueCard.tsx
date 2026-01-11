@@ -52,6 +52,9 @@ export function IssueCard({ issue, onClick, selected }: IssueCardProps) {
         "hover:bg-accent/50",
         selected && "bg-accent border-primary"
       )}
+      data-testid="issue-card"
+      data-issue-key={issue.key}
+      data-sync-status={issue._syncStatus}
     >
       {/* Issue key and sync status */}
       <div className="flex items-center gap-2 min-w-[120px]">

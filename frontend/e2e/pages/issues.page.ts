@@ -25,9 +25,9 @@ export class IssuesPage extends BasePage {
     this.connectionSelect = page.locator('select').first();
     this.syncButton = page.locator('button:has-text("Sync")').first();
     this.fullSyncButton = page.locator('button:has-text("Full Sync")');
-    this.searchInput = page.locator('input[placeholder="Search issues..."]');
+    this.searchInput = page.locator('[data-testid="issue-list-search"]');
     this.statusFilterSelect = page.locator('select:has-text("All statuses")');
-    this.issueCards = page.locator('.border.rounded-lg.cursor-pointer');
+    this.issueCards = page.locator('[data-testid="issue-card"]');
     this.noIssuesText = page.locator('text=No issues yet');
     this.noConnectionsCard = page.locator('[data-testid="no-connections-card"]');
     this.loadingText = page.locator('text=Loading...');
@@ -52,9 +52,15 @@ export class IssuesPage extends BasePage {
    * @param query - The search query
    */
   async search(query: string) {
-    await this.searchInput.fill(query);
-    // Wait for debounce (300ms in the component)
-    await this.page.waitForTimeout(400);
+    // Focus the input first
+    await this.searchInput.focus();
+    // Select all and delete to clear
+    await this.page.keyboard.press('Control+A');
+    await this.page.keyboard.press('Delete');
+    // Type the query character by character to properly trigger React events
+    await this.searchInput.type(query, { delay: 20 });
+    // Wait for debounce + React state update + re-render
+    await this.page.waitForTimeout(800);
   }
 
   /**

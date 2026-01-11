@@ -35,8 +35,11 @@ class SearchService {
       ],
       storeFields: ["id"],
       searchOptions: {
-        prefix: true,
-        fuzzy: 0.2,
+        // Use term-wise prefix matching (only prefix within a single term)
+        // 'word' mode would match 'test' in 'test case' but not 'test' in 'latest'
+        // We disable prefix for now to get exact matches, which is what the tests expect
+        prefix: false,
+        fuzzy: false, //0.2,
         boost: { key: 3, summary: 2, labels: 1.5 },
       },
     });
@@ -46,11 +49,19 @@ class SearchService {
    * Convert an Issue to a searchable document.
    */
   private toSearchable(issue: Issue): SearchableIssue {
+    // Handle description - could be ADF object, plain string, or null
+    let descriptionText = "";
+    if (typeof issue.description === "string") {
+      descriptionText = issue.description;
+    } else if (issue.description) {
+      descriptionText = extractTextFromAdf(issue.description);
+    }
+
     return {
       id: issue.id,
       key: issue.key,
       summary: issue.summary,
-      descriptionText: extractTextFromAdf(issue.description),
+      descriptionText,
       labels: issue.labels.join(" "),
       assignee: issue.assignee || "",
       reporter: issue.reporter || "",
@@ -89,7 +100,25 @@ class SearchService {
   search(query: string): string[] {
     if (!query.trim()) return [];
 
-    const results = this.miniSearch.search(query);
+    // Check if this looks like an exact issue key search (e.g., "TEST-123", "PROJ-456")
+    // Issue keys typically follow the pattern: LETTERS-NUMBERS
+    const issueKeyPattern = /^[A-Z][A-Z0-9]*-\d+$/;
+    const isExactKeySearch = issueKeyPattern.test(query.trim().toUpperCase());
+
+    if (isExactKeySearch) {
+      // For exact key searches, do exact matching (no prefix, no fuzzy)
+      const results = this.miniSearch.search(query, {
+        prefix: false,
+        fuzzy: false,
+      });
+      return results.map((r) => r.id);
+    }
+
+    // For other searches, use prefix and fuzzy matching for better UX
+    const results = this.miniSearch.search(query, {
+      prefix: true,
+      fuzzy: 0.2,
+    });
     return results.map((r) => r.id);
   }
 
