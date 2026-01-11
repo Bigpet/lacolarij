@@ -81,6 +81,7 @@ describe('SyncStatusBar', () => {
       remoteValue: {},
       localTimestamp: Date.now(),
       remoteTimestamp: '2024-01-01',
+      connectionId: 'conn-1',
     });
 
     render(<SyncStatusBar />);
@@ -97,6 +98,7 @@ describe('SyncStatusBar', () => {
       remoteValue: {},
       localTimestamp: Date.now(),
       remoteTimestamp: '2024-01-01',
+      connectionId: 'conn-1',
     });
     useSyncStore.getState().addConflict({
       id: 'conflict-2',
@@ -106,6 +108,7 @@ describe('SyncStatusBar', () => {
       remoteValue: {},
       localTimestamp: Date.now(),
       remoteTimestamp: '2024-01-01',
+      connectionId: 'conn-1',
     });
 
     render(<SyncStatusBar />);
@@ -155,6 +158,7 @@ describe('SyncStatusBar', () => {
       remoteValue: {},
       localTimestamp: Date.now(),
       remoteTimestamp: '2024-01-01',
+      connectionId: 'conn-1',
     });
 
     render(<SyncStatusBar />);

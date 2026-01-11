@@ -56,9 +56,9 @@ describe('issueService', () => {
       'pending-op-1'
     );
     vi.mocked(pendingOperationsRepository.deleteByEntityId).mockResolvedValue(
-      1
+      undefined
     );
-    vi.mocked(issueRepository.put).mockResolvedValue(undefined);
+    vi.mocked(issueRepository.put).mockResolvedValue('issue-1');
   });
 
   describe('updateSummary', () => {

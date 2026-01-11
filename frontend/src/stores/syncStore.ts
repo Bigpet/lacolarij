@@ -28,7 +28,7 @@ interface SyncState {
 
   // Actions
   setStatus: (status: 'idle' | 'syncing' | 'error') => void;
-  setLastSync: (date: Date) => void;
+  setLastSync: (date: Date | null) => void;
   setPendingCount: (count: number) => void;
   addConflict: (conflict: Conflict) => void;
   updateConflict: (id: string, updates: Partial<Omit<Conflict, 'id'>>) => void;
