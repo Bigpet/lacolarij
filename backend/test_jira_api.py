@@ -4,7 +4,8 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.services.mock_jira.router import reset_storage, router as mock_jira_router
+from app.services.mock_jira.router import reset_storage
+from app.services.mock_jira.router import router as mock_jira_router
 
 # Use API version 3 for testing
 JIRA_API_VERSION = "3"
