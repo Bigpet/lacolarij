@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     debug: bool = False
 
     # Allow DEBUG to accept non-boolean values (e.g., "pw:api" for debugging)
-    @field_validator('debug', mode='before')
+    @field_validator("debug", mode="before")
     @classmethod
     def parse_debug(cls, v: bool | str) -> bool:
         if isinstance(v, bool):
@@ -31,7 +31,7 @@ class Settings(BaseSettings):
         if isinstance(v, str):
             # Accept any non-empty string as truthy for debugging
             # This allows DEBUG=pw:api, DEBUG=1, DEBUG=true, etc.
-            return v.lower() not in ('', '0', 'false', 'no', 'off')
+            return v.lower() not in ("", "0", "false", "no", "off")
         return bool(v)
 
     # Database

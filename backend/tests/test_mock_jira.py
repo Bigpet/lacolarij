@@ -64,7 +64,9 @@ class TestCreateIssue:
                         "content": [
                             {
                                 "type": "paragraph",
-                                "content": [{"type": "text", "text": "Test description"}],
+                                "content": [
+                                    {"type": "text", "text": "Test description"}
+                                ],
                             }
                         ],
                     },

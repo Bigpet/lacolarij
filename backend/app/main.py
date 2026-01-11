@@ -54,6 +54,7 @@ def create_app() -> FastAPI:
     # Include test routes only in test environment
     if os.getenv("JIRALOCAL_ENV") == "test":
         from app.api.test import router as test_router
+
         app.include_router(test_router)
 
     # Health check endpoint

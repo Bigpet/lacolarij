@@ -13,7 +13,8 @@ logger = logging.getLogger(__name__)
 
 def _now_iso() -> str:
     """Generate ISO 8601 timestamp for JIRA compatibility."""
-    return datetime.now(timezone.utc).isoformat(timespec='milliseconds')
+    return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
+
 
 from app.services.mock_jira.models import (
     DEFAULT_TRANSITIONS,
@@ -42,7 +43,9 @@ def _get_issue(issue_id_or_key: str) -> dict[str, Any]:
 @router.post("/rest/api/3/issue")
 async def create_issue(issue: IssueCreate) -> dict[str, Any]:
     """Create a new issue."""
-    key = f"TEST-{len(_issues) // 2 + 1}"  # Divide by 2 since we store by both key and id
+    key = (
+        f"TEST-{len(_issues) // 2 + 1}"  # Divide by 2 since we store by both key and id
+    )
     issue_id = str(len(_issues) // 2 + 1)
     now = _now_iso()
 
@@ -141,7 +144,9 @@ async def get_comments(issue_id_or_key: str) -> dict[str, Any]:
         "startAt": 0,
         "maxResults": 50,
     }
-    logger.info(f"[MockJIRA] Returning {result['total']} comments for {issue_id_or_key}")
+    logger.info(
+        f"[MockJIRA] Returning {result['total']} comments for {issue_id_or_key}"
+    )
     return result
 
 
@@ -227,13 +232,11 @@ async def search_issues(
     if "order by" in jql.lower():
         if "asc" in jql.lower():
             unique_issues.sort(
-                key=lambda x: x["fields"].get("updated", ""),
-                reverse=False
+                key=lambda x: x["fields"].get("updated", ""), reverse=False
             )
         else:
             unique_issues.sort(
-                key=lambda x: x["fields"].get("updated", ""),
-                reverse=True
+                key=lambda x: x["fields"].get("updated", ""), reverse=True
             )
 
     # Simple pagination (no actual nextPageToken implementation for mock)
