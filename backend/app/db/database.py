@@ -1,13 +1,10 @@
 """Database configuration and session management."""
 
-from pathlib import Path
-
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
-# Default database path
-DEFAULT_DB_PATH = Path(__file__).parent.parent.parent / "data" / "jiralocal.db"
+from app.config import get_settings
 
 
 class Base(DeclarativeBase):
@@ -16,27 +13,23 @@ class Base(DeclarativeBase):
     pass
 
 
-def get_database_url(db_path: Path | None = None) -> str:
-    """Get the SQLite database URL."""
-    path = db_path or DEFAULT_DB_PATH
-    path.parent.mkdir(parents=True, exist_ok=True)
-    return f"sqlite+aiosqlite:///{path}"
-
-
 # Create async engine
 engine = create_async_engine(
-    get_database_url(),
+    get_settings().get_database_url(),
     echo=False,
     future=True,
 )
 
 
-# Enable foreign keys for SQLite
+# Enable foreign keys for SQLite only (PostgreSQL has them enabled by default)
 @event.listens_for(engine.sync_engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
-    cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA foreign_keys=ON")
-    cursor.close()
+    """Enable foreign keys for SQLite connections."""
+    settings = get_settings()
+    if settings.database_type == "sqlite":
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
 
 
 # Session factory
