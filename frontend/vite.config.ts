@@ -41,13 +41,12 @@ function dynamicProxyPlugin(): Plugin {
           req.headers["x-jira-url"] || "http://localhost:8000";
 
         // Rewrite URL: remove /api prefix for external JIRA, keep for local backend
-        let targetPath = req.url;
         if (
           req.headers["x-jira-url"] &&
           !String(req.headers["x-jira-url"]).includes("localhost")
         ) {
           // External JIRA - strip /api prefix
-          targetPath = req.url.replace(/^\/api/, "");
+          req.url = req.url.replace(/^\/api/, "");
         }
 
         proxy.web(req, res, {

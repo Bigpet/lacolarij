@@ -142,7 +142,7 @@ function renderAdfContent(content: unknown[]): React.ReactNode[] {
         );
       case 'text':
         return <span key={index}>{n.text}</span>;
-      case 'heading':
+      case 'heading': {
         const level = (n.attrs?.level as number) || 1;
         const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
         return (
@@ -150,6 +150,7 @@ function renderAdfContent(content: unknown[]): React.ReactNode[] {
             {n.content ? renderAdfContent(n.content) : null}
           </HeadingTag>
         );
+      }
       case 'bulletList':
         return (
           <ul key={index}>{n.content ? renderAdfContent(n.content) : null}</ul>
@@ -221,16 +222,17 @@ export function IssueDetail({
   const [isLoadingTransitions, setIsLoadingTransitions] = React.useState(false);
 
   // Load transitions when connection is available
+  const issueKey = issue?.key;
   React.useEffect(() => {
-    if (connectionId && issue) {
+    if (connectionId && issueKey) {
       setIsLoadingTransitions(true);
       api
-        .getTransitions(connectionId, issue.key)
+        .getTransitions(connectionId, issueKey)
         .then((result) => setTransitions(result.transitions))
         .catch((err) => console.error('Failed to load transitions:', err))
         .finally(() => setIsLoadingTransitions(false));
     }
-  }, [connectionId, issue?.key]);
+  }, [connectionId, issueKey]);
 
   const handleSaveSummary = async () => {
     if (!issue || !editedSummary.trim()) return;
