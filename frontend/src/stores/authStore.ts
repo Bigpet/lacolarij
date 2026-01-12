@@ -73,7 +73,9 @@ export const useAuthStore = create<AuthState>()(
           // Fetch user info after login
           await get().fetchCurrentUser();
         } catch (err) {
-          set({ error: err instanceof Error ? err.message : 'Demo login failed' });
+          set({
+            error: err instanceof Error ? err.message : 'Demo login failed',
+          });
           throw err;
         } finally {
           set({ isLoading: false });

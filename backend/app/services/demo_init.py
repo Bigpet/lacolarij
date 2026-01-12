@@ -42,7 +42,8 @@ def _seed_demo_issues() -> None:
             "fields": {
                 "summary": "Setup development environment",
                 "description": _create_adf_text(
-                    "Install all necessary tools and dependencies for local development."
+                    "Install all necessary tools and dependencies for local "
+                    "development."
                 ),
                 "issuetype": {"name": "Task", "id": "10001"},
                 "project": {"key": "DEMO", "id": "10000", "name": "Demo Project"},
@@ -75,7 +76,8 @@ def _seed_demo_issues() -> None:
             "fields": {
                 "summary": "Implement user authentication",
                 "description": _create_adf_text(
-                    "Add JWT-based authentication with login and registration endpoints."
+                    "Add JWT-based authentication with login and registration "
+                    "endpoints."
                 ),
                 "issuetype": {"name": "Story", "id": "10002"},
                 "project": {"key": "DEMO", "id": "10000", "name": "Demo Project"},
@@ -138,7 +140,8 @@ def _seed_demo_issues() -> None:
             "fields": {
                 "summary": "Fix responsive layout on mobile",
                 "description": _create_adf_text(
-                    "Navigation menu breaks on screens smaller than 768px. Need to fix responsive breakpoints."
+                    "Navigation menu breaks on screens smaller than 768px. "
+                    "Need to fix responsive breakpoints."
                 ),
                 "issuetype": {"name": "Bug", "id": "10003"},
                 "project": {"key": "DEMO", "id": "10000", "name": "Demo Project"},
@@ -171,7 +174,8 @@ def _seed_demo_issues() -> None:
             "fields": {
                 "summary": "Add unit tests for API endpoints",
                 "description": _create_adf_text(
-                    "Write comprehensive unit tests for all API endpoints to ensure reliability."
+                    "Write comprehensive unit tests for all API endpoints to "
+                    "ensure reliability."
                 ),
                 "issuetype": {"name": "Task", "id": "10001"},
                 "project": {"key": "DEMO", "id": "10000", "name": "Demo Project"},

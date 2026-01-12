@@ -9,7 +9,7 @@ from app.core.exceptions import AuthenticationError, ConflictError
 from app.core.security import create_access_token, hash_password, verify_password
 from app.dependencies import CurrentUser, UserRepo
 from app.models.schemas import Token, UserCreate, UserResponse
-from app.services.demo_init import DEMO_PASSWORD, DEMO_USERNAME
+from app.services.demo_init import DEMO_USERNAME
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
