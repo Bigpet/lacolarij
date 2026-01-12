@@ -54,6 +54,7 @@ class ConnectionRepository:
         api_token_encrypted: str,
         api_version: int = 3,
         is_default: bool = False,
+        is_locked: bool = False,
     ) -> JiraConnection:
         """Create a new JIRA connection."""
         connection = JiraConnection(
@@ -64,6 +65,7 @@ class ConnectionRepository:
             api_token_encrypted=api_token_encrypted,
             api_version=api_version,
             is_default=is_default,
+            is_locked=is_locked,
         )
         self.session.add(connection)
         await self.session.commit()
