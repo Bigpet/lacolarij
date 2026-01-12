@@ -9,6 +9,7 @@ dependencies = [
     "pydantic>=2.12.5",
     "pydantic-settings>=2.0.0",
     "uvicorn>=0.40.0",
+    "gunicorn>=23.0.0",
     "tomli>=2.0.0; python_version < '3.11'",
     "sqlalchemy>=2.0.0",
     "aiosqlite>=0.20.0",
