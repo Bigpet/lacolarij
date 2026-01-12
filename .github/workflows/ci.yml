@@ -156,5 +156,4 @@ jobs:
           username: ${{ secrets.OCI_USER }}
           key: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
           script: |
-            cd ~ && ls -lah 
-# && /jiralocal && ./deploy.sh
+            cd ~/jiralocal && ./deploy.sh
