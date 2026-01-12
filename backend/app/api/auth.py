@@ -9,6 +9,7 @@ from app.core.exceptions import AuthenticationError, ConflictError
 from app.core.security import create_access_token, hash_password, verify_password
 from app.dependencies import CurrentUser, UserRepo
 from app.models.schemas import Token, UserCreate, UserResponse
+from app.services.demo_init import DEMO_PASSWORD, DEMO_USERNAME
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -56,3 +57,21 @@ async def login(
 async def get_current_user_info(current_user: CurrentUser) -> UserResponse:
     """Get the current authenticated user's information."""
     return UserResponse.model_validate(current_user)
+
+
+@router.post("/demo-login", response_model=Token)
+async def demo_login(user_repo: UserRepo) -> Token:
+    """Login as demo user without credentials.
+
+    This endpoint allows users to try the app with pre-seeded demo data
+    without creating an account.
+    """
+    # Find demo user
+    user = await user_repo.get_by_username(DEMO_USERNAME)
+    if not user:
+        raise AuthenticationError(detail="Demo user not found")
+
+    # Create access token
+    access_token = create_access_token(data={"sub": user.id})
+
+    return Token(access_token=access_token)

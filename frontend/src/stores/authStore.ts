@@ -16,6 +16,7 @@ interface AuthState {
   // Actions
   login: (username: string, password: string) => Promise<void>;
   register: (username: string, password: string) => Promise<void>;
+  demoLogin: () => Promise<void>;
   logout: () => void;
   fetchCurrentUser: () => Promise<void>;
   clearError: () => void;
@@ -56,6 +57,23 @@ export const useAuthStore = create<AuthState>()(
           set({
             error: err instanceof Error ? err.message : 'Registration failed',
           });
+          throw err;
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      demoLogin: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const { access_token } = await api.demoLogin();
+          api.setToken(access_token);
+          set({ token: access_token });
+
+          // Fetch user info after login
+          await get().fetchCurrentUser();
+        } catch (err) {
+          set({ error: err instanceof Error ? err.message : 'Demo login failed' });
           throw err;
         } finally {
           set({ isLoading: false });

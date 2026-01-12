@@ -94,6 +94,12 @@ class ApiClient {
     return this.request<User>('/auth/me');
   }
 
+  async demoLogin(): Promise<AuthToken> {
+    return this.request<AuthToken>('/auth/demo-login', {
+      method: 'POST',
+    });
+  }
+
   // Connection endpoints
   async listConnections(): Promise<JiraConnection[]> {
     return this.request<JiraConnection[]>('/users/connections');

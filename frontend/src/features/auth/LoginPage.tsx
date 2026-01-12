@@ -15,7 +15,7 @@ import {
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const { login, demoLogin, isLoading, error, clearError } = useAuthStore();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -25,6 +25,17 @@ export function LoginPage() {
 
     try {
       await login(username, password);
+      navigate('/');
+    } catch {
+      // Error is handled by the store
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    clearError();
+
+    try {
+      await demoLogin();
       navigate('/');
     } catch {
       // Error is handled by the store
@@ -78,6 +89,25 @@ export function LoginPage() {
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Signing in...' : 'Sign in'}
+            </Button>
+            <div className="relative w-full">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  or
+                </span>
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={handleDemoLogin}
+              disabled={isLoading}
+            >
+              Try Demo (no signup)
             </Button>
             <p className="text-sm text-muted-foreground text-center">
               Don&apos;t have an account?{' '}

@@ -9,6 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.router import api_router
 from app.config import get_settings
 from app.db.database import close_db, init_db
+from app.db.repositories import ConnectionRepository, UserRepository
+from app.services.demo_init import initialize_demo_data
 from app.services.mock_jira import mock_jira_router
 
 
@@ -17,6 +19,16 @@ async def lifespan(app: FastAPI):
     """Application lifespan manager."""
     # Startup
     await init_db()
+
+    # Initialize demo data
+    from app.db.database import get_session
+
+    async for session in get_session():
+        user_repo = UserRepository(session)
+        conn_repo = ConnectionRepository(session)
+        await initialize_demo_data(user_repo, conn_repo)
+        break
+
     yield
     # Shutdown
     await close_db()
