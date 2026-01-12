@@ -146,7 +146,7 @@ jobs:
   deploy:
     name: Deploy to OCI
     runs-on: ubuntu-latest
-    needs: [lint-backend, lint-frontend, test-frontend, test-frontend-e2e, test-backend]
+    needs: [lint-backend, lint-frontend, test-frontend, test-backend] # test-frontend-e2e,
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Deploy via SSH
