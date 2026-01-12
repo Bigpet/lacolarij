@@ -26,6 +26,7 @@ class JiraConnection(Base):
     api_token_encrypted: Mapped[str] = mapped_column(String(500), nullable=False)
     api_version: Mapped[int] = mapped_column(Integer, default=3)
     is_default: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_locked: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

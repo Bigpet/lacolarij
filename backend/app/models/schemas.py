@@ -80,6 +80,7 @@ class JiraConnectionResponse(BaseModel):
     email: str
     api_version: int
     is_default: bool
+    is_locked: bool
     created_at: datetime
 
 

@@ -83,6 +83,9 @@ async def update_connection(
     if connection.user_id != current_user.id:
         raise ForbiddenError()
 
+    if connection.is_locked:
+        raise ForbiddenError("Cannot modify locked demo connection")
+
     # Prepare update data
     update_data = connection_data.model_dump(exclude_unset=True)
 
@@ -114,5 +117,8 @@ async def delete_connection(
 
     if connection.user_id != current_user.id:
         raise ForbiddenError()
+
+    if connection.is_locked:
+        raise ForbiddenError("Cannot delete locked demo connection")
 
     await conn_repo.delete(connection)

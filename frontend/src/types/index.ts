@@ -29,6 +29,7 @@ export interface JiraConnection {
   email: string;
   api_version: number;
   is_default: boolean;
+  is_locked: boolean;
   created_at: string;
 }
 
