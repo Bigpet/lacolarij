@@ -47,9 +47,48 @@ async def get_session() -> AsyncSession:
 
 
 async def init_db() -> None:
-    """Initialize database tables."""
+    """Initialize database tables and run schema migrations."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # Run simple schema migrations for SQLite
+        await conn.run_sync(_run_migrations)
+
+
+def _run_migrations(conn) -> None:
+    """Run simple schema migrations to add missing columns.
+
+    This is a lightweight migration system for SQLite that adds columns
+    that may be missing from older database versions.
+    """
+    from sqlalchemy import inspect, text
+    from sqlalchemy.exc import OperationalError
+
+    settings = get_settings()
+    if settings.database_type != "sqlite":
+        return
+
+    inspector = inspect(conn)
+
+    # Migration: Add is_locked column to jira_connections if missing
+    if "jira_connections" in inspector.get_table_names():
+        columns = [col["name"] for col in inspector.get_columns("jira_connections")]
+        if "is_locked" not in columns:
+            try:
+                conn.execute(
+                    text(
+                        """
+ALTER TABLE
+    jira_connections
+ADD COLUMN
+    is_locked BOOLEAN DEFAULT 0
+"""
+                    )
+                )
+                # Log to stdout since logger may not be configured yet
+                print("Migration: Added is_locked column to jira_connections")
+            except OperationalError:
+                # Another worker already added the column - race condition handled
+                pass
 
 
 async def close_db() -> None:

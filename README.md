@@ -63,52 +63,34 @@ JiraLocal can be deployed using Docker. Two configurations are available:
 ### Prerequisites
 
 - Docker and Docker Compose installed
-- Port 80 available on the host
+- Port 6555 available on the host (configurable via `HOST_PORT` for production)
 
-### Setup
+### Quick Start (Recommended)
 
-1. Create an environment file from the template:
-   ```bash
-   cp .env.docker.example .env.docker
-   ```
+The easiest way to deploy is using the provided deployment scripts, which handle environment setup, secret generation, and container startup automatically.
 
-2. Generate and add the required secrets to `.env.docker`:
-   ```bash
-   # Generate SECRET_KEY
-   python3 -c "import secrets; print(secrets.token_urlsafe(32))"
-
-   # Generate ENCRYPTION_KEY
-   python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
-   ```
-
-3. Run the Containers
-
-### Running with SQLite
+#### macOS / Linux
 
 ```bash
-docker-compose -f deployment/docker-compose.sqlite.yml --env-file .env.docker up --build -d
+cd deployment
+./deploy.sh
 ```
 
-### Running with PostgreSQL
+#### Windows
 
-For PostgreSQL, also set `POSTGRES_PASSWORD` in `.env.docker`.
-```bash
-docker-compose -f deployment/docker-compose.postgres.yml --env-file .env.docker up --build -d
+Simply double-click `deployment\deploy.bat` from File Explorer, or run from Command Prompt/PowerShell:
+
+```batch
+cd deployment
+.\deploy.bat
 ```
 
-### Access
+The scripts will:
+- Check that Docker is installed (also Python required for macOS/Linux only)
+- Create `.env.docker` from the template
+- Generate secure `SECRET_KEY` and `ENCRYPTION_KEY` automatically
+- Start the containers with SQLite
 
-Once running, access the application at http://localhost
+### Manual Setup
 
-### Stopping
-
-```bash
-# SQLite
-docker-compose -f deployment/docker-compose.sqlite.yml down
-
-# PostgreSQL
-docker-compose -f deployment/docker-compose.postgres.yml down
-
-# To also remove volumes (WARNING: deletes all data)
-docker-compose -f deployment/docker-compose.sqlite.yml down -v
-```
+If you prefer to set up manually, see [Deployment Manual](./docs/deployment_manual.md).

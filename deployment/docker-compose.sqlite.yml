@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: jiralocal-frontend
     ports:
-      - "80:80"
+      - "${HOST_PORT:-6555}:80"
     depends_on:
       backend:
         condition: service_healthy
@@ -30,8 +30,10 @@ services:
       - DEBUG=false
       - DATABASE_TYPE=sqlite
       - DATABASE_PATH=/app/data/jiralocal.db
-      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY is required}
-      - ENCRYPTION_KEY=${ENCRYPTION_KEY:?ENCRYPTION_KEY is required}
+      # - SECRET_KEY=${SECRET_KEY:?SECRET_KEY is required}
+      # - ENCRYPTION_KEY=${ENCRYPTION_KEY:?ENCRYPTION_KEY is required}
+      - SECRET_KEY=${SECRET_KEY:-nonsecuredefaultkey}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-nonsecuredefaultencryptionkey}
     volumes:
       - jiralocal-data:/app/data
     expose:
