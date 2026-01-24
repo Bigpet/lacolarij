@@ -30,8 +30,10 @@ services:
       - DEBUG=false
       - DATABASE_TYPE=sqlite
       - DATABASE_PATH=/app/data/jiralocal.db
-      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY is required}
-      - ENCRYPTION_KEY=${ENCRYPTION_KEY:?ENCRYPTION_KEY is required}
+      # - SECRET_KEY=${SECRET_KEY:?SECRET_KEY is required}
+      # - ENCRYPTION_KEY=${ENCRYPTION_KEY:?ENCRYPTION_KEY is required}
+      - SECRET_KEY=${SECRET_KEY:-nonsecuredefaultkey}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-nonsecuredefaultencryptionkey}
     volumes:
       - jiralocal-data:/app/data
     expose:
