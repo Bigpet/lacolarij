@@ -63,7 +63,7 @@ JiraLocal can be deployed using Docker. Two configurations are available:
 ### Prerequisites
 
 - Docker and Docker Compose installed
-- Port 80 available on the host
+- Port 6555 available on the host (configurable via `HOST_PORT` for production)
 
 ### Quick Start (Recommended)
 

@@ -115,4 +115,4 @@ echo "Starting containers..."
 docker compose -f "$SCRIPT_DIR/docker-compose.sqlite.yml" --env-file "$ENV_FILE" up --build -d
 
 echo "=== Deployment complete ==="
-echo "JiraLocal should now be running."
+echo "JiraLocal should now be running at http://localhost:6555/ ."

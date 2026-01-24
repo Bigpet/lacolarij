@@ -5,7 +5,7 @@ This document describes how to deploy JiraLocal manually, without using the prov
 ## Prerequisites
 
 - Docker and Docker Compose installed
-- Port 80 available on the host
+- Port 6555 available on the host (or configure `HOST_PORT` in `.env.docker`)
 
 ## Manual Setup
 
@@ -41,7 +41,13 @@ docker-compose -f deployment/docker-compose.postgres.yml --env-file .env.docker 
 
 ## Access
 
-Once running, access the application at http://localhost
+Once running, access the application at http://localhost:6555
+
+To use a different port, set `HOST_PORT` in `.env.docker`:
+```bash
+# For production on port 80
+echo "HOST_PORT=80" >> .env.docker
+```
 
 ## Stopping
 
