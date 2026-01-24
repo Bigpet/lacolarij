@@ -66,13 +66,20 @@ interface DialogContentProps {
   'data-testid'?: string;
 }
 
-function DialogContent({ children, className, 'data-testid': testId }: DialogContentProps) {
+function DialogContent({
+  children,
+  className,
+  'data-testid': testId,
+}: DialogContentProps) {
   const { open, onOpenChange } = useDialog();
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" data-testid="dialog-container">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      data-testid="dialog-container"
+    >
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50"

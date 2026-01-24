@@ -36,7 +36,9 @@ export function IssuesPage() {
               (projectCounts[issue.projectKey] || 0) + 1;
           }
         }
-        const sorted = Object.entries(projectCounts).sort((a, b) => b[1] - a[1]);
+        const sorted = Object.entries(projectCounts).sort(
+          (a, b) => b[1] - a[1]
+        );
         if (sorted.length > 0) {
           setDefaultProjectKey(sorted[0][0]);
         }

@@ -131,7 +131,10 @@ export function CreateIssueModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="bg-destructive/10 text-destructive p-3 rounded-md text-sm" data-testid="create-issue-error">
+            <div
+              className="bg-destructive/10 text-destructive p-3 rounded-md text-sm"
+              data-testid="create-issue-error"
+            >
               {error}
             </div>
           )}
@@ -195,7 +198,11 @@ export function CreateIssueModal({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isCreating} data-testid="create-issue-submit">
+            <Button
+              type="submit"
+              disabled={isCreating}
+              data-testid="create-issue-submit"
+            >
               {isCreating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Create Issue
             </Button>
