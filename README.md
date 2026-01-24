@@ -86,7 +86,7 @@ cd deployment
 ```
 
 The scripts will:
-- Check that Docker and Python are installed
+- Check that Docker is installed (Python required for macOS/Linux only; Windows uses .NET built-in cryptography)
 - Create `.env.docker` from the template
 - Generate secure `SECRET_KEY` and `ENCRYPTION_KEY` automatically
 - Start the containers with SQLite

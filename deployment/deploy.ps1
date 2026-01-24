@@ -1,6 +1,6 @@
 # JiraLocal Deployment Script for Windows
 # This script automates the setup steps from README.md
-# Prerequisites: Docker Desktop and Python 3
+# Prerequisites: Docker Desktop
 
 # Get script directory and project root
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -34,15 +34,6 @@ function Check-Prerequisites {
     $missingPrerequisites = 0
 
     Write-Host "Checking prerequisites..." -ForegroundColor Yellow
-
-    # Check for Python 3
-    if (Test-CommandExists "python") {
-        $pythonVersion = python --version 2>&1
-        Write-Host "[OK] Python found: $pythonVersion" -ForegroundColor Green
-    } else {
-        Write-Host "[ERROR] Python 3 is not installed or not in PATH" -ForegroundColor Red
-        $missingPrerequisites = 1
-    }
 
     # Check for Docker
     if (Test-CommandExists "docker") {
@@ -153,4 +144,3 @@ Write-Host "JiraLocal should now be running." -ForegroundColor Green
 Write-Host ""
 Write-Host "To view logs, run: docker compose -f `"$DockerComposeFile`" logs -f" -ForegroundColor Gray
 Write-Host "To stop, run: docker compose -f `"$DockerComposeFile`" down" -ForegroundColor Gray
-\rr
