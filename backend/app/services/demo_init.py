@@ -250,17 +250,26 @@ async def initialize_demo_data(
     """Initialize demo user, connection, and seed data.
 
     This is called on app startup to ensure demo environment is ready.
+    Uses try/except for IntegrityError to handle race conditions when
+    multiple workers start simultaneously.
     """
-    # Check if demo user already exists
+    from sqlalchemy.exc import IntegrityError
+
+    # Get or create demo user
     demo_user = await user_repo.get_by_username(DEMO_USERNAME)
 
     if not demo_user:
-        # Create demo user
-        password_hash = hash_password(DEMO_PASSWORD)
-        demo_user = await user_repo.create(
-            username=DEMO_USERNAME, password_hash=password_hash
-        )
-        logger.info(f"Created demo user: {DEMO_USERNAME}")
+        try:
+            password_hash = hash_password(DEMO_PASSWORD)
+            demo_user = await user_repo.create(
+                username=DEMO_USERNAME, password_hash=password_hash
+            )
+            logger.info(f"Created demo user: {DEMO_USERNAME}")
+        except IntegrityError:
+            # Another worker created the user - rollback and fetch it
+            await user_repo.session.rollback()
+            demo_user = await user_repo.get_by_username(DEMO_USERNAME)
+            logger.info(f"Demo user created by another worker: {DEMO_USERNAME}")
     else:
         logger.info(f"Demo user already exists: {DEMO_USERNAME}")
 
@@ -271,21 +280,26 @@ async def initialize_demo_data(
     )
 
     if not demo_connection:
-        # Create locked demo JIRA connection
-        # Use a dummy encrypted token (mock server doesn't need real auth)
-        encrypted_token = encrypt_api_token("demo-token")
+        try:
+            # Create locked demo JIRA connection
+            # Use a dummy encrypted token (mock server doesn't need real auth)
+            encrypted_token = encrypt_api_token("demo-token")
 
-        demo_connection = await conn_repo.create(
-            user_id=demo_user.id,
-            name="Demo JIRA",
-            jira_url="demo://local",
-            email=DEMO_EMAIL,
-            api_token_encrypted=encrypted_token,
-            api_version=3,
-            is_default=True,
-            is_locked=True,
-        )
-        logger.info("Created locked demo JIRA connection")
+            demo_connection = await conn_repo.create(
+                user_id=demo_user.id,
+                name="Demo JIRA",
+                jira_url="demo://local",
+                email=DEMO_EMAIL,
+                api_token_encrypted=encrypted_token,
+                api_version=3,
+                is_default=True,
+                is_locked=True,
+            )
+            logger.info("Created locked demo JIRA connection")
+        except IntegrityError:
+            # Another worker created the connection - rollback and continue
+            await conn_repo.session.rollback()
+            logger.info("Demo JIRA connection created by another worker")
     else:
         logger.info("Demo JIRA connection already exists")
 
