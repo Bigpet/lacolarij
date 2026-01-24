@@ -63,19 +63,21 @@ function DialogTrigger({ children, asChild }: DialogTriggerProps) {
 interface DialogContentProps {
   children: React.ReactNode;
   className?: string;
+  'data-testid'?: string;
 }
 
-function DialogContent({ children, className }: DialogContentProps) {
+function DialogContent({ children, className, 'data-testid': testId }: DialogContentProps) {
   const { open, onOpenChange } = useDialog();
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center" data-testid="dialog-container">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50"
         onClick={() => onOpenChange(false)}
+        data-testid="dialog-backdrop"
       />
       {/* Content */}
       <div
@@ -83,12 +85,14 @@ function DialogContent({ children, className }: DialogContentProps) {
           'relative z-50 w-full max-w-lg rounded-lg border bg-background p-6 shadow-lg',
           className
         )}
+        data-testid={testId || 'dialog-content'}
       >
         {children}
         <button
           type="button"
           className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           onClick={() => onOpenChange(false)}
+          data-testid="dialog-close-button"
         >
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>

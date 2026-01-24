@@ -12,6 +12,17 @@ export class IssuesPage extends BasePage {
   readonly noIssuesText: Locator;
   readonly noConnectionsCard: Locator;
   readonly loadingText: Locator;
+  readonly createIssueButton: Locator;
+
+  // Create Issue Modal locators
+  readonly createIssueModal: Locator;
+  readonly createIssueProjectKey: Locator;
+  readonly createIssueType: Locator;
+  readonly createIssueSummary: Locator;
+  readonly createIssueDescription: Locator;
+  readonly createIssueSubmitButton: Locator;
+  readonly createIssueCancelButton: Locator;
+  readonly createIssueError: Locator;
 
   // Status counters
   readonly todoCount: Locator;
@@ -31,6 +42,17 @@ export class IssuesPage extends BasePage {
     this.noIssuesText = page.locator('text=No issues yet');
     this.noConnectionsCard = page.locator('[data-testid="no-connections-card"]');
     this.loadingText = page.locator('text=Loading...');
+    this.createIssueButton = page.locator('[data-testid="create-issue-button"]');
+
+    // Create Issue Modal locators
+    this.createIssueModal = page.locator('[data-testid="create-issue-modal"]');
+    this.createIssueProjectKey = page.locator('[data-testid="create-issue-project-key"]');
+    this.createIssueType = page.locator('[data-testid="create-issue-type"]');
+    this.createIssueSummary = page.locator('[data-testid="create-issue-summary"]');
+    this.createIssueDescription = page.locator('[data-testid="create-issue-description"]');
+    this.createIssueSubmitButton = page.locator('[data-testid="create-issue-submit"]');
+    this.createIssueCancelButton = page.locator('[data-testid="create-issue-cancel"]');
+    this.createIssueError = page.locator('[data-testid="create-issue-error"]');
 
     // Status counters
     this.todoCount = page.locator('text=To Do:').locator('strong');
@@ -198,5 +220,87 @@ export class IssuesPage extends BasePage {
    */
   async hasNoConnections(): Promise<boolean> {
     return await this.noConnectionsCard.isVisible();
+  }
+
+  /**
+   * Open the Create Issue modal
+   */
+  async openCreateIssueModal() {
+    await this.createIssueButton.click();
+    await expect(this.createIssueModal).toBeVisible();
+  }
+
+  /**
+   * Close the Create Issue modal via Cancel button
+   */
+  async closeCreateIssueModal() {
+    await this.createIssueCancelButton.click();
+    await expect(this.createIssueModal).not.toBeVisible();
+  }
+
+  /**
+   * Fill the Create Issue form
+   */
+  async fillCreateIssueForm(options: {
+    projectKey?: string;
+    issueType?: string;
+    summary?: string;
+    description?: string;
+  }) {
+    if (options.projectKey !== undefined) {
+      await this.createIssueProjectKey.clear();
+      await this.createIssueProjectKey.fill(options.projectKey);
+    }
+    if (options.issueType !== undefined) {
+      await this.createIssueType.selectOption(options.issueType);
+    }
+    if (options.summary !== undefined) {
+      await this.createIssueSummary.clear();
+      await this.createIssueSummary.fill(options.summary);
+    }
+    if (options.description !== undefined) {
+      await this.createIssueDescription.clear();
+      await this.createIssueDescription.fill(options.description);
+    }
+  }
+
+  /**
+   * Submit the Create Issue form
+   */
+  async submitCreateIssue() {
+    await this.createIssueSubmitButton.click();
+  }
+
+  /**
+   * Create an issue via the modal (complete flow)
+   */
+  async createIssue(options: {
+    projectKey: string;
+    summary: string;
+    issueType?: string;
+    description?: string;
+  }) {
+    await this.openCreateIssueModal();
+    await this.fillCreateIssueForm(options);
+    await this.submitCreateIssue();
+    // Modal should close after successful creation
+    await expect(this.createIssueModal).not.toBeVisible({ timeout: 10000 });
+  }
+
+  /**
+   * Get the validation error message from the Create Issue modal
+   */
+  async getCreateIssueError(): Promise<string | null> {
+    if (await this.createIssueError.isVisible()) {
+      return await this.createIssueError.textContent();
+    }
+    return null;
+  }
+
+  /**
+   * Check if the Create Issue modal is open
+   */
+  async isCreateIssueModalOpen(): Promise<boolean> {
+    return await this.createIssueModal.isVisible();
   }
 }

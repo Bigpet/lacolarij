@@ -121,7 +121,7 @@ export function CreateIssueModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md" data-testid="create-issue-modal">
         <DialogHeader>
           <DialogTitle>Create Issue</DialogTitle>
           <DialogDescription>
@@ -131,7 +131,7 @@ export function CreateIssueModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="bg-destructive/10 text-destructive p-3 rounded-md text-sm">
+            <div className="bg-destructive/10 text-destructive p-3 rounded-md text-sm" data-testid="create-issue-error">
               {error}
             </div>
           )}
@@ -191,10 +191,11 @@ export function CreateIssueModal({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isCreating}
+              data-testid="create-issue-cancel"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isCreating}>
+            <Button type="submit" disabled={isCreating} data-testid="create-issue-submit">
               {isCreating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Create Issue
             </Button>
