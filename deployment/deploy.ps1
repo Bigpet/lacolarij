@@ -2,8 +2,6 @@
 # This script automates the setup steps from README.md
 # Prerequisites: Docker Desktop and Python 3
 
-$ErrorActionPreference = "Stop"
-
 # Get script directory and project root
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ProjectRoot = Split-Path -Parent $ScriptDir
@@ -14,6 +12,23 @@ $DockerComposeFile = Join-Path $ScriptDir "docker-compose.sqlite.yml"
 Write-Host "=== JiraLocal Deployment Script ===" -ForegroundColor Cyan
 Write-Host ""
 
+# Function to check if a command exists
+function Test-CommandExists {
+    param([string]$Command)
+    $oldPreference = $ErrorActionPreference
+    $ErrorActionPreference = "stop"
+    try {
+        if (Get-Command $Command -ErrorAction SilentlyContinue) {
+            return $true
+        }
+        return $false
+    } catch {
+        return $false
+    } finally {
+        $ErrorActionPreference = $oldPreference
+    }
+}
+
 # Function to check all prerequisites
 function Check-Prerequisites {
     $missingPrerequisites = 0
@@ -21,28 +36,28 @@ function Check-Prerequisites {
     Write-Host "Checking prerequisites..." -ForegroundColor Yellow
 
     # Check for Python 3
-    try {
+    if (Test-CommandExists "python") {
         $pythonVersion = python --version 2>&1
         Write-Host "✓ Python found: $pythonVersion" -ForegroundColor Green
-    } catch {
+    } else {
         Write-Host "❌ Python 3 is not installed or not in PATH" -ForegroundColor Red
         $missingPrerequisites = 1
     }
 
     # Check for Docker
-    try {
+    if (Test-CommandExists "docker") {
         $dockerVersion = docker --version 2>&1
         Write-Host "✓ Docker found: $dockerVersion" -ForegroundColor Green
-    } catch {
+    } else {
         Write-Host "❌ Docker is not installed or not in PATH" -ForegroundColor Red
         $missingPrerequisites = 1
     }
 
     # Check for Docker Compose
-    try {
-        $composeVersion = docker compose version 2>&1
-        Write-Host "✓ Docker Compose found: $composeVersion" -ForegroundColor Green
-    } catch {
+    $composeCheck = docker compose version 2>&1
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "✓ Docker Compose found: $composeCheck" -ForegroundColor Green
+    } else {
         Write-Host "❌ Docker Compose is not available" -ForegroundColor Red
         $missingPrerequisites = 1
     }
