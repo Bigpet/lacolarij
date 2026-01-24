@@ -38,53 +38,54 @@ function Check-Prerequisites {
     # Check for Python 3
     if (Test-CommandExists "python") {
         $pythonVersion = python --version 2>&1
-        Write-Host "✓ Python found: $pythonVersion" -ForegroundColor Green
+        Write-Host "[OK] Python found: $pythonVersion" -ForegroundColor Green
     } else {
-        Write-Host "❌ Python 3 is not installed or not in PATH" -ForegroundColor Red
+        Write-Host "[ERROR] Python 3 is not installed or not in PATH" -ForegroundColor Red
         $missingPrerequisites = 1
     }
 
     # Check for Docker
     if (Test-CommandExists "docker") {
         $dockerVersion = docker --version 2>&1
-        Write-Host "✓ Docker found: $dockerVersion" -ForegroundColor Green
+        Write-Host "[OK] Docker found: $dockerVersion" -ForegroundColor Green
     } else {
-        Write-Host "❌ Docker is not installed or not in PATH" -ForegroundColor Red
+        Write-Host "[ERROR] Docker is not installed or not in PATH" -ForegroundColor Red
         $missingPrerequisites = 1
     }
 
     # Check for Docker Compose
-    $composeCheck = docker compose version 2>&1
+    $null = docker compose version 2>&1
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "✓ Docker Compose found: $composeCheck" -ForegroundColor Green
+        $composeVersion = docker compose version 2>&1
+        Write-Host "[OK] Docker Compose found: $composeVersion" -ForegroundColor Green
     } else {
-        Write-Host "❌ Docker Compose is not available" -ForegroundColor Red
+        Write-Host "[ERROR] Docker Compose is not available" -ForegroundColor Red
         $missingPrerequisites = 1
     }
 
     # Check for required files
     if (Test-Path $EnvTemplate) {
-        Write-Host "✓ Environment template found: $EnvTemplate" -ForegroundColor Green
+        Write-Host "[OK] Environment template found" -ForegroundColor Green
     } else {
-        Write-Host "❌ Environment template file not found: $EnvTemplate" -ForegroundColor Red
+        Write-Host "[ERROR] Environment template file not found: $EnvTemplate" -ForegroundColor Red
         $missingPrerequisites = 1
     }
 
     if (Test-Path $DockerComposeFile) {
-        Write-Host "✓ Docker Compose file found: $DockerComposeFile" -ForegroundColor Green
+        Write-Host "[OK] Docker Compose file found" -ForegroundColor Green
     } else {
-        Write-Host "❌ Docker Compose file not found: $DockerComposeFile" -ForegroundColor Red
+        Write-Host "[ERROR] Docker Compose file not found: $DockerComposeFile" -ForegroundColor Red
         $missingPrerequisites = 1
     }
 
     if ($missingPrerequisites -ne 0) {
         Write-Host ""
-        Write-Host "❌ Prerequisites check failed. Please install missing dependencies and try again." -ForegroundColor Red
+        Write-Host "[ERROR] Prerequisites check failed. Please install missing dependencies and try again." -ForegroundColor Red
         exit 1
     }
 
     Write-Host ""
-    Write-Host "✓ All prerequisites met." -ForegroundColor Green
+    Write-Host "[OK] All prerequisites met." -ForegroundColor Green
     Write-Host ""
 }
 
@@ -101,7 +102,6 @@ if (-not (Test-Path $EnvFile)) {
 
 # Step 2: Generate and add required secrets if not already set
 function Generate-SecretKey {
-    # Generate a URL-safe 32-byte random key (similar to secrets.token_urlsafe(32))
     $bytes = New-Object byte[] 32
     $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
     $rng.GetBytes($bytes)
@@ -110,7 +110,6 @@ function Generate-SecretKey {
 }
 
 function Generate-EncryptionKey {
-    # Generate a Fernet-compatible key (32 bytes, base64 URL-safe encoded)
     $bytes = New-Object byte[] 32
     $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
     $rng.GetBytes($bytes)
@@ -154,3 +153,4 @@ Write-Host "JiraLocal should now be running." -ForegroundColor Green
 Write-Host ""
 Write-Host "To view logs, run: docker compose -f `"$DockerComposeFile`" logs -f" -ForegroundColor Gray
 Write-Host "To stop, run: docker compose -f `"$DockerComposeFile`" down" -ForegroundColor Gray
+\rr
