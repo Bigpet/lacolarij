@@ -76,7 +76,12 @@ def _run_migrations(conn) -> None:
             try:
                 conn.execute(
                     text(
-                        "ALTER TABLE jira_connections ADD COLUMN is_locked BOOLEAN DEFAULT 0"
+                        """
+ALTER TABLE
+    jira_connections
+ADD COLUMN
+    is_locked BOOLEAN DEFAULT 0
+"""
                     )
                 )
                 # Log to stdout since logger may not be configured yet
