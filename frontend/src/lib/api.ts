@@ -186,6 +186,20 @@ class ApiClient {
     );
   }
 
+  async createIssue(
+    connectionId: string,
+    payload: { fields: Record<string, unknown> }
+  ): Promise<{ id: string; key: string; self: string }> {
+    return this.jiraRequest<{ id: string; key: string; self: string }>(
+      connectionId,
+      `/rest/api/3/issue`,
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }
+    );
+  }
+
   async getTransitions(
     connectionId: string,
     issueIdOrKey: string

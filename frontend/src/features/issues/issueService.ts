@@ -16,7 +16,82 @@ async function updatePendingCount(): Promise<void> {
   useSyncStore.getState().setPendingCount(count);
 }
 
+export interface CreateIssueInput {
+  projectKey: string;
+  issueType: string;
+  summary: string;
+  description?: unknown;
+}
+
 export const issueService = {
+  /**
+   * Create a new issue locally with a temporary ID.
+   * The issue will be synced to the remote server later.
+   */
+  async createIssue(input: CreateIssueInput): Promise<Issue> {
+    const uuid = crypto.randomUUID();
+    const shortId = uuid.slice(0, 8).toUpperCase();
+    const now = Date.now();
+
+    const issue: Issue = {
+      id: `LOCAL-${uuid}`,
+      key: `LOCAL-${shortId}`,
+      projectKey: input.projectKey,
+      summary: input.summary,
+      description: input.description ?? null,
+      status: 'To Do',
+      statusCategory: 'todo',
+      assignee: null,
+      reporter: '',
+      priority: 'Medium',
+      issueType: input.issueType,
+      labels: [],
+      created: new Date().toISOString(),
+      updated: new Date().toISOString(),
+      _localUpdated: now,
+      _syncStatus: 'pending',
+      _syncError: null,
+      _remoteVersion: '',
+    };
+
+    // 1. Store in IndexedDB
+    await issueRepository.put(issue);
+
+    // 2. Queue pending operation for sync
+    await pendingOperationsRepository.add({
+      entityType: 'issue',
+      entityId: issue.id,
+      operation: 'create',
+      payload: {
+        fields: {
+          project: { key: input.projectKey },
+          issuetype: { name: input.issueType },
+          summary: input.summary,
+          ...(input.description ? { description: input.description } : {}),
+        },
+      },
+      createdAt: now,
+      attempts: 0,
+      lastError: null,
+    });
+
+    // 3. Update pending count
+    await updatePendingCount();
+
+    return issue;
+  },
+
+  /**
+   * Replace a local issue with the remote version after successful sync.
+   * Deletes the old LOCAL-* issue and inserts with the real id/key.
+   */
+  async replaceWithRemote(localId: string, remoteIssue: Issue): Promise<void> {
+    // Delete the old local issue
+    await issueRepository.delete(localId);
+    // Insert the remote issue
+    await issueRepository.put(remoteIssue);
+  },
+
   /**
    * Update the summary of an issue locally.
    */

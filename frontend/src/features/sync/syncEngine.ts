@@ -13,6 +13,7 @@ import {
   pendingOperationsRepository,
 } from '@/lib/db';
 import { useSyncStore } from '@/stores/syncStore';
+import { issueService } from '@/features/issues/issueService';
 import type { Issue, PendingOperation } from '@/types';
 
 // Map status category from JIRA to our simplified version
@@ -377,6 +378,8 @@ export class SyncEngine {
       try {
         if (op.entityType === 'comment') {
           await this.executePendingCommentOperation(connectionId, op);
+        } else if (op.operation === 'create') {
+          await this.executePendingCreateOperation(connectionId, op);
         } else {
           await this.executePendingIssueOperation(connectionId, op);
         }
@@ -505,6 +508,80 @@ export class SyncEngine {
     await pendingOperationsRepository.delete(op.id);
 
     console.log(`Successfully pushed ${localIssue.key}`);
+  }
+
+  /**
+   * Execute a pending create operation for a new issue.
+   */
+  private async executePendingCreateOperation(
+    connectionId: string,
+    op: PendingOperation
+  ): Promise<void> {
+    const localIssue = await issueRepository.getById(op.entityId);
+    if (!localIssue) {
+      // Issue was deleted locally, remove pending op
+      await pendingOperationsRepository.delete(op.id);
+      return;
+    }
+
+    const payload = op.payload as { fields: Record<string, unknown> };
+
+    console.log(
+      `[syncEngine] Creating issue ${localIssue.key} on remote server...`
+    );
+
+    // Create the issue on the remote server
+    const createResult = await api.createIssue(connectionId, {
+      fields: payload.fields,
+    });
+
+    console.log(
+      `[syncEngine] Issue created: id=${createResult.id}, key=${createResult.key}`
+    );
+
+    // Fetch the full issue to get all fields and timestamps
+    const remoteIssue = await api.getIssue(connectionId, createResult.key);
+
+    // Convert to local format
+    const newLocalIssue = this.mapJiraIssueToLocalStatic(remoteIssue);
+
+    // Replace the LOCAL-* issue with the real one
+    await issueService.replaceWithRemote(op.entityId, newLocalIssue);
+
+    // Remove pending operation
+    await pendingOperationsRepository.delete(op.id);
+
+    console.log(
+      `[syncEngine] Successfully created and synced ${createResult.key} (was ${localIssue.key})`
+    );
+  }
+
+  /**
+   * Static version of mapJiraIssueToLocal for use in sync engine.
+   */
+  private mapJiraIssueToLocalStatic(jiraIssue: JiraIssue): Issue {
+    const { fields } = jiraIssue;
+
+    return {
+      id: jiraIssue.id,
+      key: jiraIssue.key,
+      projectKey: fields.project.key,
+      summary: fields.summary,
+      description: fields.description,
+      status: fields.status.name,
+      statusCategory: mapStatusCategory(fields.status.statusCategory.key),
+      assignee: fields.assignee?.displayName || null,
+      reporter: fields.reporter?.displayName || '',
+      priority: fields.priority?.name || 'Medium',
+      issueType: fields.issuetype.name,
+      labels: fields.labels || [],
+      created: fields.created,
+      updated: fields.updated,
+      _localUpdated: Date.now(),
+      _syncStatus: 'synced',
+      _syncError: null,
+      _remoteVersion: fields.updated,
+    };
   }
 
   /**
