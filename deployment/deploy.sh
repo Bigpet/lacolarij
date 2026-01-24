@@ -8,8 +8,70 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 ENV_FILE="$PROJECT_ROOT/.env.docker"
 ENV_TEMPLATE="$PROJECT_ROOT/.env.docker.example"
+DOCKER_COMPOSE_FILE="$SCRIPT_DIR/docker-compose.sqlite.yml"
 
 echo "=== JiraLocal Deployment Script ==="
+
+# Function to check all prerequisites
+check_prerequisites() {
+    local missing_prerequisites=0
+
+    echo "Checking prerequisites..."
+
+    # Check for Python 3
+    if ! command -v python3 &> /dev/null; then
+        echo "❌ Python 3 is not installed or not in PATH"
+        missing_prerequisites=1
+    else
+        echo "✓ Python 3 found: $(python3 --version)"
+    fi
+
+    # Check for Docker
+    if ! command -v docker &> /dev/null; then
+        echo "❌ Docker is not installed or not in PATH"
+        missing_prerequisites=1
+    else
+        echo "✓ Docker found: $(docker --version)"
+    fi
+
+    # Check for Docker Compose (v2 or v1)
+    if docker compose version &> /dev/null; then
+        echo "✓ Docker Compose v2 found: $(docker compose version)"
+    elif command -v docker-compose &> /dev/null; then
+        echo "✓ Docker Compose v1 found: $(docker-compose --version)"
+    else
+        echo "❌ Docker Compose is not installed or not in PATH"
+        missing_prerequisites=1
+    fi
+
+    # Check for required files
+    if [ ! -f "$ENV_TEMPLATE" ]; then
+        echo "❌ Environment template file not found: $ENV_TEMPLATE"
+        missing_prerequisites=1
+    else
+        echo "✓ Environment template found: $ENV_TEMPLATE"
+    fi
+
+    if [ ! -f "$DOCKER_COMPOSE_FILE" ]; then
+        echo "❌ Docker Compose file not found: $DOCKER_COMPOSE_FILE"
+        missing_prerequisites=1
+    else
+        echo "✓ Docker Compose file found: $DOCKER_COMPOSE_FILE"
+    fi
+
+    if [ $missing_prerequisites -ne 0 ]; then
+        echo ""
+        echo "❌ Prerequisites check failed. Please install missing dependencies and try again."
+        exit 1
+    fi
+
+    echo ""
+    echo "✓ All prerequisites met."
+    echo ""
+}
+
+# Check prerequisites before proceeding
+check_prerequisites
 
 # Step 1: Create environment file from template if it doesn't exist
 if [ ! -f "$ENV_FILE" ]; then
@@ -25,7 +87,7 @@ generate_secret_key() {
 }
 
 generate_encryption_key() {
-    python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+    python3 -c "import secrets; import base64; print(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode())"
 }
 
 # Check if SECRET_KEY is empty and generate if needed
