@@ -125,7 +125,7 @@ npm run dev
 # Run unit tests
 npm run test
 
-# Run E2E tests (requires backend running)
+# Run E2E tests (starts demo backend if not running)
 npm run test:e2e
 
 # Run E2E tests with browser visible
@@ -304,7 +304,7 @@ GitHub Actions workflow at `.github/workflows/ci.yml`:
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────┐
 │ Lint            │     │ Test             │     │ Deploy      │
-│ ├─ Backend      │────▶│ ├─ Frontend Unit │────▶│ (main only) │
+│ ├─ Backend      │────>│ ├─ Frontend Unit │────>│ (main only) │
 │ └─ Frontend     │     │ ├─ Frontend E2E  │     │             │
 └─────────────────┘     │ └─ Backend pytest│     └─────────────┘
                         └──────────────────┘
