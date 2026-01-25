@@ -16,7 +16,7 @@ export function Header() {
           className="flex items-center gap-2 font-bold text-xl"
         >
           <Logo size={24} />
-          JiraLocal
+          LaColaRij
         </Link>
 
         <nav className="flex items-center gap-4">

@@ -36,7 +36,7 @@ const HeroSection = () => {
 
           {/* Subtitle */}
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto mb-10">
-            JiraLocal connects to your Jira instance, letting you search, edit,
+            LaColaRij connects to your Jira instance, letting you search, edit,
             and manage issues offline — then sync seamlessly when you&apos;re
             back online.
           </p>
@@ -51,14 +51,6 @@ const HeroSection = () => {
               Go to Demo
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="px-8 py-6 text-lg font-semibold rounded-xl border-2 hover:bg-secondary transition-all duration-300"
-              onClick={() => navigate('/login')}
-            >
-              Connect Jira
-            </Button>
           </div>
 
           {/* Feature pills */}
@@ -66,10 +58,6 @@ const HeroSection = () => {
             <FeaturePill
               icon={<Cloud className="w-4 h-4" />}
               text="Works Offline"
-            />
-            <FeaturePill
-              icon={<RefreshCw className="w-4 h-4" />}
-              text="Auto Sync"
             />
             <FeaturePill
               icon={<Zap className="w-4 h-4" />}

@@ -23,7 +23,7 @@ const CTASection = () => {
           </h2>
 
           <p className="text-xl text-muted-foreground mb-10">
-            Start with our demo server to experience JiraLocal, or connect your
+            Start with our demo server to experience LaColaRij, or connect your
             own Jira instance.
           </p>
 

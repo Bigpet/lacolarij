@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <Link to="/" className="flex items-center gap-3">
             <Logo size={28} />
-            <span className="font-bold text-lg text-foreground">JiraLocal</span>
+            <span className="font-bold text-lg text-foreground">LaColaRij</span>
           </Link>
 
           <nav className="flex items-center gap-6 text-sm text-muted-foreground">
@@ -32,7 +32,7 @@ const Footer = () => {
 
           <div className="flex items-center gap-4">
             <a
-              href="https://github.com/Bigpet/jiralocal"
+              href="https://github.com/Bigpet/lacolarij"
               target="_blank"
               rel="noopener noreferrer"
               className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
@@ -44,7 +44,7 @@ const Footer = () => {
 
         <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
           <p>
-            &copy; {new Date().getFullYear()} JiraLocal. Built for developers
+            &copy; {new Date().getFullYear()} LaColaRij. Built for developers
             who work anywhere.
           </p>
         </div>
