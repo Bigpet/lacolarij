@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/ui/Logo';
 import { SyncStatusBar } from '@/components/sync/SyncStatusBar';
 import { LogOut, Settings } from 'lucide-react';
 
@@ -10,8 +11,9 @@ export function Header() {
   return (
     <header className="border-b bg-background">
       <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-        <Link to="/" className="font-bold text-xl">
-          JiraLocal
+        <Link to="/" className="flex items-center gap-2 font-bold text-xl">
+          <Logo size={24} />
+          LaColaRij
         </Link>
 
         <nav className="flex items-center gap-4">
