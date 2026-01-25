@@ -31,8 +31,8 @@ test.describe('Registration', () => {
     const uniqueUsername = `e2e_new_user_${Date.now()}`;
     await registerPage.register(uniqueUsername, 'SecurePassword123!');
 
-    // Should redirect to home page after successful registration
-    await expect(page).toHaveURL('/', { timeout: 10000 });
+    // Should redirect to dashboard page after successful registration
+    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
   });
 
   test('should show error for mismatched passwords', async ({ page }) => {
@@ -90,17 +90,17 @@ test.describe('Registration', () => {
     await expect(page).toHaveURL('/login');
   });
 
-  test('should redirect to home if already logged in', async ({ page }) => {
+  test('should redirect to dashboard if already logged in', async ({ page }) => {
     const registerPage = new RegisterPage(page);
     await registerPage.goto('/register');
 
     // First register to get logged in
     const uniqueUsername = `e2e_redirect_test_${Date.now()}`;
     await registerPage.register(uniqueUsername, 'SecurePassword123!');
-    await expect(page).toHaveURL('/', { timeout: 10000 });
+    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
 
     // Try to go to register page again - should redirect
     await page.goto('/register');
-    await expect(page).toHaveURL('/', { timeout: 5000 });
+    await expect(page).toHaveURL('/dashboard', { timeout: 5000 });
   });
 });

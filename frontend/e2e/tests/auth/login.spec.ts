@@ -31,8 +31,8 @@ test.describe('Login', () => {
 
     await loginPage.login(TEST_USERS.default.username, TEST_USERS.default.password);
 
-    // Should redirect to home page after successful login
-    await expect(page).toHaveURL('/', { timeout: 10000 });
+    // Should redirect to dashboard page after successful login
+    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
   });
 
   test('should show error for invalid credentials', async ({ page }) => {
@@ -75,16 +75,16 @@ test.describe('Login', () => {
     await expect(page).toHaveURL('/register');
   });
 
-  test('should redirect to home if already logged in', async ({ page }) => {
+  test('should redirect to dashboard if already logged in', async ({ page }) => {
     const loginPage = new LoginPage(page);
     await loginPage.goto('/login');
 
     // First login
     await loginPage.login(TEST_USERS.default.username, TEST_USERS.default.password);
-    await expect(page).toHaveURL('/', { timeout: 10000 });
+    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
 
     // Try to go to login page again - should redirect
     await page.goto('/login');
-    await expect(page).toHaveURL('/', { timeout: 5000 });
+    await expect(page).toHaveURL('/dashboard', { timeout: 5000 });
   });
 });

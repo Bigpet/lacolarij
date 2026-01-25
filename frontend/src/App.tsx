@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { AppShell } from '@/components/layout/AppShell';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { RegisterPage } from '@/features/auth/RegisterPage';
+import { LandingPage } from '@/pages/LandingPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { IssuesPage } from '@/pages/IssuesPage';
 import { IssueDetailPage } from '@/pages/IssueDetailPage';
@@ -14,15 +15,29 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
   // Redirect to dashboard if already logged in
   if (token) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;
 }
 
+function RootRoute() {
+  const { token } = useAuthStore();
+
+  // Show landing page for unauthenticated users, redirect to dashboard for authenticated
+  if (token) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <LandingPage />;
+}
+
 function App() {
   return (
     <Routes>
+      {/* Landing page for unauthenticated users */}
+      <Route path="/" element={<RootRoute />} />
+
       {/* Public routes */}
       <Route
         path="/login"
@@ -43,7 +58,7 @@ function App() {
 
       {/* Protected routes */}
       <Route element={<AppShell />}>
-        <Route path="/" element={<DashboardPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/issues" element={<IssuesPage />} />
         <Route path="/issues/:issueId" element={<IssueDetailPage />} />
         <Route path="/board" element={<BoardPage />} />
