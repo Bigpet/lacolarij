@@ -25,7 +25,7 @@ export function LoginPage() {
 
     try {
       await login(username, password);
-      navigate('/');
+      navigate('/dashboard');
     } catch {
       // Error is handled by the store
     }
@@ -36,7 +36,7 @@ export function LoginPage() {
 
     try {
       await demoLogin();
-      navigate('/');
+      navigate('/dashboard');
     } catch {
       // Error is handled by the store
     }
@@ -102,8 +102,7 @@ export function LoginPage() {
             </div>
             <Button
               type="button"
-              variant="outline"
-              className="w-full"
+              className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground font-medium shadow-sm"
               onClick={handleDemoLogin}
               disabled={isLoading}
             >
