@@ -32,7 +32,7 @@ test.describe('Issue Creation', () => {
     // Login
     const loginPage = new LoginPage(page);
     await loginPage.login(TEST_USERS.default.username, TEST_USERS.default.password);
-    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
+    await expect(page).toHaveURL('/issues', { timeout: 10000 });
 
     // Set up a mock JIRA connection with consistent name
     const settingsPage = new SettingsPage(page);

@@ -14,6 +14,7 @@ import {
 } from '@/lib/db';
 import { useSyncStore } from '@/stores/syncStore';
 import { issueService } from '@/features/issues/issueService';
+import { logSyncEvent } from '@/features/sync/syncDebugService';
 import type { Issue, PendingOperation } from '@/types';
 
 // Map status category from JIRA to our simplified version
@@ -108,6 +109,16 @@ export class SyncEngine {
     store.setError(null);
     store.setActiveConnection(options.connectionId);
 
+    logSyncEvent({
+      level: 'info',
+      operation: 'push',
+      message: 'Sync started',
+      details: {
+        connectionId: options.connectionId,
+        fullSync: options.fullSync,
+      },
+    });
+
     try {
       // Push local changes first (before pull to minimize conflicts)
       await this.pushPendingChanges(options.connectionId);
@@ -121,10 +132,26 @@ export class SyncEngine {
       // Update pending count
       const pendingCount = await db.pendingOperations.count();
       store.setPendingCount(pendingCount);
+
+      logSyncEvent({
+        level: 'success',
+        operation: 'push',
+        message: 'Sync completed successfully',
+        details: { pendingCount },
+      });
     } catch (error) {
       console.error('Sync error:', error);
       store.setStatus('error');
-      store.setError(error instanceof Error ? error.message : 'Sync failed');
+      const errorMessage =
+        error instanceof Error ? error.message : 'Sync failed';
+      store.setError(errorMessage);
+
+      logSyncEvent({
+        level: 'error',
+        operation: 'push',
+        message: `Sync failed: ${errorMessage}`,
+        details: { error: errorMessage },
+      });
     } finally {
       this.isRunning = false;
     }
@@ -164,6 +191,14 @@ export class SyncEngine {
         : 'created >= -3000w ORDER BY updated ASC';
     }
 
+    // DEFENSIVE: Jira rejects unbounded queries, ensure JQL is never empty
+    if (!searchJql || searchJql.trim() === '') {
+      console.error('[syncEngine] BUG: searchJql is empty, using fallback');
+      searchJql = 'created >= -3000w ORDER BY updated ASC';
+    }
+
+    console.log(`[syncEngine] Final search JQL: ${searchJql}`);
+
     let nextPageToken: string | undefined = undefined;
     let totalFetched = 0;
 
@@ -199,6 +234,13 @@ export class SyncEngine {
 
       totalFetched += response.issues.length;
 
+      logSyncEvent({
+        level: 'info',
+        operation: 'pull',
+        message: `Pulled batch of ${response.issues.length} issues (total: ${totalFetched})`,
+        details: { batchSize: response.issues.length, totalFetched },
+      });
+
       // Check if there's a next page
       if (!response.nextPageToken) {
         break;
@@ -208,6 +250,13 @@ export class SyncEngine {
     }
 
     console.log(`Synced ${totalFetched} issues`);
+
+    logSyncEvent({
+      level: 'success',
+      operation: 'pull',
+      message: `Pull completed: ${totalFetched} issues synced`,
+      details: { totalFetched },
+    });
 
     // Update sync metadata
     await syncMetaRepository.setLastSyncTime(connectionId, Date.now());
@@ -273,6 +322,20 @@ export class SyncEngine {
       if (remote.fields.updated !== local._remoteVersion) {
         // Remote changed too - we have a conflict
         console.log(`[syncEngine] CONFLICT detected for ${remote.key}`);
+
+        logSyncEvent({
+          level: 'warn',
+          operation: 'conflict',
+          entityType: 'issue',
+          entityId: local.id,
+          entityKey: local.key,
+          message: `Conflict detected: ${local.key}`,
+          details: {
+            localVersion: local._remoteVersion,
+            remoteVersion: remote.fields.updated,
+          },
+        });
+
         await issueRepository.put({
           ...local,
           _syncStatus: 'conflict',
@@ -364,10 +427,22 @@ export class SyncEngine {
 
     if (pending.length === 0) {
       console.log('No pending changes to push');
+      logSyncEvent({
+        level: 'info',
+        operation: 'push',
+        message: 'No pending changes to push',
+      });
       return;
     }
 
     console.log(`Pushing ${pending.length} pending changes`);
+
+    logSyncEvent({
+      level: 'info',
+      operation: 'push',
+      message: `Pushing ${pending.length} pending operations`,
+      details: { count: pending.length },
+    });
 
     for (const op of pending) {
       // Process both issue and comment operations
@@ -385,6 +460,17 @@ export class SyncEngine {
         }
       } catch (error) {
         console.error(`Failed to push operation for ${op.entityId}:`, error);
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+
+        logSyncEvent({
+          level: 'error',
+          operation: 'push',
+          entityType: op.entityType,
+          entityId: op.entityId,
+          message: `Push failed for ${op.entityId}: ${errorMessage}`,
+          details: { error: errorMessage, operation: op.operation },
+        });
 
         // Check if it's a conflict error (409)
         if (this.isConflictError(error)) {
@@ -479,6 +565,20 @@ export class SyncEngine {
     // Check for version conflict
     if (remoteIssue.fields.updated !== localIssue._remoteVersion) {
       console.log(`Conflict detected for ${localIssue.key}`);
+
+      logSyncEvent({
+        level: 'warn',
+        operation: 'conflict',
+        entityType: 'issue',
+        entityId: localIssue.id,
+        entityKey: localIssue.key,
+        message: `Conflict during push: ${localIssue.key}`,
+        details: {
+          localVersion: localIssue._remoteVersion,
+          remoteVersion: remoteIssue.fields.updated,
+        },
+      });
+
       await this.handlePushConflict(
         localIssue,
         remoteIssue,
@@ -508,6 +608,16 @@ export class SyncEngine {
     await pendingOperationsRepository.delete(op.id);
 
     console.log(`Successfully pushed ${localIssue.key}`);
+
+    logSyncEvent({
+      level: 'success',
+      operation: 'push',
+      entityType: 'issue',
+      entityId: localIssue.id,
+      entityKey: localIssue.key,
+      message: `Pushed ${localIssue.key}: ${op.operation}`,
+      details: { newVersion: updatedRemote.fields.updated },
+    });
   }
 
   /**
@@ -539,21 +649,60 @@ export class SyncEngine {
       `[syncEngine] Issue created: id=${createResult.id}, key=${createResult.key}`
     );
 
-    // Fetch the full issue to get all fields and timestamps
-    const remoteIssue = await api.getIssue(connectionId, createResult.key);
+    // The issue was created on Jira - we MUST delete the pending operation
+    // to prevent duplicate creation on retry, regardless of whether getIssue succeeds
+    try {
+      // Fetch the full issue to get all fields and timestamps
+      const remoteIssue = await api.getIssue(connectionId, createResult.key);
 
-    // Convert to local format
-    const newLocalIssue = this.mapJiraIssueToLocalStatic(remoteIssue);
+      // Convert to local format
+      const newLocalIssue = this.mapJiraIssueToLocalStatic(remoteIssue);
 
-    // Replace the LOCAL-* issue with the real one
-    await issueService.replaceWithRemote(op.entityId, newLocalIssue);
+      // Replace the LOCAL-* issue with the real one
+      await issueService.replaceWithRemote(op.entityId, newLocalIssue);
 
-    // Remove pending operation
+      console.log(
+        `[syncEngine] Successfully created and synced ${createResult.key} (was ${localIssue.key})`
+      );
+    } catch (fetchError) {
+      // getIssue failed, but the issue WAS created on Jira
+      // Create a minimal local issue with the info we have to prevent duplicate creation
+      console.warn(
+        `[syncEngine] Issue ${createResult.key} created but failed to fetch full details:`,
+        fetchError
+      );
+
+      const minimalIssue: Issue = {
+        id: createResult.id,
+        key: createResult.key,
+        projectKey: localIssue.projectKey,
+        summary: localIssue.summary,
+        description: localIssue.description,
+        status: localIssue.status,
+        statusCategory: localIssue.statusCategory,
+        assignee: localIssue.assignee,
+        reporter: localIssue.reporter,
+        priority: localIssue.priority,
+        issueType: localIssue.issueType,
+        labels: localIssue.labels,
+        created: localIssue.created,
+        updated: new Date().toISOString(),
+        _localUpdated: Date.now(),
+        _syncStatus: 'pending', // Mark as pending so it gets re-fetched on next sync
+        _syncError: 'Created on remote but failed to fetch full details',
+        _remoteVersion: '',
+      };
+
+      // Replace the LOCAL-* issue with the real key
+      await issueService.replaceWithRemote(op.entityId, minimalIssue);
+
+      console.log(
+        `[syncEngine] Created ${createResult.key} with minimal data (was ${localIssue.key}), will re-fetch on next sync`
+      );
+    }
+
+    // ALWAYS remove the pending create operation since the issue was created
     await pendingOperationsRepository.delete(op.id);
-
-    console.log(
-      `[syncEngine] Successfully created and synced ${createResult.key} (was ${localIssue.key})`
-    );
   }
 
   /**

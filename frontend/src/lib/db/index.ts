@@ -154,6 +154,10 @@ export const pendingOperationsRepository = {
     return db.pendingOperations.orderBy('createdAt').toArray();
   },
 
+  async getById(id: string): Promise<PendingOperation | undefined> {
+    return db.pendingOperations.get(id);
+  },
+
   async getByEntityId(entityId: string): Promise<PendingOperation[]> {
     return db.pendingOperations.where('entityId').equals(entityId).toArray();
   },

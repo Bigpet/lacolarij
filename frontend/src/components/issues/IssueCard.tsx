@@ -49,7 +49,7 @@ export function IssueCard({ issue, onClick, selected }: IssueCardProps) {
       onClick={onClick}
       className={cn(
         'flex items-center gap-4 p-3 border rounded-lg cursor-pointer transition-colors',
-        'hover:bg-accent/50',
+        'hover:bg-muted/50',
         selected && 'bg-accent border-primary'
       )}
       data-testid="issue-card"

@@ -11,7 +11,6 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from app.services.mock_jira.models import (
     DEFAULT_TRANSITIONS,
     CommentCreate,
-    IssueCreate,
     TransitionRequest,
 )
 
@@ -41,48 +40,65 @@ def _get_issue(issue_id_or_key: str) -> dict[str, Any]:
 # Create routes for both API versions
 @router.post("/rest/api/2/issue")
 @router.post("/rest/api/3/issue")
-async def create_issue(issue: IssueCreate) -> dict[str, Any]:
-    """Create a new issue."""
-    key = (
-        f"TEST-{len(_issues) // 2 + 1}"  # Divide by 2 since we store by both key and id
-    )
-    issue_id = str(len(_issues) // 2 + 1)
-    now = _now_iso()
+async def create_issue(request: Request) -> dict[str, Any]:
+    """Create a new issue.
 
-    new_issue = {
-        "id": issue_id,
-        "key": key,
-        "self": f"http://localhost:8000/rest/api/3/issue/{key}",
-        "fields": {
-            "summary": issue.fields.summary,
-            "description": issue.fields.description,
-            "issuetype": issue.fields.issuetype or {"name": "Task"},
-            "project": issue.fields.project or {"key": "TEST"},
-            "status": {
-                "name": "To Do",
-                "id": "1",
-                "statusCategory": {
-                    "id": 2,
-                    "key": "new",
-                    "colorName": "blue-gray",
+    Note: Manually parse the body to handle missing Content-Type during 307 redirects.
+    """
+    try:
+        body_bytes = await request.body()
+        if not body_bytes:
+            raise HTTPException(status_code=400, detail="Missing request body")
+
+        issue_data = json.loads(body_bytes)
+
+        # Extract fields from the request body
+        fields = issue_data.get("fields", {})
+        summary = fields.get("summary", "Untitled Issue")
+        description = fields.get("description")
+        issuetype = fields.get("issuetype", {"name": "Task"})
+        project = fields.get("project", {"key": "TEST"})
+
+        key = f"TEST-{len(_issues) // 2 + 1}"
+        issue_id = str(len(_issues) // 2 + 1)
+        now = _now_iso()
+
+        new_issue = {
+            "id": issue_id,
+            "key": key,
+            "self": f"http://localhost:8000/rest/api/3/issue/{key}",
+            "fields": {
+                "summary": summary,
+                "description": description,
+                "issuetype": issuetype,
+                "project": project,
+                "status": {
                     "name": "To Do",
+                    "id": "1",
+                    "statusCategory": {
+                        "id": 2,
+                        "key": "new",
+                        "colorName": "blue-gray",
+                        "name": "To Do",
+                    },
                 },
+                "priority": {"name": "Medium"},
+                "assignee": None,
+                "reporter": {"displayName": "Demo User"},
+                "labels": [],
+                "created": now,
+                "updated": now,
+                "comment": {"comments": [], "total": 0},
             },
-            "priority": {"name": "Medium"},
-            "assignee": None,
-            "reporter": {"displayName": "Demo User"},
-            "labels": [],
-            "created": now,
-            "updated": now,
-            "comment": {"comments": [], "total": 0},
-        },
-    }
+        }
 
-    # Store by both key and ID for lookup flexibility
-    _issues[key] = new_issue
-    _issues[issue_id] = new_issue
+        # Store by both key and ID for lookup flexibility
+        _issues[key] = new_issue
+        _issues[issue_id] = new_issue
 
-    return new_issue
+        return new_issue
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON body")
 
 
 @router.get("/rest/api/2/issue/{issue_id_or_key}")

@@ -146,8 +146,15 @@ class ApiClient {
       fields?: string[];
     } = {}
   ): Promise<JiraSearchResponse> {
+    console.log(`[api] searchIssues called with jql: "${params.jql}"`);
     const queryParams = new URLSearchParams();
-    if (params.jql) queryParams.set('jql', params.jql);
+    if (params.jql) {
+      queryParams.set('jql', params.jql);
+    } else {
+      // DEFENSIVE: Always include a bounded JQL to prevent Jira rejection
+      console.warn('[api] searchIssues: jql is empty, using fallback');
+      queryParams.set('jql', 'created >= -3000w ORDER BY updated ASC');
+    }
     if (params.nextPageToken)
       queryParams.set('nextPageToken', params.nextPageToken);
     if (params.maxResults !== undefined)

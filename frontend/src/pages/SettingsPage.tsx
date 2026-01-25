@@ -11,13 +11,19 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Trash2, Plus } from 'lucide-react';
+import { Trash2, Plus, Bug } from 'lucide-react';
+import { SyncDebugPanel } from '@/components/sync/debug/SyncDebugPanel';
+import { useSyncStore } from '@/stores/syncStore';
 
 export function SettingsPage() {
   const [connections, setConnections] = useState<JiraConnection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
+
+  // Get active connection for debug panel
+  const { activeConnectionId } = useSyncStore();
 
   // Form state
   const [name, setName] = useState('');
@@ -190,6 +196,33 @@ export function SettingsPage() {
           )}
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bug className="h-5 w-5" />
+            Sync Debugging
+          </CardTitle>
+          <CardDescription>
+            Debug tools for diagnosing sync issues
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            View sync logs, inspect pending operations, and test syncing
+            individual changes in isolation.
+          </p>
+          <Button onClick={() => setShowDebugPanel(true)}>
+            Open Debug Panel
+          </Button>
+        </CardContent>
+      </Card>
+
+      <SyncDebugPanel
+        open={showDebugPanel}
+        onOpenChange={setShowDebugPanel}
+        connectionId={activeConnectionId}
+      />
     </div>
   );
 }

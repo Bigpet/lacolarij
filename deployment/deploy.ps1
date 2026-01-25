@@ -140,7 +140,7 @@ docker compose -f "$DockerComposeFile" --env-file "$EnvFile" up --build -d
 
 Write-Host ""
 Write-Host "=== Deployment complete ===" -ForegroundColor Cyan
-Write-Host "JiraLocal should now be running at http://localhost:6555/ ." -ForegroundColor Green
+Write-Host "LaColaRij (JiraLocal) should now be running at http://localhost:6555/ ." -ForegroundColor Green
 Write-Host ""
 Write-Host "To view logs, run: docker compose -f `"$DockerComposeFile`" logs -f" -ForegroundColor Gray
 Write-Host "To stop, run: docker compose -f `"$DockerComposeFile`" down" -ForegroundColor Gray
