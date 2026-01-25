@@ -25,7 +25,7 @@ export function LoginPage() {
 
     try {
       await login(username, password);
-      navigate('/dashboard');
+      navigate('/issues');
     } catch {
       // Error is handled by the store
     }
@@ -36,7 +36,7 @@ export function LoginPage() {
 
     try {
       await demoLogin();
-      navigate('/dashboard');
+      navigate('/issues');
     } catch {
       // Error is handled by the store
     }

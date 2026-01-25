@@ -38,7 +38,7 @@ export function RegisterPage() {
 
     try {
       await register(username, password);
-      navigate('/dashboard');
+      navigate('/issues');
     } catch {
       // Error is handled by the store
     }
