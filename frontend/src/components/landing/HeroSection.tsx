@@ -37,8 +37,8 @@ const HeroSection = () => {
           {/* Subtitle */}
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto mb-10">
             JiraLocal connects to your Jira instance, letting you search, edit,
-            and manage issues offline — then sync seamlessly when you&apos;re back
-            online.
+            and manage issues offline — then sync seamlessly when you&apos;re
+            back online.
           </p>
 
           {/* CTA Buttons */}
