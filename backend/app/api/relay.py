@@ -168,6 +168,7 @@ async def _relay_jira_request_impl(
             "authorization",
             "content-length",
             "connection",
+            "content-type",
         ):
             headers[key] = value
 

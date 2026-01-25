@@ -96,3 +96,16 @@ export interface PendingOperation {
 export interface ApiError {
   detail: string;
 }
+
+// Sync debug types
+export interface SyncLogEntry {
+  id: string;
+  timestamp: number;
+  level: 'info' | 'warn' | 'error' | 'success';
+  operation: 'push' | 'pull' | 'conflict' | 'isolated-sync';
+  entityType?: 'issue' | 'comment';
+  entityId?: string;
+  entityKey?: string;
+  message: string;
+  details?: unknown;
+}
