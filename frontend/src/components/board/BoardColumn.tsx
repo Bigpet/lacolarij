@@ -49,7 +49,7 @@ export function BoardColumn({
             {...provided.droppableProps}
             className={cn(
               'flex-1 p-2 space-y-2 rounded-b-lg border border-t-0 min-h-[200px]',
-              snapshot.isDraggingOver && 'bg-accent/50'
+              snapshot.isDraggingOver && 'bg-primary/10'
             )}
           >
             {issues.map((issue, index) => (

@@ -31,7 +31,7 @@ test.describe('Issue List View', () => {
     // Login
     const loginPage = new LoginPage(page);
     await loginPage.login(TEST_USERS.default.username, TEST_USERS.default.password);
-    await expect(page).toHaveURL('/', { timeout: 10000 });
+    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
   });
 
   test.describe('With Mock JIRA Connection', () => {

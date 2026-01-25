@@ -7,7 +7,7 @@ test.describe('Smoke Tests', () => {
     await page.goto('/');
 
     // Check that the page loads without errors
-    await expect(page).toHaveTitle(/JiraLocal/);
+    await expect(page).toHaveTitle(/LaColaRij/);
   });
 
   test('should be able to go offline', async ({ page }) => {

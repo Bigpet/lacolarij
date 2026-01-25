@@ -21,13 +21,13 @@ test.describe('Session Persistence', () => {
 
     // Login
     await loginPage.login(TEST_USERS.default.username, TEST_USERS.default.password);
-    await expect(page).toHaveURL('/', { timeout: 10000 });
+    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
 
     // Reload page
     await page.reload();
 
-    // Should still be on home page (not redirected to login)
-    await expect(page).toHaveURL('/');
+    // Should still be on dashboard page (not redirected to login)
+    await expect(page).toHaveURL('/dashboard');
   });
 
   test('should persist session when navigating to different pages', async ({ page }) => {
@@ -36,7 +36,7 @@ test.describe('Session Persistence', () => {
 
     // Login
     await loginPage.login(TEST_USERS.default.username, TEST_USERS.default.password);
-    await expect(page).toHaveURL('/', { timeout: 10000 });
+    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
 
     // Navigate to issues page
     await page.goto('/issues');
@@ -60,7 +60,7 @@ test.describe('Session Persistence', () => {
 
     // Login
     await loginPage.login(TEST_USERS.default.username, TEST_USERS.default.password);
-    await expect(page).toHaveURL('/', { timeout: 10000 });
+    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
 
     // Click logout button in header - look for the LogOut icon button
     const logoutButton = page.locator('header').locator('button').filter({
@@ -89,9 +89,13 @@ test.describe('Session Persistence', () => {
     await expect(page).toHaveURL('/login');
   });
 
-  test('should redirect unauthenticated users to login', async ({ page }) => {
-    // Try to access protected routes without logging in
+  test('should redirect unauthenticated users to login from protected routes', async ({ page }) => {
+    // Root shows landing page for unauthenticated users
     await page.goto('/');
+    await expect(page).toHaveURL('/');
+
+    // Protected routes should redirect to login
+    await page.goto('/dashboard');
     await expect(page).toHaveURL('/login');
 
     await page.goto('/issues');
@@ -110,7 +114,7 @@ test.describe('Session Persistence', () => {
 
     // Login
     await loginPage.login(TEST_USERS.default.username, TEST_USERS.default.password);
-    await expect(page).toHaveURL('/', { timeout: 10000 });
+    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
 
     // Verify auth token is stored
     const authStorage = await page.evaluate(() => {
@@ -129,7 +133,7 @@ test.describe('Session Persistence', () => {
 
     // Login
     await loginPage.login(TEST_USERS.default.username, TEST_USERS.default.password);
-    await expect(page).toHaveURL('/', { timeout: 10000 });
+    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
 
     // Verify token exists
     let authStorage = await page.evaluate(() => {

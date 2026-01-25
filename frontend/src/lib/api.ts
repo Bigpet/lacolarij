@@ -1,5 +1,5 @@
 /**
- * API client for JiraLocal backend communication.
+ * API client for LaColaRij backend communication.
  */
 
 import type {
