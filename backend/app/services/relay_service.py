@@ -1,7 +1,6 @@
 """Relay service for forwarding requests to JIRA servers."""
 
 import base64
-import json
 import logging
 from dataclasses import dataclass
 from typing import Any
@@ -89,7 +88,8 @@ class RelayService:
         }
 
         logger.info(
-            f"[RelayService] Initial headers (before update): {list(request_headers.keys())}"
+            "[RelayService] Initial headers (before update):"
+            f" {list(request_headers.keys())}"
         )
 
         if headers:
@@ -153,7 +153,7 @@ class RelayService:
                 "transfer-encoding",
                 "upgrade",
                 "content-length",  # Let FastAPI recalculate this
-                "content-encoding",  # httpx already decompresses; don't tell browser to decompress again
+                "content-encoding",  # httpx already decompresses; don't tell browser to decompress again  # noqa: E501
                 "authorization",  # Don't leak auth headers
             }
 
