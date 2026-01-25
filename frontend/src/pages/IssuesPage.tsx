@@ -1,12 +1,13 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IssueList } from '@/components/issues';
+import { IssueList, CreateIssueModal } from '@/components/issues';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useSync } from '@/features/sync/syncEngine';
 import { api } from '@/lib/api';
+import { issueRepository } from '@/lib/db';
 import type { Issue, JiraConnection } from '@/types';
-import { RefreshCw, Settings } from 'lucide-react';
+import { RefreshCw, Settings, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function IssuesPage() {
@@ -17,8 +18,34 @@ export function IssuesPage() {
     string | null
   >(null);
   const [isLoadingConnections, setIsLoadingConnections] = useState(true);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [defaultProjectKey, setDefaultProjectKey] = useState('');
 
   const { sync, status: syncStatus } = useSync();
+
+  // Get default project key from existing issues
+  useEffect(() => {
+    const loadDefaultProjectKey = async () => {
+      const issues = await issueRepository.getAll();
+      if (issues.length > 0) {
+        // Use the most common project key
+        const projectCounts: Record<string, number> = {};
+        for (const issue of issues) {
+          if (!issue.projectKey.startsWith('LOCAL')) {
+            projectCounts[issue.projectKey] =
+              (projectCounts[issue.projectKey] || 0) + 1;
+          }
+        }
+        const sorted = Object.entries(projectCounts).sort(
+          (a, b) => b[1] - a[1]
+        );
+        if (sorted.length > 0) {
+          setDefaultProjectKey(sorted[0][0]);
+        }
+      }
+    };
+    loadDefaultProjectKey();
+  }, []);
 
   // Load connections on mount
   useEffect(() => {
@@ -43,6 +70,14 @@ export function IssuesPage() {
   const handleIssueSelect = useCallback(
     (issue: Issue) => {
       setSelectedIssue(issue);
+      navigate(`/issues/${issue.id}`);
+    },
+    [navigate]
+  );
+
+  const handleIssueCreated = useCallback(
+    (issue: Issue) => {
+      // Navigate to the newly created issue
       navigate(`/issues/${issue.id}`);
     },
     [navigate]
@@ -87,6 +122,15 @@ export function IssuesPage() {
               ))}
             </select>
           )}
+
+          <Button
+            size="sm"
+            onClick={() => setIsCreateModalOpen(true)}
+            data-testid="create-issue-button"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create Issue
+          </Button>
 
           <Button
             variant="outline"
@@ -147,6 +191,14 @@ export function IssuesPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Create Issue Modal */}
+      <CreateIssueModal
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        defaultProjectKey={defaultProjectKey}
+        onIssueCreated={handleIssueCreated}
+      />
     </div>
   );
 }
