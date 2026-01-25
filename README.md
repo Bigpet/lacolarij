@@ -266,7 +266,7 @@ Deployed to OCI (Oracle Cloud Infrastructure) with auto-deployment on push to ma
 - Docker and Docker Compose installed
 - Port 6555 available (configurable via `HOST_PORT`)
 
-#### Quick Start (Recommended)
+#### <a name="quickstart"></a>Quick Start (Recommended)
 
 **macOS / Linux:**
 ```bash
@@ -324,6 +324,13 @@ Complete instructions to build and run the project from scratch.
 
 ### Quick Start
 
+#### Test Build and Deployment
+
+Look at [The Quickstart Guide](#quickstart) to run the whole project locally.
+After deploying, access it at http://localhost:6555 .
+
+#### Development Run Tests
+
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/jiralocal.git
@@ -359,11 +366,3 @@ npm run dev
 
 Access at http://localhost:5173 (frontend dev server proxies API requests to backend).
 
-### Production Deployment
-
-```bash
-cd deployment
-./deploy.sh
-```
-
-Access at http://localhost:6555
