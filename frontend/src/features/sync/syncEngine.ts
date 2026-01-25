@@ -641,21 +641,60 @@ export class SyncEngine {
       `[syncEngine] Issue created: id=${createResult.id}, key=${createResult.key}`
     );
 
-    // Fetch the full issue to get all fields and timestamps
-    const remoteIssue = await api.getIssue(connectionId, createResult.key);
+    // The issue was created on Jira - we MUST delete the pending operation
+    // to prevent duplicate creation on retry, regardless of whether getIssue succeeds
+    try {
+      // Fetch the full issue to get all fields and timestamps
+      const remoteIssue = await api.getIssue(connectionId, createResult.key);
 
-    // Convert to local format
-    const newLocalIssue = this.mapJiraIssueToLocalStatic(remoteIssue);
+      // Convert to local format
+      const newLocalIssue = this.mapJiraIssueToLocalStatic(remoteIssue);
 
-    // Replace the LOCAL-* issue with the real one
-    await issueService.replaceWithRemote(op.entityId, newLocalIssue);
+      // Replace the LOCAL-* issue with the real one
+      await issueService.replaceWithRemote(op.entityId, newLocalIssue);
 
-    // Remove pending operation
+      console.log(
+        `[syncEngine] Successfully created and synced ${createResult.key} (was ${localIssue.key})`
+      );
+    } catch (fetchError) {
+      // getIssue failed, but the issue WAS created on Jira
+      // Create a minimal local issue with the info we have to prevent duplicate creation
+      console.warn(
+        `[syncEngine] Issue ${createResult.key} created but failed to fetch full details:`,
+        fetchError
+      );
+
+      const minimalIssue: Issue = {
+        id: createResult.id,
+        key: createResult.key,
+        projectKey: localIssue.projectKey,
+        summary: localIssue.summary,
+        description: localIssue.description,
+        status: localIssue.status,
+        statusCategory: localIssue.statusCategory,
+        assignee: localIssue.assignee,
+        reporter: localIssue.reporter,
+        priority: localIssue.priority,
+        issueType: localIssue.issueType,
+        labels: localIssue.labels,
+        created: localIssue.created,
+        updated: new Date().toISOString(),
+        _localUpdated: Date.now(),
+        _syncStatus: 'pending', // Mark as pending so it gets re-fetched on next sync
+        _syncError: 'Created on remote but failed to fetch full details',
+        _remoteVersion: '',
+      };
+
+      // Replace the LOCAL-* issue with the real key
+      await issueService.replaceWithRemote(op.entityId, minimalIssue);
+
+      console.log(
+        `[syncEngine] Created ${createResult.key} with minimal data (was ${localIssue.key}), will re-fetch on next sync`
+      );
+    }
+
+    // ALWAYS remove the pending create operation since the issue was created
     await pendingOperationsRepository.delete(op.id);
-
-    console.log(
-      `[syncEngine] Successfully created and synced ${createResult.key} (was ${localIssue.key})`
-    );
   }
 
   /**

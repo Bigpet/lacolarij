@@ -169,6 +169,19 @@ async def _relay_jira_request_impl(
             "content-length",
             "connection",
             "content-type",
+            "cookie",
+            "accept-language",
+            "accept-encoding",
+            "referer",
+            "sec-fetch-dest",
+            "sec-fetch-mode",
+            "sec-fetch-site",
+            "origin",
+            "sec-ch-ua-mobile",
+            "sec-ch-ua",
+            "user-agent",
+            "sec-ch-ua-platform",
+            "x-jira-url",
         ):
             headers[key] = value
 

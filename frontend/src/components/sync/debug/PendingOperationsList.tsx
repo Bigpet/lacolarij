@@ -257,7 +257,7 @@ export function PendingOperationsList({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       {/* Toolbar */}
       <div className="flex items-center gap-2 px-3 py-2 border-b bg-muted/30">
         <span className="text-sm font-medium">
@@ -283,7 +283,7 @@ export function PendingOperationsList({
       </div>
 
       {/* Operations list */}
-      <div className="flex-1 overflow-auto p-3">
+      <div className="flex-1 min-h-0 overflow-auto p-3">
         {operations.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
             No pending operations. All changes have been synced.

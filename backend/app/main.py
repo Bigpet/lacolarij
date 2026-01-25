@@ -1,7 +1,11 @@
 """FastAPI application factory."""
 
+import logging
 import os
 from contextlib import asynccontextmanager
+
+# Configure logging to show all levels
+logging.basicConfig(level=logging.DEBUG)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

@@ -1,6 +1,8 @@
 """Relay service for forwarding requests to JIRA servers."""
 
 import base64
+import json
+import logging
 from dataclasses import dataclass
 from typing import Any
 
@@ -8,6 +10,8 @@ import httpx
 
 from app.core.security import decrypt_api_token
 from app.models.connection import JiraConnection
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -68,6 +72,9 @@ class RelayService:
         Returns:
             RelayResponse containing status, headers, and body
         """
+        logger.info("=" * 60)
+        logger.info("[RelayService] forward_request called (NEW CODE LOADED)")
+        logger.info("=" * 60)
         # Build target URL
         base_url = connection.jira_url.rstrip("/")
         api_path = self._get_api_path(connection, path)
@@ -78,11 +85,49 @@ class RelayService:
             "Authorization": self._get_auth_header(connection),
             "Content-Type": "application/json",
             "Accept": "application/json",
+            "X-Atlassian-Token": "no-check",
         }
+
+        logger.info(
+            f"[RelayService] Initial headers (before update): {list(request_headers.keys())}"
+        )
+
         if headers:
+            logger.info(f"[RelayService] Client headers to add: {list(headers.keys())}")
             request_headers.update(headers)
 
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
+        # Always ensure XSRF bypass header is set (in case client overwrote it)
+        request_headers["X-Atlassian-Token"] = "no-check"
+
+        # Log request details (mask auth header for security)
+        logger.info(f"[RelayService] {method.upper()} {url}")
+        logger.info(
+            f"[RelayService] Connection: {connection.name} ({connection.jira_url})"
+        )
+        safe_headers = {
+            k: "***" if k.lower() == "authorization" else v
+            for k, v in request_headers.items()
+        }
+        logger.info(f"[RelayService] Final headers being sent: {safe_headers}")
+        if body:
+            logger.info(f"[RelayService] Body: {body}")
+        if query_params:
+            logger.info(f"[RelayService] Query params: {query_params}")
+
+        # Add event hook to log actual outgoing request
+        async def log_request(request):
+            safe_req_headers = {
+                k: "***" if k.lower() == "authorization" else v
+                for k, v in request.headers.items()
+            }
+            logger.info(
+                f"[RelayService] httpx OUTGOING request headers: {safe_req_headers}"
+            )
+            return request
+
+        async with httpx.AsyncClient(
+            timeout=self.timeout, event_hooks={"request": [log_request]}
+        ) as client:
             response = await client.request(
                 method=method.upper(),
                 url=url,
@@ -90,6 +135,11 @@ class RelayService:
                 params=query_params,
                 headers=request_headers,
             )
+
+            # Log response
+            logger.info(f"[RelayService] Response status: {response.status_code}")
+            if response.status_code >= 400:
+                logger.error(f"[RelayService] Response body: {response.text}")
 
             # Extract response headers (forward all except hop-by-hop headers)
             # Hop-by-hop headers that should NOT be forwarded:

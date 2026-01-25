@@ -14,6 +14,8 @@ import { Button } from '@/components/ui/button';
 import { SyncLogViewer } from './SyncLogViewer';
 import { PendingOperationsList } from './PendingOperationsList';
 import { cn } from '@/lib/utils';
+import { api } from '@/lib/api';
+import type { JiraConnection } from '@/types';
 
 interface SyncDebugPanelProps {
   open: boolean;
@@ -26,19 +28,59 @@ type Tab = 'logs' | 'pending';
 export function SyncDebugPanel({
   open,
   onOpenChange,
-  connectionId,
+  connectionId: initialConnectionId,
 }: SyncDebugPanelProps) {
   const [activeTab, setActiveTab] = React.useState<Tab>('logs');
+  const [connections, setConnections] = React.useState<JiraConnection[]>([]);
+  const [selectedConnectionId, setSelectedConnectionId] = React.useState<
+    string | null
+  >(initialConnectionId);
+
+  // Load connections when dialog opens
+  React.useEffect(() => {
+    if (open) {
+      api.listConnections().then(setConnections).catch(console.error);
+    }
+  }, [open]);
+
+  // Update selected connection when prop changes
+  React.useEffect(() => {
+    if (initialConnectionId) {
+      setSelectedConnectionId(initialConnectionId);
+    }
+  }, [initialConnectionId]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Sync Debugging</DialogTitle>
           <DialogDescription>
             View sync logs and manage pending operations
           </DialogDescription>
         </DialogHeader>
+
+        {/* Connection Selector */}
+        <div className="flex items-center gap-2 px-1 py-2 border-b">
+          <label className="text-sm font-medium">Connection:</label>
+          <select
+            className="flex-1 max-w-xs text-sm border rounded px-2 py-1.5 bg-background"
+            value={selectedConnectionId || ''}
+            onChange={(e) => setSelectedConnectionId(e.target.value || null)}
+          >
+            <option value="">Select a connection...</option>
+            {connections.map((conn) => (
+              <option key={conn.id} value={conn.id}>
+                {conn.name} ({conn.jira_url})
+              </option>
+            ))}
+          </select>
+          {!selectedConnectionId && (
+            <span className="text-xs text-yellow-600">
+              Select a connection to enable sync actions
+            </span>
+          )}
+        </div>
 
         {/* Tab Navigation */}
         <div className="flex border-b">
@@ -66,12 +108,12 @@ export function SyncDebugPanel({
           </button>
         </div>
 
-        {/* Tab Content */}
-        <div className="flex-1 overflow-hidden">
+        {/* Tab Content - fixed height with scroll */}
+        <div className="flex-1 min-h-0 overflow-hidden">
           {activeTab === 'logs' ? (
             <SyncLogViewer />
           ) : (
-            <PendingOperationsList connectionId={connectionId} />
+            <PendingOperationsList connectionId={selectedConnectionId} />
           )}
         </div>
 

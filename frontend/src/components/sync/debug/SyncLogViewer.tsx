@@ -51,12 +51,13 @@ function getLevelColor(level: SyncLogEntry['level']) {
 
 function formatTimestamp(ts: number): string {
   const date = new Date(ts);
-  return date.toLocaleTimeString(undefined, {
+  const timeStr = date.toLocaleTimeString(undefined, {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
-    fractionalSecondDigits: 3,
   });
+  const ms = String(date.getMilliseconds()).padStart(3, '0');
+  return `${timeStr}.${ms}`;
 }
 
 interface LogEntryRowProps {
@@ -161,7 +162,7 @@ export function SyncLogViewer() {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       {/* Toolbar */}
       <div className="flex items-center gap-2 px-3 py-2 border-b bg-muted/30">
         {/* Level filter */}
@@ -243,7 +244,7 @@ export function SyncLogViewer() {
       </div>
 
       {/* Log entries */}
-      <div ref={scrollRef} className="flex-1 overflow-auto">
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-auto">
         {filteredLogs.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
             {logs.length === 0
