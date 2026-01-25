@@ -12,7 +12,7 @@ export function Header() {
     <header className="border-b bg-background">
       <div className="container mx-auto px-4 h-14 flex items-center justify-between">
         <Link
-          to="/dashboard"
+          to="/issues"
           className="flex items-center gap-2 font-bold text-xl"
         >
           <Logo size={24} />
