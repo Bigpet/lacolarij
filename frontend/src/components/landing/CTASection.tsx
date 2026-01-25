@@ -1,6 +1,6 @@
-import { ArrowRight, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { ArrowRight, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const CTASection = () => {
   const navigate = useNavigate();
@@ -23,7 +23,8 @@ const CTASection = () => {
           </h2>
 
           <p className="text-xl text-muted-foreground mb-10">
-            Start with our demo server to experience JiraLocal, or connect your own Jira instance.
+            Start with our demo server to experience JiraLocal, or connect your
+            own Jira instance.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -39,7 +40,7 @@ const CTASection = () => {
               variant="outline"
               size="lg"
               className="px-8 py-6 text-lg font-semibold rounded-xl border-2 hover:bg-secondary transition-all duration-300"
-              onClick={() => window.location.href = '#docs'}
+              onClick={() => (window.location.href = '#docs')}
             >
               Read Documentation
             </Button>
@@ -59,7 +60,9 @@ const CTASection = () => {
 
 const StatItem = ({ value, label }: { value: string; label: string }) => (
   <div className="text-center">
-    <div className="text-3xl md:text-4xl font-bold text-gradient-primary mb-2">{value}</div>
+    <div className="text-3xl md:text-4xl font-bold text-gradient-primary mb-2">
+      {value}
+    </div>
     <div className="text-sm text-muted-foreground">{label}</div>
   </div>
 );

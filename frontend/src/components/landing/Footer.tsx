@@ -1,6 +1,6 @@
-import { Github } from "lucide-react";
-import { Logo } from "@/components/ui/Logo";
-import { Link } from "react-router-dom";
+import { Github } from 'lucide-react';
+import { Logo } from '@/components/ui/Logo';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -13,9 +13,21 @@ const Footer = () => {
           </Link>
 
           <nav className="flex items-center gap-6 text-sm text-muted-foreground">
-            <a href="#docs" className="hover:text-foreground transition-colors">Documentation</a>
-            <a href="#privacy" className="hover:text-foreground transition-colors">Privacy</a>
-            <a href="#terms" className="hover:text-foreground transition-colors">Terms</a>
+            <a href="#docs" className="hover:text-foreground transition-colors">
+              Documentation
+            </a>
+            <a
+              href="#privacy"
+              className="hover:text-foreground transition-colors"
+            >
+              Privacy
+            </a>
+            <a
+              href="#terms"
+              className="hover:text-foreground transition-colors"
+            >
+              Terms
+            </a>
           </nav>
 
           <div className="flex items-center gap-4">
@@ -31,7 +43,10 @@ const Footer = () => {
         </div>
 
         <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} JiraLocal. Built for developers who work anywhere.</p>
+          <p>
+            &copy; {new Date().getFullYear()} JiraLocal. Built for developers
+            who work anywhere.
+          </p>
         </div>
       </div>
     </footer>

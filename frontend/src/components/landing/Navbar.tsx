@@ -1,8 +1,8 @@
-import { Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/ui/Logo";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Menu, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/ui/Logo';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,7 +22,9 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-8">
             <NavLink href="#features">Features</NavLink>
             <NavLink href="#docs">Docs</NavLink>
-            <NavLink href="https://github.com/Bigpet/jiralocal" external>GitHub</NavLink>
+            <NavLink href="https://github.com/Bigpet/jiralocal" external>
+              GitHub
+            </NavLink>
           </div>
 
           {/* CTA Buttons */}
@@ -55,9 +57,19 @@ const Navbar = () => {
         {isOpen && (
           <div className="md:hidden py-4 border-t border-border">
             <div className="flex flex-col gap-4">
-              <NavLink href="#features" mobile>Features</NavLink>
-              <NavLink href="#docs" mobile>Docs</NavLink>
-              <NavLink href="https://github.com/Bigpet/jiralocal" external mobile>GitHub</NavLink>
+              <NavLink href="#features" mobile>
+                Features
+              </NavLink>
+              <NavLink href="#docs" mobile>
+                Docs
+              </NavLink>
+              <NavLink
+                href="https://github.com/Bigpet/jiralocal"
+                external
+                mobile
+              >
+                GitHub
+              </NavLink>
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 <Button
                   variant="ghost"
@@ -85,7 +97,7 @@ const NavLink = ({
   href,
   children,
   mobile = false,
-  external = false
+  external = false,
 }: {
   href: string;
   children: React.ReactNode;
@@ -94,10 +106,10 @@ const NavLink = ({
 }) => (
   <a
     href={href}
-    target={external ? "_blank" : undefined}
-    rel={external ? "noopener noreferrer" : undefined}
+    target={external ? '_blank' : undefined}
+    rel={external ? 'noopener noreferrer' : undefined}
     className={`text-muted-foreground hover:text-foreground transition-colors font-medium ${
-      mobile ? "py-2" : ""
+      mobile ? 'py-2' : ''
     }`}
   >
     {children}

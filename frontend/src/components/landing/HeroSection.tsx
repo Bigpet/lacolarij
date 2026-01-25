@@ -1,6 +1,6 @@
-import { ArrowRight, Zap, Cloud, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { ArrowRight, Zap, Cloud, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -10,7 +10,10 @@ const HeroSection = () => {
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-float" style={{ animationDelay: "3s" }} />
+        <div
+          className="absolute -bottom-40 -left-40 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-float"
+          style={{ animationDelay: '3s' }}
+        />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-3xl" />
       </div>
 
@@ -19,7 +22,9 @@ const HeroSection = () => {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8">
             <Zap className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-foreground">Local-first Jira experience</span>
+            <span className="text-sm font-medium text-foreground">
+              Local-first Jira experience
+            </span>
           </div>
 
           {/* Main heading */}
@@ -31,7 +36,9 @@ const HeroSection = () => {
 
           {/* Subtitle */}
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto mb-10">
-            JiraLocal connects to your Jira instance, letting you search, edit, and manage issues offline — then sync seamlessly when you're back online.
+            JiraLocal connects to your Jira instance, letting you search, edit,
+            and manage issues offline — then sync seamlessly when you&apos;re back
+            online.
           </p>
 
           {/* CTA Buttons */}
@@ -56,9 +63,18 @@ const HeroSection = () => {
 
           {/* Feature pills */}
           <div className="flex flex-wrap justify-center gap-3 mt-12">
-            <FeaturePill icon={<Cloud className="w-4 h-4" />} text="Works Offline" />
-            <FeaturePill icon={<RefreshCw className="w-4 h-4" />} text="Auto Sync" />
-            <FeaturePill icon={<Zap className="w-4 h-4" />} text="Lightning Fast" />
+            <FeaturePill
+              icon={<Cloud className="w-4 h-4" />}
+              text="Works Offline"
+            />
+            <FeaturePill
+              icon={<RefreshCw className="w-4 h-4" />}
+              text="Auto Sync"
+            />
+            <FeaturePill
+              icon={<Zap className="w-4 h-4" />}
+              text="Lightning Fast"
+            />
           </div>
         </div>
 
@@ -69,26 +85,57 @@ const HeroSection = () => {
             <div className="glass rounded-2xl p-6 shadow-lg">
               <div className="flex gap-4 overflow-hidden">
                 {/* To Do Column */}
-                <BoardColumn title="To Do" count={3} colorClass="bg-status-todo">
-                  <IssueCard id="DEMO-5" title="Add unit tests for API" priority="medium" />
-                  <IssueCard id="DEMO-3" title="Design landing page" priority="medium" />
+                <BoardColumn
+                  title="To Do"
+                  count={3}
+                  colorClass="bg-status-todo"
+                >
+                  <IssueCard
+                    id="DEMO-5"
+                    title="Add unit tests for API"
+                    priority="medium"
+                  />
+                  <IssueCard
+                    id="DEMO-3"
+                    title="Design landing page"
+                    priority="medium"
+                  />
                 </BoardColumn>
 
                 {/* In Progress Column */}
-                <BoardColumn title="In Progress" count={2} colorClass="bg-status-in-progress">
-                  <IssueCard id="DEMO-4" title="Fix responsive layout" priority="high" />
-                  <IssueCard id="DEMO-2" title="Implement auth" priority="high" />
+                <BoardColumn
+                  title="In Progress"
+                  count={2}
+                  colorClass="bg-status-in-progress"
+                >
+                  <IssueCard
+                    id="DEMO-4"
+                    title="Fix responsive layout"
+                    priority="high"
+                  />
+                  <IssueCard
+                    id="DEMO-2"
+                    title="Implement auth"
+                    priority="high"
+                  />
                 </BoardColumn>
 
                 {/* Done Column */}
                 <BoardColumn title="Done" count={2} colorClass="bg-status-done">
-                  <IssueCard id="DEMO-1" title="Setup environment" priority="high" />
+                  <IssueCard
+                    id="DEMO-1"
+                    title="Setup environment"
+                    priority="high"
+                  />
                 </BoardColumn>
               </div>
             </div>
 
             {/* Floating sync indicator */}
-            <div className="absolute -top-4 -right-4 glass rounded-xl px-4 py-2 shadow-lg animate-float" style={{ animationDelay: "1s" }}>
+            <div
+              className="absolute -top-4 -right-4 glass rounded-xl px-4 py-2 shadow-lg animate-float"
+              style={{ animationDelay: '1s' }}
+            >
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-status-done rounded-full animate-pulse" />
                 <span className="text-sm font-medium">Synced</span>
@@ -101,7 +148,13 @@ const HeroSection = () => {
   );
 };
 
-const FeaturePill = ({ icon, text }: { icon: React.ReactNode; text: string }) => (
+const FeaturePill = ({
+  icon,
+  text,
+}: {
+  icon: React.ReactNode;
+  text: string;
+}) => (
   <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary text-secondary-foreground text-sm font-medium">
     {icon}
     {text}
@@ -112,7 +165,7 @@ const BoardColumn = ({
   title,
   count,
   colorClass,
-  children
+  children,
 }: {
   title: string;
   count: number;
@@ -125,27 +178,27 @@ const BoardColumn = ({
         <div className={`w-3 h-3 rounded-full ${colorClass}`} />
         <span className="font-semibold text-foreground">{title}</span>
       </div>
-      <span className="text-sm text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{count}</span>
+      <span className="text-sm text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+        {count}
+      </span>
     </div>
-    <div className="space-y-3">
-      {children}
-    </div>
+    <div className="space-y-3">{children}</div>
   </div>
 );
 
 const IssueCard = ({
   id,
   title,
-  priority
+  priority,
 }: {
   id: string;
   title: string;
-  priority: "high" | "medium" | "low";
+  priority: 'high' | 'medium' | 'low';
 }) => {
   const priorityColors = {
-    high: "text-priority-high",
-    medium: "text-priority-medium",
-    low: "text-priority-low",
+    high: 'text-priority-high',
+    medium: 'text-priority-medium',
+    low: 'text-priority-low',
   };
 
   return (
@@ -156,8 +209,12 @@ const IssueCard = ({
           <div className="w-2 h-2 rounded-full bg-status-done" />
         </div>
       </div>
-      <p className="text-sm font-medium text-foreground line-clamp-2">{title}</p>
-      <p className={`text-xs mt-2 capitalize ${priorityColors[priority]}`}>{priority}</p>
+      <p className="text-sm font-medium text-foreground line-clamp-2">
+        {title}
+      </p>
+      <p className={`text-xs mt-2 capitalize ${priorityColors[priority]}`}>
+        {priority}
+      </p>
     </div>
   );
 };
