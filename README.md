@@ -109,8 +109,8 @@ The frontend is a Single Page Application built with React 18, TypeScript, and V
 - **TanStack Query** for server state caching
 
 ### Testing
-- **14 Vitest unit tests** covering components, services, stores, and utilities
-- **18 Playwright E2E tests** covering full user flows
+- **14 Vitest test files (247 tests)** covering components, services, stores, and utilities
+- **18 Playwright E2E test files** covering full user flows
 
 ### Commands
 ```bash
@@ -171,7 +171,7 @@ backend/app/
 - **Mock JIRA Service** - Local mock server for demo mode and testing
 
 ### Testing
-- **4 pytest test files** covering repositories, security, and mock JIRA
+- **4 pytest test files (82 tests)** covering repositories, security, and mock JIRA
 
 ### Commands
 ```bash
