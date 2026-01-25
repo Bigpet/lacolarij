@@ -153,6 +153,7 @@ class RelayService:
                 "transfer-encoding",
                 "upgrade",
                 "content-length",  # Let FastAPI recalculate this
+                "content-encoding",  # httpx already decompresses; don't tell browser to decompress again
                 "authorization",  # Don't leak auth headers
             }
 

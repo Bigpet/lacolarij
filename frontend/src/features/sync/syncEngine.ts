@@ -191,6 +191,14 @@ export class SyncEngine {
         : 'created >= -3000w ORDER BY updated ASC';
     }
 
+    // DEFENSIVE: Jira rejects unbounded queries, ensure JQL is never empty
+    if (!searchJql || searchJql.trim() === '') {
+      console.error('[syncEngine] BUG: searchJql is empty, using fallback');
+      searchJql = 'created >= -3000w ORDER BY updated ASC';
+    }
+
+    console.log(`[syncEngine] Final search JQL: ${searchJql}`);
+
     let nextPageToken: string | undefined = undefined;
     let totalFetched = 0;
 
