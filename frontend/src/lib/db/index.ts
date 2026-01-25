@@ -4,6 +4,7 @@
 
 import Dexie, { type Table } from 'dexie';
 import type { Issue, Comment, SyncMeta, PendingOperation } from '@/types';
+import { generateUUID } from '@/lib/utils';
 
 export class JiraLocalDatabase extends Dexie {
   issues!: Table<Issue, string>;
@@ -158,7 +159,7 @@ export const pendingOperationsRepository = {
   },
 
   async add(operation: Omit<PendingOperation, 'id'>): Promise<string> {
-    const id = crypto.randomUUID();
+    const id = generateUUID();
     await db.pendingOperations.add({ ...operation, id });
     return id;
   },

@@ -41,6 +41,7 @@ node_modules/
 !.env.example
 config.toml
 JIRA_*.txt
+backend/data/jiralocal.db
 
 # OS Files
 .DS_Store
