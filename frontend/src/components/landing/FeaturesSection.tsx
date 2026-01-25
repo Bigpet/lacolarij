@@ -19,7 +19,7 @@ const features = [
     icon: RefreshCcw,
     title: 'Smart Sync',
     description:
-      'Intelligent conflict resolution ensures your changes are never lost. Sync happens in the background.',
+      'Conflict resolution ensures your changes are never lost. Sync happens in the background.',
     colorClass: 'bg-accent/10 text-accent',
   },
   {
@@ -40,14 +40,14 @@ const features = [
     icon: Wifi,
     title: 'Jira Compatible',
     description:
-      'Works with any Jira instance — Cloud or Server. Use our demo server to try it out first.',
+      'Works with any Jira Cloud instance (Jira Server compatibility planned). Use our demo server to try it out first.',
     colorClass: 'bg-primary/10 text-primary',
   },
   {
     icon: Shield,
     title: 'Secure & Private',
     description:
-      'Your credentials stay on your device. No data is sent to third-party servers.',
+      'Your credentials are stored encrypted. Relay server only used as CORS proxy; all data syncs directly with Jira.',
     colorClass: 'bg-accent/10 text-accent',
   },
 ];

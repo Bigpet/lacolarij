@@ -12,23 +12,7 @@ const Footer = () => {
             <span className="font-bold text-lg text-foreground">LaColaRij</span>
           </Link>
 
-          <nav className="flex items-center gap-6 text-sm text-muted-foreground">
-            <a href="#docs" className="hover:text-foreground transition-colors">
-              Documentation
-            </a>
-            <a
-              href="#privacy"
-              className="hover:text-foreground transition-colors"
-            >
-              Privacy
-            </a>
-            <a
-              href="#terms"
-              className="hover:text-foreground transition-colors"
-            >
-              Terms
-            </a>
-          </nav>
+          <nav className="flex items-center gap-6 text-sm text-muted-foreground"></nav>
 
           <div className="flex items-center gap-4">
             <a

@@ -1,4 +1,4 @@
-import { ArrowRight, Zap, Cloud, RefreshCw } from 'lucide-react';
+import { ArrowRight, Zap, Cloud } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 

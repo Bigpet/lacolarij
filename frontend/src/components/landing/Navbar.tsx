@@ -20,8 +20,6 @@ const Navbar = () => {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
-            <NavLink href="#features">Features</NavLink>
-            <NavLink href="#docs">Docs</NavLink>
             <NavLink href="https://github.com/Bigpet/lacolarij" external>
               GitHub
             </NavLink>
