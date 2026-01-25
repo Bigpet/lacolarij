@@ -8,6 +8,7 @@
  */
 
 import { issueRepository, pendingOperationsRepository } from '@/lib/db';
+import { generateUUID } from '@/lib/utils';
 import { useSyncStore } from '@/stores/syncStore';
 import type { Issue } from '@/types';
 
@@ -29,7 +30,7 @@ export const issueService = {
    * The issue will be synced to the remote server later.
    */
   async createIssue(input: CreateIssueInput): Promise<Issue> {
-    const uuid = crypto.randomUUID();
+    const uuid = generateUUID();
     const shortId = uuid.slice(0, 8).toUpperCase();
     const now = Date.now();
 
