@@ -15,7 +15,7 @@ from app.services.demo_init import initialize_demo_data
 from app.services.mock_jira import mock_jira_router
 
 # Configure logging to show all levels
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARNING)
 
 
 @asynccontextmanager
